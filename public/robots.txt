@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap (añadir cuando se publique con dominio final)
+# Sitemap: https://sms.canalcnm.com/sitemap.xml

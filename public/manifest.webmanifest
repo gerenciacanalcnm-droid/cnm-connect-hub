@@ -1,0 +1,20 @@
+{
+  "name": "SMS CNM — CNM Digital Media",
+  "short_name": "SMS CNM",
+  "description": "Conecta con tus clientes en segundos.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0f1a",
+  "theme_color": "#0b0f1a",
+  "lang": "es-ES",
+  "categories": ["business", "productivity", "communication"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
