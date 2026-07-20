@@ -9,38 +9,177 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppSoporteRouteImport } from './routes/_app.soporte'
+import { Route as AppMiEmpresaRouteImport } from './routes/_app.mi-empresa'
+import { Route as AppFinanzasRouteImport } from './routes/_app.finanzas'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppCrmRouteImport } from './routes/_app.crm'
+import { Route as AppConfiguracionRouteImport } from './routes/_app.configuracion'
+import { Route as AppComunicacionRouteImport } from './routes/_app.comunicacion'
+import { Route as AppAutomatizacionesRouteImport } from './routes/_app.automatizaciones'
+import { Route as AppApiRouteImport } from './routes/_app.api'
+import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppSoporteRoute = AppSoporteRouteImport.update({
+  id: '/soporte',
+  path: '/soporte',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMiEmpresaRoute = AppMiEmpresaRouteImport.update({
+  id: '/mi-empresa',
+  path: '/mi-empresa',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinanzasRoute = AppFinanzasRouteImport.update({
+  id: '/finanzas',
+  path: '/finanzas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCrmRoute = AppCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConfiguracionRoute = AppConfiguracionRouteImport.update({
+  id: '/configuracion',
+  path: '/configuracion',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppComunicacionRoute = AppComunicacionRouteImport.update({
+  id: '/comunicacion',
+  path: '/comunicacion',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAutomatizacionesRoute = AppAutomatizacionesRouteImport.update({
+  id: '/automatizaciones',
+  path: '/automatizaciones',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppApiRoute = AppApiRouteImport.update({
+  id: '/api',
+  path: '/api',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/api': typeof AppApiRoute
+  '/automatizaciones': typeof AppAutomatizacionesRoute
+  '/comunicacion': typeof AppComunicacionRoute
+  '/configuracion': typeof AppConfiguracionRoute
+  '/crm': typeof AppCrmRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/finanzas': typeof AppFinanzasRoute
+  '/mi-empresa': typeof AppMiEmpresaRoute
+  '/soporte': typeof AppSoporteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/api': typeof AppApiRoute
+  '/automatizaciones': typeof AppAutomatizacionesRoute
+  '/comunicacion': typeof AppComunicacionRoute
+  '/configuracion': typeof AppConfiguracionRoute
+  '/crm': typeof AppCrmRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/finanzas': typeof AppFinanzasRoute
+  '/mi-empresa': typeof AppMiEmpresaRoute
+  '/soporte': typeof AppSoporteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/api': typeof AppApiRoute
+  '/_app/automatizaciones': typeof AppAutomatizacionesRoute
+  '/_app/comunicacion': typeof AppComunicacionRoute
+  '/_app/configuracion': typeof AppConfiguracionRoute
+  '/_app/crm': typeof AppCrmRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/finanzas': typeof AppFinanzasRoute
+  '/_app/mi-empresa': typeof AppMiEmpresaRoute
+  '/_app/soporte': typeof AppSoporteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/analytics'
+    | '/api'
+    | '/automatizaciones'
+    | '/comunicacion'
+    | '/configuracion'
+    | '/crm'
+    | '/dashboard'
+    | '/finanzas'
+    | '/mi-empresa'
+    | '/soporte'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/analytics'
+    | '/api'
+    | '/automatizaciones'
+    | '/comunicacion'
+    | '/configuracion'
+    | '/crm'
+    | '/dashboard'
+    | '/finanzas'
+    | '/mi-empresa'
+    | '/soporte'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/analytics'
+    | '/_app/api'
+    | '/_app/automatizaciones'
+    | '/_app/comunicacion'
+    | '/_app/configuracion'
+    | '/_app/crm'
+    | '/_app/dashboard'
+    | '/_app/finanzas'
+    | '/_app/mi-empresa'
+    | '/_app/soporte'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +187,111 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/soporte': {
+      id: '/_app/soporte'
+      path: '/soporte'
+      fullPath: '/soporte'
+      preLoaderRoute: typeof AppSoporteRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/mi-empresa': {
+      id: '/_app/mi-empresa'
+      path: '/mi-empresa'
+      fullPath: '/mi-empresa'
+      preLoaderRoute: typeof AppMiEmpresaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/finanzas': {
+      id: '/_app/finanzas'
+      path: '/finanzas'
+      fullPath: '/finanzas'
+      preLoaderRoute: typeof AppFinanzasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/crm': {
+      id: '/_app/crm'
+      path: '/crm'
+      fullPath: '/crm'
+      preLoaderRoute: typeof AppCrmRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/configuracion': {
+      id: '/_app/configuracion'
+      path: '/configuracion'
+      fullPath: '/configuracion'
+      preLoaderRoute: typeof AppConfiguracionRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/comunicacion': {
+      id: '/_app/comunicacion'
+      path: '/comunicacion'
+      fullPath: '/comunicacion'
+      preLoaderRoute: typeof AppComunicacionRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/automatizaciones': {
+      id: '/_app/automatizaciones'
+      path: '/automatizaciones'
+      fullPath: '/automatizaciones'
+      preLoaderRoute: typeof AppAutomatizacionesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/api': {
+      id: '/_app/api'
+      path: '/api'
+      fullPath: '/api'
+      preLoaderRoute: typeof AppApiRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppApiRoute: typeof AppApiRoute
+  AppAutomatizacionesRoute: typeof AppAutomatizacionesRoute
+  AppComunicacionRoute: typeof AppComunicacionRoute
+  AppConfiguracionRoute: typeof AppConfiguracionRoute
+  AppCrmRoute: typeof AppCrmRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppFinanzasRoute: typeof AppFinanzasRoute
+  AppMiEmpresaRoute: typeof AppMiEmpresaRoute
+  AppSoporteRoute: typeof AppSoporteRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAnalyticsRoute: AppAnalyticsRoute,
+  AppApiRoute: AppApiRoute,
+  AppAutomatizacionesRoute: AppAutomatizacionesRoute,
+  AppComunicacionRoute: AppComunicacionRoute,
+  AppConfiguracionRoute: AppConfiguracionRoute,
+  AppCrmRoute: AppCrmRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppFinanzasRoute: AppFinanzasRoute,
+  AppMiEmpresaRoute: AppMiEmpresaRoute,
+  AppSoporteRoute: AppSoporteRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
