@@ -37,12 +37,12 @@ export function Topbar() {
       <button
         type="button"
         onClick={() => setCommandOpen(true)}
-        className="group inline-flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md border border-border bg-surface px-3 text-left text-sm text-muted-foreground transition-colors hover:border-border-strong hover:bg-accent/40 sm:max-w-md"
+        className="group inline-flex h-9 min-w-0 flex-1 items-center gap-2 rounded-lg border border-border bg-surface px-3 text-left text-sm text-muted-foreground shadow-xs transition-all hover:border-border-strong hover:bg-accent/40 hover:shadow-sm sm:max-w-md"
         aria-label="Buscar en toda la plataforma"
       >
-        <Search className="h-4 w-4 shrink-0" />
+        <Search className="h-4 w-4 shrink-0 transition-colors group-hover:text-foreground" />
         <span className="min-w-0 flex-1 truncate">
-          Buscar contactos, campañas, mensajes…
+          Buscar clientes, campañas, contactos, SMS, API…
         </span>
         <kbd className="hidden shrink-0 items-center gap-1 rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex">
           ⌘K
@@ -54,15 +54,19 @@ export function Topbar() {
         <Button
           onClick={() => setNovaOpen(true)}
           size="sm"
-          className="hidden h-9 gap-1.5 gradient-brand text-primary-foreground shadow-sm hover:opacity-95 md:inline-flex"
+          className="group relative hidden h-9 gap-1.5 overflow-hidden gradient-nova text-white shadow-md transition-transform hover:scale-[1.02] hover:opacity-95 md:inline-flex"
         >
+          <span
+            aria-hidden
+            className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full"
+          />
           <Sparkles className="h-3.5 w-3.5" />
           CNM Nova
         </Button>
         <Button
           onClick={() => setNovaOpen(true)}
           size="icon"
-          className="h-9 w-9 gradient-brand text-primary-foreground shadow-sm hover:opacity-95 md:hidden"
+          className="h-9 w-9 gradient-nova text-white shadow-md hover:opacity-95 md:hidden"
           aria-label="CNM Nova"
         >
           <Sparkles className="h-4 w-4" />
