@@ -205,6 +205,11 @@
   --info: oklch(0.72 0.14 235);
   --info-foreground: oklch(0.15 0.02 235);
 
+  --nova: oklch(0.72 0.2 300);
+  --nova-foreground: oklch(0.15 0.02 300);
+  --nova-soft: oklch(0.28 0.08 300);
+
+
   --border: oklch(1 0 0 / 8%);
   --border-strong: oklch(1 0 0 / 14%);
   --input: oklch(1 0 0 / 10%);
