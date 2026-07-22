@@ -1,16 +1,17 @@
 /**
- * SMS CNM — Landing content contract
+ * SMS CNM — Landing content contract (MOCK PROVIDER)
  *
- * Todo el contenido comercial de la Landing vive detrás de este contrato.
- * En producción, el Super Administrador podrá modificarlo desde su Panel
- * y el frontend lo consumirá vía API. Aquí definimos:
+ * Este archivo actúa como **Mock Provider** de la Landing. Define:
+ *   - Los tipos del contrato con el backend (fuente de verdad TS).
+ *   - Un fallback estático usado por `landingService` mientras el Panel
+ *     del Super Administrador no exponga el endpoint real.
  *
- *   - Tipos (contrato inmutable con el backend)
- *   - Fallback estático (sólo para el primer render / dev)
- *
- * NUNCA se deben leer estos valores directamente desde los componentes.
- * Los componentes usan `useLandingContent()` que devuelve la estructura
- * cargada por React Query desde el servicio.
+ * REGLAS DE CONSUMO (Enterprise architecture):
+ *   1. Los componentes NUNCA importan `fallbackLandingContent`.
+ *   2. Los componentes consumen `useLanding()` (o `useLandingContent()`)
+ *      → hook → repository → service → (mock | api).
+ *   3. Cuando exista backend real, sólo cambia `landingService`.
+ *      Ni un componente ni un hook se modifican.
  */
 
 export type LandingBrand = {
