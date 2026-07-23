@@ -9,6 +9,7 @@ import {
   LifeBuoy,
   Settings,
   Building2,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
