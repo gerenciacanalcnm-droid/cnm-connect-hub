@@ -1,7 +1,9 @@
+// Add repository to services barrel
 export * from "./landing.service";
 export * from "./auth.service";
 export * from "./dashboard.service";
 export * from "./crm.service";
+export * from "./contact.service";
 export * from "./sms.service";
 export * from "./campaign.service";
 export * from "./analytics.service";
@@ -12,3 +14,7 @@ export * from "./settings.service";
 export * from "./support.service";
 export * from "./notification.service";
 export * from "./system.service";
+export * from "./recharge.service";
+export * from "./invoice.service";
+export * from "./api-key.service";
+export * from "./user.service";
