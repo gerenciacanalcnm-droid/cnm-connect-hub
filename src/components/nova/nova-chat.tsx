@@ -70,7 +70,7 @@ export function NovaChat() {
         ))}
         {pending && (
           <div className="flex justify-start">
-            <div className="rounded-2xl bg-muted px-4 py-3"><Loader size="sm" /></div>
+            <div className="rounded-2xl bg-muted px-4 py-3"><Loader /></div>
           </div>
         )}
       </div>
