@@ -1,4 +1,5 @@
 import type { DashboardSummary } from "@/types/dashboard";
+import { dashboardMock } from "./mocks/dashboard.mock";
 
 export interface DashboardService {
   getSummary(): Promise<DashboardSummary>;
@@ -6,6 +7,6 @@ export interface DashboardService {
 
 export const dashboardService: DashboardService = {
   async getSummary(): Promise<DashboardSummary> {
-    return { kpis: [], updatedAt: new Date().toISOString() };
+    return dashboardMock.summary();
   },
 };

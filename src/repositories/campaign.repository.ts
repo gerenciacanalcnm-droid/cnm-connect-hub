@@ -1,11 +1,11 @@
-import { campaignService } from "@/services/campaign.service";
-import type { Campaign } from "@/types/campaign";
-import type { Paginated, QueryParams } from "@/types/common";
+import { campaignService, type CampaignService } from "@/services/campaign.service";
 
-export interface CampaignRepository {
-  list(params?: QueryParams): Promise<Paginated<Campaign>>;
-}
-
-export const campaignRepository: CampaignRepository = {
-  list: (params) => campaignService.list(params),
+export const campaignRepository: CampaignService = {
+  list: (p) => campaignService.list(p),
+  getById: (id) => campaignService.getById(id),
+  create: (i) => campaignService.create(i),
+  update: (id, p) => campaignService.update(id, p),
+  remove: (id) => campaignService.remove(id),
+  duplicate: (id) => campaignService.duplicate(id),
+  setStatus: (id, s) => campaignService.setStatus(id, s),
 };

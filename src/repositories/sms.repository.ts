@@ -1,13 +1,7 @@
-import { smsService } from "@/services/sms.service";
-import type { Sms } from "@/types/sms";
-import type { Paginated, QueryParams } from "@/types/common";
+import { smsService, type SmsService } from "@/services/sms.service";
 
-export interface SmsRepository {
-  list(params?: QueryParams): Promise<Paginated<Sms>>;
-  send(input: { to: string; message: string; from?: string }): Promise<Sms>;
-}
-
-export const smsRepository: SmsRepository = {
-  list: (params) => smsService.list(params),
-  send: (input) => smsService.send(input),
+export const smsRepository: SmsService = {
+  list: (p) => smsService.list(p),
+  send: (i) => smsService.send(i),
+  bulkSend: (i) => smsService.bulkSend(i),
 };
