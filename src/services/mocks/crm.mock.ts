@@ -9,7 +9,7 @@ const TITLES = [
 ];
 
 export function buildDealsMock(count = 48): Deal[] {
-  resetSeed(0xDEAL);
+  resetSeed(0xDEA1);
   return Array.from({ length: count }).map(() => {
     const stage = pick(STAGES);
     const probMap: Record<DealStage, number> = {

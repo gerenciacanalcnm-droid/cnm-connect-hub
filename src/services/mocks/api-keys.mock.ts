@@ -22,7 +22,7 @@ export function buildWebhooksMock(): Webhook[] {
 
 const PATHS = ["/v1/sms", "/v1/campaigns", "/v1/contacts", "/v1/analytics/summary", "/v1/webhooks"];
 export function buildApiLogsMock(count = 80): ApiLog[] {
-  resetSeed(0xLOG);
+  resetSeed(0x106);
   return Array.from({ length: count }).map((_, i) => {
     const status = pick([200, 200, 200, 201, 400, 401, 429, 500]);
     return {

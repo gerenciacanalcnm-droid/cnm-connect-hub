@@ -6,7 +6,7 @@ function trend(n = 12): number[] {
 }
 
 export function buildDashboardMock(): DashboardSummary {
-  resetSeed(0xDA5H);
+  resetSeed(0xDA55);
   const kpis: DashboardKpi[] = [
     { id: "balance", label: "Saldo disponible", value: 48_720, prefix: "$", delta: 8.4, trend: trend() },
     { id: "credits", label: "SMS disponibles", value: 194_880, delta: 3.1, trend: trend() },

@@ -5,7 +5,7 @@ const METHODS: Recharge["method"][] = ["card", "transfer", "paypal"];
 const STATUS: Recharge["status"][] = ["completed", "pending", "failed"];
 
 export function buildRechargesMock(count = 40): Recharge[] {
-  resetSeed(0xRE + 0xC0);
+  resetSeed(0xEC0);
   const items: Recharge[] = [];
   for (let i = 0; i < count; i++) {
     const status = i < count - 5 ? "completed" : pick(STATUS);
