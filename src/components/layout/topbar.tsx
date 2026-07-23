@@ -1,4 +1,4 @@
-import { Bell, Search, Sparkles } from "lucide-react";
+import { Bell, HelpCircle, LifeBuoy, Keyboard, BookOpen, Search, Sparkles } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -7,7 +7,6 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,22 +15,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { ThemeToggle } from "@/components/common/theme-toggle";
+import { CompanySwitcher } from "@/components/layout/company-switcher";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useUIStore } from "@/store/ui-store";
+import { useUnreadCount } from "@/hooks/use-notifications";
 
 export function Topbar() {
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
   const setNovaOpen = useUIStore((s) => s.setNovaOpen);
+  const setNotificationsOpen = useUIStore((s) => s.setNotificationsOpen);
+  const { data: unread = 0 } = useUnreadCount();
 
   return (
     <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/80 px-3 backdrop-blur-md sm:px-4">
       <SidebarTrigger className="h-8 w-8" />
       <Separator orientation="vertical" className="h-5" />
+      <CompanySwitcher />
+      <Separator orientation="vertical" className="hidden h-5 md:block" />
+
 
       {/* Global search */}
       <button
