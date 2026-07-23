@@ -60,6 +60,13 @@ export const primaryNavigation: NavSection[] = [
         icon: BarChart3,
         description: "Métricas y reportes",
       },
+      {
+        title: "CNM Nova",
+        to: "/nova",
+        icon: Sparkles,
+        description: "Copiloto con IA",
+        badge: "IA",
+      },
     ],
   },
   {
