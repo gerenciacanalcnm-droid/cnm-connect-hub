@@ -28,10 +28,15 @@ export function CommandPalette() {
   const { setTheme } = useTheme();
   const [query, setQuery] = useState("");
 
-  const { data: contacts = [] } = useContacts();
-  const { data: campaigns = [] } = useCampaigns();
-  const { data: invoices = [] } = useInvoices();
-  const { data: sms = [] } = useSms();
+  const { data: contactsData } = useContacts();
+  const { data: campaignsData } = useCampaigns();
+  const { data: invoicesData } = useInvoices();
+  const { data: smsData } = useSms();
+
+  const contacts = contactsData?.items ?? [];
+  const campaigns = campaignsData?.items ?? [];
+  const invoices = invoicesData ?? [];
+  const sms = smsData?.items ?? [];
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
