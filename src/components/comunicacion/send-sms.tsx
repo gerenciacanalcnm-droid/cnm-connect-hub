@@ -57,10 +57,10 @@ export function SendSms() {
           </div>
         </CardContent>
       </Card>
-      <Card className="bg-gradient-to-br from-nova-50/60 to-transparent">
+      <Card className="bg-gradient-to-br from-nova-soft/50 to-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Sparkles className="h-4 w-4 text-nova-600" />
+            <Sparkles className="h-4 w-4 text-nova" />
             Vista previa
           </CardTitle>
         </CardHeader>
