@@ -14,8 +14,8 @@ const NOTIF = [
 ];
 
 export function PreferencesSettings() {
-  const language = useUIStore((s) => s.language);
-  const setLanguage = useUIStore((s) => s.setLanguage);
+  const language = useUIStore((s) => s.locale);
+  const setLanguage = useUIStore((s) => s.setLocale);
   const [prefs, setPrefs] = useState<Record<string, boolean>>({
     campaigns: true, billing: true, api: true, security: true,
   });
