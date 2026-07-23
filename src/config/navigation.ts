@@ -9,6 +9,7 @@ import {
   LifeBuoy,
   Settings,
   Building2,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -58,6 +59,13 @@ export const primaryNavigation: NavSection[] = [
         to: "/analytics",
         icon: BarChart3,
         description: "Métricas y reportes",
+      },
+      {
+        title: "CNM Nova",
+        to: "/nova",
+        icon: Sparkles,
+        description: "Copiloto con IA",
+        badge: "IA",
       },
     ],
   },

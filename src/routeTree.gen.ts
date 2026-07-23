@@ -20,6 +20,7 @@ import { Route as AuthLoginRouteImport } from './routes/_auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/_auth.forgot-password'
 import { Route as AuthAccountLockedRouteImport } from './routes/_auth.account-locked'
 import { Route as AppSoporteRouteImport } from './routes/_app.soporte'
+import { Route as AppNovaRouteImport } from './routes/_app.nova'
 import { Route as AppMiEmpresaRouteImport } from './routes/_app.mi-empresa'
 import { Route as AppFinanzasRouteImport } from './routes/_app.finanzas'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
@@ -83,6 +84,11 @@ const AppSoporteRoute = AppSoporteRouteImport.update({
   path: '/soporte',
   getParentRoute: () => AppRoute,
 } as any)
+const AppNovaRoute = AppNovaRouteImport.update({
+  id: '/nova',
+  path: '/nova',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMiEmpresaRoute = AppMiEmpresaRouteImport.update({
   id: '/mi-empresa',
   path: '/mi-empresa',
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/finanzas': typeof AppFinanzasRoute
   '/mi-empresa': typeof AppMiEmpresaRoute
+  '/nova': typeof AppNovaRoute
   '/soporte': typeof AppSoporteRoute
   '/account-locked': typeof AuthAccountLockedRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/finanzas': typeof AppFinanzasRoute
   '/mi-empresa': typeof AppMiEmpresaRoute
+  '/nova': typeof AppNovaRoute
   '/soporte': typeof AppSoporteRoute
   '/account-locked': typeof AuthAccountLockedRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/finanzas': typeof AppFinanzasRoute
   '/_app/mi-empresa': typeof AppMiEmpresaRoute
+  '/_app/nova': typeof AppNovaRoute
   '/_app/soporte': typeof AppSoporteRoute
   '/_auth/account-locked': typeof AuthAccountLockedRoute
   '/_auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/finanzas'
     | '/mi-empresa'
+    | '/nova'
     | '/soporte'
     | '/account-locked'
     | '/forgot-password'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/finanzas'
     | '/mi-empresa'
+    | '/nova'
     | '/soporte'
     | '/account-locked'
     | '/forgot-password'
@@ -247,6 +258,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/finanzas'
     | '/_app/mi-empresa'
+    | '/_app/nova'
     | '/_app/soporte'
     | '/_auth/account-locked'
     | '/_auth/forgot-password'
@@ -342,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSoporteRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/nova': {
+      id: '/_app/nova'
+      path: '/nova'
+      fullPath: '/nova'
+      preLoaderRoute: typeof AppNovaRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/mi-empresa': {
       id: '/_app/mi-empresa'
       path: '/mi-empresa'
@@ -418,6 +437,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppFinanzasRoute: typeof AppFinanzasRoute
   AppMiEmpresaRoute: typeof AppMiEmpresaRoute
+  AppNovaRoute: typeof AppNovaRoute
   AppSoporteRoute: typeof AppSoporteRoute
 }
 
@@ -431,6 +451,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppFinanzasRoute: AppFinanzasRoute,
   AppMiEmpresaRoute: AppMiEmpresaRoute,
+  AppNovaRoute: AppNovaRoute,
   AppSoporteRoute: AppSoporteRoute,
 }
 
