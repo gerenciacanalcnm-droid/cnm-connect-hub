@@ -149,12 +149,12 @@ export function CommandPalette() {
               {filteredSms.map((m) => (
                 <CommandItem
                   key={m.id}
-                  value={`sms ${m.to} ${m.body}`}
+                  value={`sms ${m.to} ${m.message}`}
                   onSelect={() => run(() => navigate({ to: "/comunicacion" }))}
                 >
                   <Send className="mr-2 h-4 w-4" />
                   <span className="truncate">{m.to}</span>
-                  <span className="ml-2 truncate text-xs text-muted-foreground">{m.body}</span>
+                  <span className="ml-2 truncate text-xs text-muted-foreground">{m.message}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
