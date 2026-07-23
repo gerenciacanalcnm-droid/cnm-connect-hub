@@ -75,34 +75,50 @@ export function Topbar() {
         </Button>
 
         <ThemeToggle />
+        <LanguageSwitcher />
+
+        {/* Help */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="hidden h-9 w-9 md:inline-flex" aria-label="Ayuda">
+              <HelpCircle className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Ayuda
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="gap-2">
+              <BookOpen className="h-4 w-4" /> Documentación
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2" onSelect={() => setCommandOpen(true)}>
+              <Keyboard className="h-4 w-4" /> Atajos de teclado
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2">
+              <LifeBuoy className="h-4 w-4" /> Contactar soporte
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Notifications */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-9 w-9"
-              aria-label="Notificaciones"
-            >
-              <Bell className="h-4 w-4" />
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary ring-2 ring-background" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-80 p-0">
-            <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <p className="text-sm font-semibold">Notificaciones</p>
-              <Badge variant="secondary" className="text-[10px]">
-                Próximamente
-              </Badge>
-            </div>
-            <div className="px-4 py-10 text-center text-sm text-muted-foreground">
-              No hay notificaciones nuevas.
-            </div>
-          </PopoverContent>
-        </Popover>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-9 w-9"
+          aria-label="Notificaciones"
+          onClick={() => setNotificationsOpen(true)}
+        >
+          <Bell className="h-4 w-4" />
+          {unread > 0 && (
+            <span className="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground ring-2 ring-background">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          )}
+        </Button>
 
         <Separator orientation="vertical" className="mx-1 h-5" />
+
 
         {/* User menu */}
         <DropdownMenu>
