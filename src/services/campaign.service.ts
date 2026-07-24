@@ -57,16 +57,11 @@ export const campaignService: CampaignService = {
         data: { page, pageSize, search: params?.search },
       })) as { rows: Row[]; total: number };
       const items = res.rows.map(mapRow);
-      return {
-        items,
-        total: res.total,
-        page,
-        pageSize,
-        totalPages: Math.max(1, Math.ceil(res.total / pageSize)),
-      };
+      const totalPages = Math.max(1, Math.ceil(res.total / pageSize));
+      return { items, pagination: { page, pageSize, total: res.total, totalPages } };
     } catch (err) {
       console.error("[campaignService] list error:", err);
-      return { items: [], total: 0, page, pageSize, totalPages: 1 };
+      return { items: [], pagination: { page, pageSize, total: 0, totalPages: 1 } };
     }
   },
   async getById(id) {

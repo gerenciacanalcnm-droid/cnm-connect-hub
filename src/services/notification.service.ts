@@ -16,7 +16,7 @@ function mapRow(r: Row): Notification {
     id: r.id,
     title: r.title,
     body: r.body ?? "",
-    severity: (r.severity as Notification["severity"]) ?? "info",
+    level: (r.severity as Notification["level"]) ?? "info",
     read: !!r.read_at,
     createdAt: r.created_at,
   };
