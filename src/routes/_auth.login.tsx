@@ -11,10 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const schema = z.object({
   email: z.string().email("Email inválido"),
-  password: z.string().min(8, "Mínimo 8 caracteres"),
+  password: z.string().min(6, "Mínimo 6 caracteres"),
   remember: z.boolean().optional(),
 });
 type FormValues = z.infer<typeof schema>;
@@ -41,9 +42,27 @@ function LoginPage() {
   });
 
   async function onSubmit(values: FormValues) {
-    await new Promise((r) => setTimeout(r, 700));
-    toast.success("Sesión iniciada", { description: values.email });
-    navigate({ to: "/dashboard" });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: values.email,
+      password: values.password,
+    });
+    if (error) {
+      toast.error("No pudimos iniciar sesión", { description: error.message });
+      return;
+    }
+    toast.success("Sesión iniciada");
+    // check role → route to /admin/dashboard when super_admin
+    const { data: user } = await supabase.auth.getUser();
+    if (user.user) {
+      const { data: rr } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.user.id);
+      const isAdmin = (rr ?? []).some((r) => r.role === "super_admin");
+      navigate({ to: isAdmin ? "/admin/dashboard" : "/dashboard" });
+    } else {
+      navigate({ to: "/dashboard" });
+    }
   }
 
   return (
@@ -112,7 +131,7 @@ function LoginPage() {
             checked={form.watch("remember")}
             onCheckedChange={(v) => form.setValue("remember", !!v)}
           />
-          Mantener sesión iniciada por 30 días
+          Mantener sesión iniciada
         </label>
 
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>

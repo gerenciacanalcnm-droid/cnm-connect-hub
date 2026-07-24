@@ -12,21 +12,19 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
-const schema = z
-  .object({
-    name: z.string().min(2, "Ingresa tu nombre"),
-    company: z.string().min(2, "Ingresa tu empresa"),
-    email: z.string().email("Email inválido"),
-    password: z
-      .string()
-      .min(8, "Mínimo 8 caracteres")
-      .regex(/[A-Z]/, "Debe incluir una mayúscula")
-      .regex(/[0-9]/, "Debe incluir un número"),
-    terms: z.literal(true, {
-      errorMap: () => ({ message: "Debes aceptar los términos" }),
-    }),
-  });
+const schema = z.object({
+  name: z.string().min(2, "Ingresa tu nombre"),
+  company: z.string().min(2, "Ingresa tu empresa"),
+  email: z.string().email("Email inválido"),
+  password: z
+    .string()
+    .min(8, "Mínimo 8 caracteres")
+    .regex(/[A-Z]/, "Debe incluir una mayúscula")
+    .regex(/[0-9]/, "Debe incluir un número"),
+  terms: z.literal(true, { errorMap: () => ({ message: "Debes aceptar los términos" }) }),
+});
 type FormValues = z.infer<typeof schema>;
 
 export const Route = createFileRoute("/_auth/register")({
@@ -54,10 +52,7 @@ function PasswordStrength({ value }: { value: string }) {
       {rules.map((r) => (
         <li
           key={r.label}
-          className={cn(
-            "flex items-center gap-1",
-            r.ok ? "text-success" : "text-muted-foreground",
-          )}
+          className={cn("flex items-center gap-1", r.ok ? "text-success" : "text-muted-foreground")}
         >
           <Check className={cn("h-3 w-3", !r.ok && "opacity-30")} />
           {r.label}
@@ -76,10 +71,21 @@ function RegisterPage() {
   });
   const password = form.watch("password");
 
-  async function onSubmit() {
-    await new Promise((r) => setTimeout(r, 800));
-    toast.success("Cuenta creada", { description: "Revisa tu correo para verificarla." });
-    navigate({ to: "/verify-email" });
+  async function onSubmit(values: FormValues) {
+    const { error } = await supabase.auth.signUp({
+      email: values.email,
+      password: values.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: { full_name: values.name, company_name: values.company },
+      },
+    });
+    if (error) {
+      toast.error("No pudimos crear la cuenta", { description: error.message });
+      return;
+    }
+    toast.success("Cuenta creada", { description: "Ya puedes iniciar sesión." });
+    navigate({ to: "/login" });
   }
 
   return (
