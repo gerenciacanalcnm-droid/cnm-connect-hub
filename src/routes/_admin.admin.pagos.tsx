@@ -16,7 +16,7 @@ const ICONS: Record<PaymentMethod["provider"], typeof CreditCard> = {
   pse: Banknote,
 };
 
-export const Route = createFileRoute("/_admin/admin/pagos" as never)({
+export const Route = createFileRoute("/_admin/admin/pagos")({
   head: () => ({ meta: [{ title: "Métodos de Pago — Super Admin" }] }),
   component: PagosPage,
 });

@@ -13,7 +13,7 @@ import { generateAdminUsers, type AdminUser } from "@/services/mocks/admin.mock"
 import { formatRelativeTime } from "@/lib/format";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/usuarios" as never)({
+export const Route = createFileRoute("/_admin/admin/usuarios")({
   head: () => ({ meta: [{ title: "Usuarios — Super Admin" }] }),
   component: UsuariosPage,
 });

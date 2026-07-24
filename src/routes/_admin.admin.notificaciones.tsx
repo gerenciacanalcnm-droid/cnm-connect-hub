@@ -15,7 +15,7 @@ const ROWS = [
   { k: "whatsapp", label: "WhatsApp", icon: MessageCircle, description: "Alertas por WhatsApp cuando esté activo." },
 ] as const;
 
-export const Route = createFileRoute("/_admin/admin/notificaciones" as never)({
+export const Route = createFileRoute("/_admin/admin/notificaciones")({
   head: () => ({ meta: [{ title: "Notificaciones — Super Admin" }] }),
   component: NotifPage,
 });

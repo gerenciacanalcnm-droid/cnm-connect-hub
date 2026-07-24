@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { adminConfig } from "@/config/admin.config";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/config-api" as never)({
+export const Route = createFileRoute("/_admin/admin/config-api")({
   head: () => ({ meta: [{ title: "API — Super Admin" }] }),
   component: ConfigApi,
 });

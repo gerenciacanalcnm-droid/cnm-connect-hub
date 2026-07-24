@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, RefreshCw, Server, Database, HardDrive, Cpu, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/sistema" as never)({
+export const Route = createFileRoute("/_admin/admin/sistema")({
   head: () => ({ meta: [{ title: "Sistema — Super Admin" }] }),
   component: SistemaPage,
 });

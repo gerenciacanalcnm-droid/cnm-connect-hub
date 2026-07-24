@@ -21,7 +21,7 @@ const seed: Role[] = [
   { id: "r6", name: "Solo lectura", company: "Todos", users: 96, permissions: 4, system: false },
 ];
 
-export const Route = createFileRoute("/_admin/admin/roles" as never)({
+export const Route = createFileRoute("/_admin/admin/roles")({
   head: () => ({ meta: [{ title: "Roles — Super Admin" }] }),
   component: RolesPage,
 });

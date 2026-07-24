@@ -13,7 +13,7 @@ import { defaultTariffs, type TariffTier } from "@/config/admin.config";
 import { formatCurrency } from "@/lib/format";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/tarifas" as never)({
+export const Route = createFileRoute("/_admin/admin/tarifas")({
   head: () => ({ meta: [{ title: "Tarifas — Super Admin" }] }),
   component: TarifasPage,
 });

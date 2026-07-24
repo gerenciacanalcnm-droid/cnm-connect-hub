@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { adminConfig } from "@/config/admin.config";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/config-general" as never)({
+export const Route = createFileRoute("/_admin/admin/config-general")({
   head: () => ({ meta: [{ title: "Configuración General — Super Admin" }] }),
   component: ConfigGeneral,
 });

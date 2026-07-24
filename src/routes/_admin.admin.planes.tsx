@@ -14,7 +14,7 @@ import { formatCurrency, formatNumber } from "@/lib/format";
 import { Plus, Star, Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/planes" as never)({
+export const Route = createFileRoute("/_admin/admin/planes")({
   head: () => ({ meta: [{ title: "Planes — Super Admin" }] }),
   component: PlanesPage,
 });

@@ -12,7 +12,7 @@ import { adminConfig } from "@/config/admin.config";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/config-nova" as never)({
+export const Route = createFileRoute("/_admin/admin/config-nova")({
   head: () => ({ meta: [{ title: "CNM Nova — Super Admin" }] }),
   component: NovaConfig,
 });

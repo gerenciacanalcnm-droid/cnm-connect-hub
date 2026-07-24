@@ -14,7 +14,7 @@ const LEVEL_TONE: Record<LogEntry["level"], string> = {
   debug: "bg-muted text-muted-foreground",
 };
 
-export const Route = createFileRoute("/_admin/admin/logs" as never)({
+export const Route = createFileRoute("/_admin/admin/logs")({
   head: () => ({ meta: [{ title: "Logs — Super Admin" }] }),
   component: LogsPage,
 });

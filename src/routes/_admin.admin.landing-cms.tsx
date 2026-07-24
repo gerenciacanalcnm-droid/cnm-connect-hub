@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/landing-cms" as never)({
+export const Route = createFileRoute("/_admin/admin/landing-cms")({
   head: () => ({ meta: [{ title: "Landing CMS — Super Admin" }] }),
   component: LandingCms,
 });

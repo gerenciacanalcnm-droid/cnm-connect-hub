@@ -15,7 +15,7 @@ const TONE: Record<Integration["status"], string> = {
   error: "border-destructive/40 text-destructive bg-destructive/10",
 };
 
-export const Route = createFileRoute("/_admin/admin/integraciones" as never)({
+export const Route = createFileRoute("/_admin/admin/integraciones")({
   head: () => ({ meta: [{ title: "Integraciones — Super Admin" }] }),
   component: IntPage,
 });

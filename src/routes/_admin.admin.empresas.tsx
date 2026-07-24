@@ -12,7 +12,7 @@ import { generateAdminCompanies, type CompanyAdmin } from "@/services/mocks/admi
 import { formatCurrency } from "@/lib/format";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/empresas" as never)({
+export const Route = createFileRoute("/_admin/admin/empresas")({
   head: () => ({ meta: [{ title: "Empresas — Super Admin" }] }),
   component: EmpresasPage,
 });

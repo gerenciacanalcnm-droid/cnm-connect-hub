@@ -22,7 +22,7 @@ const seed = Array.from({ length: 30 }, (_, i) => ({
   createdAt: daysAgo(i),
 })) as Recharge[];
 
-export const Route = createFileRoute("/_admin/admin/recargas" as never)({
+export const Route = createFileRoute("/_admin/admin/recargas")({
   head: () => ({ meta: [{ title: "Recargas — Super Admin" }] }),
   component: RecargasPage,
 });

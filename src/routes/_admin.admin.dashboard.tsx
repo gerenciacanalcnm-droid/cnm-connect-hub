@@ -7,7 +7,7 @@ import { Building2, Users, MessageSquare, DollarSign, TrendingUp, AlertTriangle,
 import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, Legend } from "recharts";
 import { StatusBadge } from "@/components/common/status-badge";
 
-export const Route = createFileRoute("/_admin/admin/dashboard" as never)({
+export const Route = createFileRoute("/_admin/admin/dashboard")({
   head: () => ({ meta: [{ title: "Super Dashboard — SMS CNM Admin" }, { name: "description", content: "Centro de control ejecutivo de SMS CNM." }] }),
   component: SuperDashboard,
 });

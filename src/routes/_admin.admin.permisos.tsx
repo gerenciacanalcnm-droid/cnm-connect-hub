@@ -21,7 +21,7 @@ const seed = Object.fromEntries(
   ])
 ) as Record<string, Record<string, Record<string, boolean>>>;
 
-export const Route = createFileRoute("/_admin/admin/permisos" as never)({
+export const Route = createFileRoute("/_admin/admin/permisos")({
   head: () => ({ meta: [{ title: "Permisos — Super Admin" }] }),
   component: PermisosPage,
 });

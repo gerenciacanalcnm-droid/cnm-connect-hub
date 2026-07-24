@@ -25,7 +25,7 @@ const META: Record<string, { icon: LucideIcon; label: string; description: strin
   support: { icon: LifeBuoy, label: "Soporte", description: "Tickets y helpdesk." },
 };
 
-export const Route = createFileRoute("/_admin/admin/feature-flags" as never)({
+export const Route = createFileRoute("/_admin/admin/feature-flags")({
   head: () => ({ meta: [{ title: "Feature Flags — Super Admin" }] }),
   component: FeatureFlagsPage,
 });

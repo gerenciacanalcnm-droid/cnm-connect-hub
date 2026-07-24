@@ -12,7 +12,7 @@ import { defaultPromotions, type Promotion } from "@/config/admin.config";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/promociones" as never)({
+export const Route = createFileRoute("/_admin/admin/promociones")({
   head: () => ({ meta: [{ title: "Promociones — Super Admin" }] }),
   component: PromoPage,
 });

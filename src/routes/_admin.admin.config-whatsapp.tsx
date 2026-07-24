@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_admin/admin/config-whatsapp" as never)({
+export const Route = createFileRoute("/_admin/admin/config-whatsapp")({
   head: () => ({ meta: [{ title: "Configuración WhatsApp — Super Admin" }] }),
   component: ConfigWa,
 });

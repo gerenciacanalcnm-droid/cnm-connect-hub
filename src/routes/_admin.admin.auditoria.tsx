@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { generateAuditEntries, type AuditEntry } from "@/services/mocks/admin.mock";
 import { formatDateTime } from "@/lib/format";
 
-export const Route = createFileRoute("/_admin/admin/auditoria" as never)({
+export const Route = createFileRoute("/_admin/admin/auditoria")({
   head: () => ({ meta: [{ title: "Auditoría — Super Admin" }] }),
   component: AuditoriaPage,
 });
