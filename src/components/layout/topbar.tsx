@@ -1,4 +1,4 @@
-import { Bell, HelpCircle, LifeBuoy, Keyboard, BookOpen, Search, Sparkles } from "lucide-react";
+import { Bell, HelpCircle, LifeBuoy, Keyboard, BookOpen, Search, Sparkles, Shield } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -146,6 +146,12 @@ export function Topbar() {
             <DropdownMenuItem>Mi perfil</DropdownMenuItem>
             <DropdownMenuItem>Configuración</DropdownMenuItem>
             <DropdownMenuItem>Facturación</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <a href="/admin/dashboard" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" /> Super Admin
+              </a>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Centro de ayuda</DropdownMenuItem>
             <DropdownMenuItem>Novedades</DropdownMenuItem>
