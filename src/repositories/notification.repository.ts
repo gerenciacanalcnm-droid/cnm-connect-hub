@@ -4,4 +4,5 @@ export const notificationRepository: NotificationService = {
   unreadCount: () => notificationService.unreadCount(),
   markAsRead: (id) => notificationService.markAsRead(id),
   markAllRead: () => notificationService.markAllRead(),
+  remove: (id) => notificationService.remove(id),
 };

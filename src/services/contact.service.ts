@@ -99,12 +99,12 @@ export const contactService: ContactService = {
     await deleteContact({ data: { id } });
   },
   async bulkImport(file) {
-    const { uploadUrl, path } = (await getContactImportUploadUrl({
+    const signed = (await getContactImportUploadUrl({
       data: { filename: file.name },
-    })) as { uploadUrl: string; path: string };
-    const put = await fetch(uploadUrl, { method: "PUT", body: file });
+    })) as { path: string; token: string; signedUrl: string };
+    const put = await fetch(signed.signedUrl, { method: "PUT", body: file });
     if (!put.ok) throw new Error(`Fallo la subida del CSV [${put.status}]`);
-    return (await importContactsCsv({ data: { path } })) as {
+    return (await importContactsCsv({ data: { path: signed.path } })) as {
       imported: number;
       duplicates: number;
       errors: number;
