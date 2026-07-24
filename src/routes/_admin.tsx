@@ -1,20 +1,39 @@
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Toaster } from "@/components/ui/sonner";
 import { CompanyProvider } from "@/context/company-context";
-import { availableCompanies } from "@/config/companies.available";
-import { Shield } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
+import { Loader2, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/_admin")({
+  ssr: false,
   component: AdminLayout,
 });
 
 function AdminLayout() {
+  const { loading, user, isSuperAdmin } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) navigate({ to: "/login", replace: true });
+    else if (!isSuperAdmin) navigate({ to: "/dashboard", replace: true });
+  }, [loading, user, isSuperAdmin, navigate]);
+
+  if (loading || !user || !isSuperAdmin) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
-    <CompanyProvider initial={availableCompanies[0]} available={availableCompanies}>
+    <CompanyProvider>
       <SidebarProvider>
         <div className="flex min-h-screen w-full bg-background">
           <AdminSidebar />
