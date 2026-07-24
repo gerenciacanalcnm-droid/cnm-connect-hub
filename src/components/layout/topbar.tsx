@@ -20,12 +20,37 @@ import { CompanySwitcher } from "@/components/layout/company-switcher";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useUIStore } from "@/store/ui-store";
 import { useUnreadCount } from "@/hooks/use-notifications";
+import { useAuth } from "@/context/auth-context";
+import { useNavigate } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export function Topbar() {
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
   const setNovaOpen = useUIStore((s) => s.setNovaOpen);
   const setNotificationsOpen = useUIStore((s) => s.setNotificationsOpen);
   const { data: unread = 0 } = useUnreadCount();
+  const { user, profile, isSuperAdmin } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const displayName = profile?.full_name || user?.email || "Cuenta";
+  const displayEmail = user?.email ?? "";
+  const initials = (profile?.full_name ?? user?.email ?? "CN")
+    .split(/\s|@/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0]!.toUpperCase())
+    .join("");
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    toast.success("Sesión cerrada");
+    navigate({ to: "/login", replace: true });
+  }
 
   return (
     <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/80 px-3 backdrop-blur-md sm:px-4">
@@ -128,35 +153,42 @@ export function Topbar() {
               aria-label="Menú de usuario"
             >
               <Avatar className="h-8 w-8">
-                <AvatarImage src="" alt="" />
+                <AvatarImage src={profile?.avatar_url ?? ""} alt={displayName} />
                 <AvatarFallback className="bg-accent text-xs font-semibold text-accent-foreground">
-                  CN
+                  {initials || "CN"}
                 </AvatarFallback>
               </Avatar>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="flex flex-col gap-0.5">
-              <span className="text-sm font-semibold">CNM Digital Media</span>
-              <span className="text-xs font-normal text-muted-foreground">
-                admin@canalcnm.com
-              </span>
+              <span className="text-sm font-semibold">{displayName}</span>
+              {displayEmail && (
+                <span className="text-xs font-normal text-muted-foreground">{displayEmail}</span>
+              )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Mi perfil</DropdownMenuItem>
             <DropdownMenuItem>Configuración</DropdownMenuItem>
             <DropdownMenuItem>Facturación</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <a href="/admin/dashboard" className="flex items-center gap-2">
-                <Shield className="h-4 w-4" /> Super Admin
-              </a>
-            </DropdownMenuItem>
+            {isSuperAdmin && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <a href="/admin/dashboard" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" /> Super Admin
+                  </a>
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem>Centro de ayuda</DropdownMenuItem>
             <DropdownMenuItem>Novedades</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onSelect={handleSignOut}
+            >
               Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuContent>

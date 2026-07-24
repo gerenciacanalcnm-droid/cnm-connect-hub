@@ -9,16 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const schema = z
-  .object({
-    password: z.string().min(8, "Mínimo 8 caracteres"),
-    confirm: z.string(),
-  })
-  .refine((d) => d.password === d.confirm, {
-    message: "Las contraseñas no coinciden",
-    path: ["confirm"],
-  });
+  .object({ password: z.string().min(8, "Mínimo 8 caracteres"), confirm: z.string() })
+  .refine((d) => d.password === d.confirm, { message: "Las contraseñas no coinciden", path: ["confirm"] });
 type FormValues = z.infer<typeof schema>;
 
 export const Route = createFileRoute("/_auth/reset-password")({
@@ -42,9 +37,14 @@ function ResetPage() {
     defaultValues: { password: "", confirm: "" },
   });
 
-  async function onSubmit() {
-    await new Promise((r) => setTimeout(r, 700));
+  async function onSubmit(values: FormValues) {
+    const { error } = await supabase.auth.updateUser({ password: values.password });
+    if (error) {
+      toast.error("No pudimos actualizar la contraseña", { description: error.message });
+      return;
+    }
     toast.success("Contraseña actualizada");
+    await supabase.auth.signOut();
     navigate({ to: "/login" });
   }
 

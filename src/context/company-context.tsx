@@ -1,10 +1,11 @@
 /**
- * CompanyContext — soporte multitenant.
- * Guarda la empresa activa y expone un switcher.
+ * CompanyContext — empresa activa, alimentada por AuthContext.
+ * Guarda selección en localStorage.
  */
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Company } from "@/types/company";
 import { companyConfig } from "@/config/company.config";
+import { useAuth } from "./auth-context";
 
 type CompanyContextValue = {
   current: Company;
@@ -13,27 +14,45 @@ type CompanyContextValue = {
 };
 
 const CompanyContext = createContext<CompanyContextValue | null>(null);
+const STORAGE_KEY = "cnm:active_company_id";
+const FALLBACK = companyConfig as unknown as Company;
 
-export function CompanyProvider({
-  children,
-  initial,
-  available,
-}: {
-  children: ReactNode;
-  initial?: Company;
-  available?: Company[];
-}) {
-  const seed = (initial ?? (companyConfig as unknown as Company)) satisfies Company;
-  const list = available ?? [seed];
-  const [current, setCurrent] = useState<Company>(seed);
+export function CompanyProvider({ children }: { children: ReactNode }) {
+  const { companies } = useAuth();
+  const list: Company[] = useMemo(() => {
+    const mapped = companies
+      .map((m) => m.company)
+      .filter((c): c is NonNullable<typeof c> => !!c)
+      .map((c) => ({
+        ...FALLBACK,
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        logoUrl: c.logo_url ?? FALLBACK.logoUrl,
+      })) as Company[];
+    return mapped.length ? mapped : [FALLBACK];
+  }, [companies]);
+
+  const [currentId, setCurrentId] = useState<string>(() => {
+    if (typeof window === "undefined") return list[0]!.id;
+    return localStorage.getItem(STORAGE_KEY) ?? list[0]!.id;
+  });
+
+  useEffect(() => {
+    if (!list.find((c) => c.id === currentId)) setCurrentId(list[0]!.id);
+  }, [list, currentId]);
+
+  const current = list.find((c) => c.id === currentId) ?? list[0]!;
 
   const value = useMemo<CompanyContextValue>(
     () => ({
       current,
       available: list,
       switchTo: (id) => {
-        const next = list.find((c) => c.id === id);
-        if (next) setCurrent(next);
+        if (list.find((c) => c.id === id)) {
+          setCurrentId(id);
+          if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, id);
+        }
       },
     }),
     [current, list],
@@ -43,8 +62,7 @@ export function CompanyProvider({
 }
 
 export function useCurrentCompany(): Company {
-  const ctx = useContext(CompanyContext);
-  return ctx?.current ?? (companyConfig as unknown as Company);
+  return useContext(CompanyContext)?.current ?? FALLBACK;
 }
 
 export function useCompanyContext(): CompanyContextValue {

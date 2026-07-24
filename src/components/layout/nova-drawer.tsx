@@ -13,14 +13,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUIStore } from "@/store/ui-store";
 import { useNova } from "@/hooks/use-nova";
 import { novaService, type NovaMessage } from "@/services/nova.service";
-import { novaMock } from "@/services/mocks/nova.mock";
 import { cn } from "@/lib/utils";
+
+const WELCOME: NovaMessage[] = [
+  { from: "nova", text: "¡Hola! Soy CNM Nova, tu copiloto IA. ¿En qué te ayudo hoy?" },
+];
 
 export function NovaDrawer() {
   const open = useUIStore((s) => s.novaOpen);
   const setOpen = useUIStore((s) => s.setNovaOpen);
   const { data: suggestions = [] } = useNova();
-  const [messages, setMessages] = useState<NovaMessage[]>(() => novaMock.history());
+  const [messages, setMessages] = useState<NovaMessage[]>(WELCOME);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);

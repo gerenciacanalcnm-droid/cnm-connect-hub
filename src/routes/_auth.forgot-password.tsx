@@ -8,6 +8,8 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const schema = z.object({ email: z.string().email("Email inválido") });
 type FormValues = z.infer<typeof schema>;
@@ -30,7 +32,13 @@ function ForgotPage() {
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { email: "" } });
 
   async function onSubmit(v: FormValues) {
-    await new Promise((r) => setTimeout(r, 700));
+    const { error } = await supabase.auth.resetPasswordForEmail(v.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast.error("No pudimos enviar el correo", { description: error.message });
+      return;
+    }
     setSent(v.email);
   }
 
@@ -56,10 +64,7 @@ function ForgotPage() {
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             ¿No recibiste el correo?{" "}
-            <button
-              className="font-medium text-primary hover:underline"
-              onClick={() => setSent(null)}
-            >
+            <button className="font-medium text-primary hover:underline" onClick={() => setSent(null)}>
               Intentar de nuevo
             </button>
           </p>
