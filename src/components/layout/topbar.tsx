@@ -20,12 +20,37 @@ import { CompanySwitcher } from "@/components/layout/company-switcher";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useUIStore } from "@/store/ui-store";
 import { useUnreadCount } from "@/hooks/use-notifications";
+import { useAuth } from "@/context/auth-context";
+import { useNavigate } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export function Topbar() {
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
   const setNovaOpen = useUIStore((s) => s.setNovaOpen);
   const setNotificationsOpen = useUIStore((s) => s.setNotificationsOpen);
   const { data: unread = 0 } = useUnreadCount();
+  const { user, profile, isSuperAdmin } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const displayName = profile?.full_name || user?.email || "Cuenta";
+  const displayEmail = user?.email ?? "";
+  const initials = (profile?.full_name ?? user?.email ?? "CN")
+    .split(/\s|@/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0]!.toUpperCase())
+    .join("");
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    toast.success("Sesión cerrada");
+    navigate({ to: "/login", replace: true });
+  }
 
   return (
     <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/80 px-3 backdrop-blur-md sm:px-4">
