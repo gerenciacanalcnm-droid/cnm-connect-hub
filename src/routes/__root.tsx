@@ -152,7 +152,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system">
-        <Outlet />
+        <AuthProvider>
+          <Outlet />
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
