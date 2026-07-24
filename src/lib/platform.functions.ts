@@ -90,7 +90,7 @@ export const listFeatureFlags = createServerFn({ method: "GET" }).handler(async 
   const sb = await admin();
   const { data, error } = await sb
     .from("feature_flags")
-    .select("id, key, description, enabled_globally, rollout_percentage, targeting_rules, created_at, updated_at")
+    .select("id, key, description, enabled_globally, rollout_percentage, target_companies, created_at, updated_at")
     .order("key");
   if (error) throw new Error(error.message);
   return data ?? [];
@@ -106,7 +106,7 @@ export const upsertFeatureFlag = createServerFn({ method: "POST" })
         description: z.string().optional(),
         enabled_globally: z.boolean().default(false),
         rollout_percentage: z.number().min(0).max(100).default(0),
-        targeting_rules: z.record(z.string(), z.unknown()).default({}),
+        target_companies: z.array(z.string().uuid()).default([]),
       })
       .parse(v),
   )
@@ -116,7 +116,7 @@ export const upsertFeatureFlag = createServerFn({ method: "POST" })
       description: data.description ?? null,
       enabled_globally: data.enabled_globally,
       rollout_percentage: data.rollout_percentage,
-      targeting_rules: data.targeting_rules as never,
+      target_companies: data.target_companies,
     };
     const q = data.id
       ? context.supabase.from("feature_flags").update(row).eq("id", data.id).select().single()
