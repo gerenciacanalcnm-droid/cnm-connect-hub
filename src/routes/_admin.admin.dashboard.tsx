@@ -2,13 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AdminPage } from "@/components/admin/admin-page";
 import { KpiCard } from "@/components/common/kpi-card";
 import { ChartCard } from "@/components/common/chart-card";
-import { Widget } from "@/components/common/widget";
 import { Button } from "@/components/ui/button";
 import { Building2, Users, MessageSquare, DollarSign, TrendingUp, AlertTriangle, Activity, Wallet, Send, MessageCircle, Zap, Package, RefreshCw, ServerCog } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, Legend } from "recharts";
 import { StatusBadge } from "@/components/common/status-badge";
 
-export const Route = createFileRoute("/_admin/admin/dashboard")({
+export const Route = createFileRoute("/_admin/admin/dashboard" as never)({
   head: () => ({ meta: [{ title: "Super Dashboard — SMS CNM Admin" }, { name: "description", content: "Centro de control ejecutivo de SMS CNM." }] }),
   component: SuperDashboard,
 });
@@ -25,6 +24,9 @@ const traffic = Array.from({ length: 30 }, (_, i) => ({
   wa: 5_000 + Math.round(Math.random() * 8_000),
 }));
 
+const up = { value: "+12%", direction: "up" as const };
+const down = { value: "-8%", direction: "down" as const };
+
 function SuperDashboard() {
   return (
     <AdminPage
@@ -38,22 +40,22 @@ function SuperDashboard() {
       }
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KpiCard label="Empresas" value="248" icon={Building2} trend={{ value: 12, direction: "up" }} />
-        <KpiCard label="Usuarios activos" value="1.842" icon={Users} trend={{ value: 8, direction: "up" }} />
-        <KpiCard label="Clientes" value="3.517" icon={Users} trend={{ value: 4, direction: "up" }} />
-        <KpiCard label="Ingresos (mes)" value="$128.4M" icon={DollarSign} trend={{ value: 18, direction: "up" }} tone="emerald" />
-        <KpiCard label="Saldo vendido" value="$412M" icon={Wallet} trend={{ value: 9, direction: "up" }} />
+        <KpiCard label="Empresas" value="248" icon={Building2} delta={up} />
+        <KpiCard label="Usuarios activos" value="1.842" icon={Users} delta={up} />
+        <KpiCard label="Clientes" value="3.517" icon={Users} delta={up} />
+        <KpiCard label="Ingresos (mes)" value="$128.4M" icon={DollarSign} delta={up} tone="success" />
+        <KpiCard label="Saldo vendido" value="$412M" icon={Wallet} delta={up} />
         <KpiCard label="Saldo disponible" value="$78.2M" icon={Wallet} />
-        <KpiCard label="SMS enviados hoy" value="184K" icon={Send} trend={{ value: 22, direction: "up" }} />
-        <KpiCard label="WhatsApp enviados" value="21K" icon={MessageCircle} trend={{ value: 5, direction: "up" }} tone="nova" />
+        <KpiCard label="SMS enviados hoy" value="184K" icon={Send} delta={up} />
+        <KpiCard label="WhatsApp enviados" value="21K" icon={MessageCircle} delta={up} tone="nova" />
         <KpiCard label="Campañas activas" value="132" icon={MessageSquare} />
-        <KpiCard label="Recargas (mes)" value="612" icon={Package} trend={{ value: 15, direction: "up" }} />
-        <KpiCard label="Clientes nuevos" value="94" icon={TrendingUp} trend={{ value: 27, direction: "up" }} tone="emerald" />
+        <KpiCard label="Recargas (mes)" value="612" icon={Package} delta={up} />
+        <KpiCard label="Clientes nuevos" value="94" icon={TrendingUp} delta={up} tone="success" />
         <KpiCard label="Uso API" value="1.2M req" icon={Activity} />
-        <KpiCard label="Errores 24h" value="42" icon={AlertTriangle} tone="destructive" trend={{ value: 12, direction: "down" }} />
+        <KpiCard label="Errores 24h" value="42" icon={AlertTriangle} tone="destructive" delta={down} />
         <KpiCard label="Alertas" value="7" icon={Zap} tone="destructive" />
-        <KpiCard label="Facturación" value="$142.8M" icon={DollarSign} tone="emerald" />
-        <KpiCard label="Sistema" value="Operativo" icon={ServerCog} tone="emerald" />
+        <KpiCard label="Facturación" value="$142.8M" icon={DollarSign} tone="success" />
+        <KpiCard label="Sistema" value="Operativo" icon={ServerCog} tone="success" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -86,7 +88,7 @@ function SuperDashboard() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Widget title="Estado del sistema" description="Componentes críticos">
+        <ChartCard title="Estado del sistema" description="Componentes críticos">
           <div className="space-y-3">
             {[
               { name: "API Gateway", s: "active" },
@@ -101,22 +103,22 @@ function SuperDashboard() {
               </div>
             ))}
           </div>
-        </Widget>
-        <Widget title="Alertas recientes" description="Últimas 24 horas">
+        </ChartCard>
+        <ChartCard title="Alertas recientes" description="Últimas 24 horas">
           <ul className="space-y-3 text-sm">
             <li className="flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" /> Rate limit del 92% para tenant "Retail Prime".</li>
             <li className="flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" /> 3 recargas pendientes de aprobación &gt;24h.</li>
             <li className="flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" /> Proveedor SMS reportó latencia elevada 03:12.</li>
           </ul>
-        </Widget>
-        <Widget title="Actividad" description="Últimos eventos">
+        </ChartCard>
+        <ChartCard title="Actividad" description="Últimos eventos">
           <ul className="space-y-3 text-sm">
             <li>+94 nuevos usuarios esta semana</li>
             <li>+18 empresas activadas</li>
             <li>512 campañas ejecutadas hoy</li>
             <li>7 tickets críticos abiertos</li>
           </ul>
-        </Widget>
+        </ChartCard>
       </div>
     </AdminPage>
   );

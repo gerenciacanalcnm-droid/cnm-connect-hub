@@ -8,7 +8,7 @@ import { CompanyProvider } from "@/context/company-context";
 import { availableCompanies } from "@/config/companies.available";
 import { Shield } from "lucide-react";
 
-export const Route = createFileRoute("/_admin")({
+export const Route = createFileRoute("/_admin" as never)({
   component: AdminLayout,
 });
 
