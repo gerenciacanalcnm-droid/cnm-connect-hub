@@ -1,9 +1,6 @@
 import type { Contact } from "@/types/contact";
 import type { Paginated, QueryParams } from "@/types/common";
-import { contactsMock } from "./mocks/contacts.mock";
-import { paginate, id } from "./mocks/seed";
-
-const DATA: Contact[] = contactsMock.list();
+import { listContacts } from "@/lib/platform.functions";
 
 export interface ContactInput {
   firstName: string;
@@ -22,64 +19,64 @@ export interface ContactService {
   bulkImport(rows: ContactInput[]): Promise<{ imported: number; duplicates: number }>;
 }
 
-function applyQuery(items: Contact[], q?: QueryParams & { tag?: string }): Contact[] {
-  let out = items;
-  if (q?.search) {
-    const s = q.search.toLowerCase();
-    out = out.filter(
-      (r) => r.firstName.toLowerCase().includes(s) ||
-        r.lastName?.toLowerCase().includes(s) ||
-        r.phone.includes(s) ||
-        r.email?.toLowerCase().includes(s),
-    );
-  }
-  if (q?.tag) out = out.filter((r) => r.tags.includes(q.tag!));
-  return out;
+type Row = {
+  id: string;
+  company_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  phone: string;
+  email: string | null;
+  tags: string[] | null;
+  created_at: string;
+};
+
+function mapRow(r: Row): Contact {
+  return {
+    id: r.id,
+    companyId: r.company_id,
+    firstName: r.first_name ?? "",
+    lastName: r.last_name ?? undefined,
+    phone: r.phone,
+    email: r.email ?? undefined,
+    tags: r.tags ?? [],
+    createdAt: r.created_at,
+  };
 }
+
+const notImpl = () => {
+  throw new Error("Escritura de contactos requiere auth (próximo sprint).");
+};
 
 export const contactService: ContactService = {
   async list(params) {
-    const filtered = applyQuery(DATA, params);
-    return paginate(filtered, params?.page ?? 1, params?.pageSize ?? 20);
-  },
-  async getById(cid) {
-    return DATA.find((c) => c.id === cid);
-  },
-  async create(input) {
-    const item: Contact = {
-      id: id("ct"),
-      companyId: "cnm-1",
-      firstName: input.firstName,
-      lastName: input.lastName,
-      phone: input.phone,
-      email: input.email,
-      tags: input.tags ?? [],
-      createdAt: new Date().toISOString(),
-    };
-    DATA.unshift(item);
-    return item;
-  },
-  async update(cid, patch) {
-    const i = DATA.findIndex((c) => c.id === cid);
-    if (i < 0) throw new Error("Contact not found");
-    DATA[i] = { ...DATA[i]!, ...patch } as Contact;
-    return DATA[i]!;
-  },
-  async remove(cid) {
-    const i = DATA.findIndex((c) => c.id === cid);
-    if (i >= 0) DATA.splice(i, 1);
-  },
-  async bulkImport(rows) {
-    let imported = 0;
-    let duplicates = 0;
-    for (const r of rows) {
-      if (DATA.some((c) => c.phone === r.phone)) {
-        duplicates++;
-        continue;
-      }
-      await this.create(r);
-      imported++;
+    const page = params?.page ?? 1;
+    const pageSize = params?.pageSize ?? 20;
+    try {
+      const res = (await listContacts({
+        data: { page, pageSize, search: params?.search, tag: params?.tag },
+      })) as { rows: Row[]; total: number };
+      const items = res.rows.map(mapRow);
+      const totalPages = Math.max(1, Math.ceil(res.total / pageSize));
+      return { items, pagination: { page, pageSize, total: res.total, totalPages } };
+    } catch (err) {
+      console.error("[contactService] list error:", err);
+      return { items: [], pagination: { page, pageSize, total: 0, totalPages: 1 } };
     }
-    return { imported, duplicates };
+  },
+  async getById(id) {
+    const all = await this.list({ pageSize: 200 });
+    return all.items.find((c) => c.id === id);
+  },
+  async create() {
+    return notImpl();
+  },
+  async update() {
+    return notImpl();
+  },
+  async remove() {
+    return notImpl();
+  },
+  async bulkImport() {
+    return notImpl();
   },
 };

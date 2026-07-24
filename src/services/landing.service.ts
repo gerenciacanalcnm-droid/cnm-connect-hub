@@ -1,20 +1,35 @@
 /**
- * LandingService — fuente única para el contenido de la Landing.
- * Hoy lee del mock provider (`@/config/landing-content`).
- * Mañana consumirá `apiClient.get("/landing-content")` sin tocar componentes.
+ * LandingService — resuelve el contenido de la landing.
+ * Intenta leer desde `settings/landing/content` (Landing CMS del Super Admin).
+ * Si no hay contenido o falla la consulta, cae al mock por defecto para que
+ * el sitio nunca quede en blanco.
  */
 import { fallbackLandingContent, type LandingContent } from "@/config/landing-content";
 import { LandingMapper } from "@/mappers/landing.mapper";
-// import { apiClient } from "@/lib/api/client";
+import { getLandingContent as getLandingContentFn } from "@/lib/platform.functions";
 
 export interface LandingService {
   getContent(): Promise<LandingContent>;
 }
 
+function isBootstrap(value: unknown): boolean {
+  return (
+    !value ||
+    (typeof value === "object" &&
+      value !== null &&
+      "_bootstrap" in (value as Record<string, unknown>))
+  );
+}
+
 export const landingService: LandingService = {
   async getContent(): Promise<LandingContent> {
-    // TODO backend: const dto = await apiClient.get<unknown>("/landing-content");
-    // return LandingMapper.fromDTO(landingSchema.parse(dto));
-    return LandingMapper.fromDTO(fallbackLandingContent);
+    try {
+      const remote = await getLandingContentFn();
+      if (isBootstrap(remote)) return LandingMapper.fromDTO(fallbackLandingContent);
+      return LandingMapper.fromDTO(remote as LandingContent);
+    } catch (err) {
+      console.error("[landingService] fallback a mock:", err);
+      return LandingMapper.fromDTO(fallbackLandingContent);
+    }
   },
 };

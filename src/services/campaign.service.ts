@@ -1,9 +1,7 @@
 import type { Campaign } from "@/types/campaign";
+import type { CampaignStatus } from "@/constants/status";
 import type { Paginated, QueryParams } from "@/types/common";
-import { campaignsMock } from "./mocks/campaigns.mock";
-import { paginate, id } from "./mocks/seed";
-
-const DATA: Campaign[] = campaignsMock.list();
+import { listCampaigns } from "@/lib/platform.functions";
 
 export interface CampaignInput {
   name: string;
@@ -22,55 +20,67 @@ export interface CampaignService {
   setStatus(id: string, status: Campaign["status"]): Promise<Campaign>;
 }
 
-function applyQuery(items: Campaign[], q?: QueryParams): Campaign[] {
-  let out = items;
-  if (q?.search) {
-    const s = q.search.toLowerCase();
-    out = out.filter((r) => r.name.toLowerCase().includes(s));
-  }
-  return out;
+type Row = {
+  id: string;
+  company_id: string;
+  name: string;
+  status: string;
+  message_body: string;
+  total_recipients: number | null;
+  scheduled_at: string | null;
+  created_at: string;
+};
+
+function mapRow(r: Row): Campaign {
+  return {
+    id: r.id,
+    companyId: r.company_id,
+    name: r.name,
+    status: r.status as CampaignStatus,
+    message: r.message_body,
+    audienceSize: r.total_recipients ?? 0,
+    scheduledAt: r.scheduled_at ?? undefined,
+    createdAt: r.created_at,
+  };
 }
+
+const notImpl = () => {
+  throw new Error("Escritura de campañas requiere auth (próximo sprint).");
+};
 
 export const campaignService: CampaignService = {
   async list(params) {
-    const filtered = applyQuery(DATA, params);
-    return paginate(filtered, params?.page ?? 1, params?.pageSize ?? 20);
+    const page = params?.page ?? 1;
+    const pageSize = params?.pageSize ?? 20;
+    try {
+      const res = (await listCampaigns({
+        data: { page, pageSize, search: params?.search },
+      })) as { rows: Row[]; total: number };
+      const items = res.rows.map(mapRow);
+      const totalPages = Math.max(1, Math.ceil(res.total / pageSize));
+      return { items, pagination: { page, pageSize, total: res.total, totalPages } };
+    } catch (err) {
+      console.error("[campaignService] list error:", err);
+      return { items: [], pagination: { page, pageSize, total: 0, totalPages: 1 } };
+    }
   },
-  async getById(cid) {
-    return DATA.find((c) => c.id === cid);
+  async getById(id) {
+    const all = await this.list({ pageSize: 200 });
+    return all.items.find((c) => c.id === id);
   },
-  async create(input) {
-    const item: Campaign = {
-      id: id("cmp"),
-      name: input.name,
-      message: input.message,
-      audienceSize: input.audienceSize ?? 0,
-      scheduledAt: input.scheduledAt,
-      status: input.scheduledAt ? "scheduled" : "draft",
-      createdAt: new Date().toISOString(),
-      companyId: "cnm-1",
-    };
-    DATA.unshift(item);
-    return item;
+  async create() {
+    return notImpl();
   },
-  async update(cid, patch) {
-    const i = DATA.findIndex((c) => c.id === cid);
-    if (i < 0) throw new Error("Campaign not found");
-    DATA[i] = { ...DATA[i]!, ...patch } as Campaign;
-    return DATA[i]!;
+  async update() {
+    return notImpl();
   },
-  async remove(cid) {
-    const i = DATA.findIndex((c) => c.id === cid);
-    if (i >= 0) DATA.splice(i, 1);
+  async remove() {
+    return notImpl();
   },
-  async duplicate(cid) {
-    const orig = DATA.find((c) => c.id === cid);
-    if (!orig) throw new Error("Campaign not found");
-    const copy: Campaign = { ...orig, id: id("cmp"), name: `${orig.name} (copia)`, status: "draft", createdAt: new Date().toISOString() };
-    DATA.unshift(copy);
-    return copy;
+  async duplicate() {
+    return notImpl();
   },
-  async setStatus(cid, status) {
-    return this.update(cid, { status });
+  async setStatus() {
+    return notImpl();
   },
 };
