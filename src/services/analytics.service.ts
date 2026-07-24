@@ -12,6 +12,6 @@ export const analyticsService: AnalyticsService = {
     return [];
   },
   async getBreakdown() {
-    return { byStatus: [], byCountry: [] };
+    return { delivery: [], failures: [], cost: [], byOperator: [], byCountry: [] };
   },
 };

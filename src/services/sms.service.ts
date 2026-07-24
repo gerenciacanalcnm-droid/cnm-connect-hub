@@ -11,7 +11,12 @@ export interface SmsService {
 
 export const smsService: SmsService = {
   async list(params) {
-    return { items: [], total: 0, page: params?.page ?? 1, pageSize: params?.pageSize ?? 20 };
+    const page = params?.page ?? 1;
+    const pageSize = params?.pageSize ?? 20;
+    return {
+      items: [],
+      pagination: { page, pageSize, total: 0, totalPages: 0 },
+    };
   },
   async send() { throw NOT_CONNECTED; },
   async bulkSend() { throw NOT_CONNECTED; },
