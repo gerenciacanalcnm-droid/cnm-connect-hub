@@ -730,7 +730,8 @@ export const listAuditLogs = createServerFn({ method: "GET" })
     if (data.action) q = q.eq("action", data.action);
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
-    return { rows: rows ?? [], total: count ?? 0 };
+    const normalized = (rows ?? []).map((r) => ({ ...r, ip: r.ip == null ? null : String(r.ip) }));
+    return { rows: normalized, total: count ?? 0 };
   });
 
 // ═══════════════════ SYSTEM LOGS ═══════════════════
