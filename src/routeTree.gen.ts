@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthVerifyEmailRouteImport } from './routes/_auth.verify-email'
 import { Route as AuthSessionExpiredRouteImport } from './routes/_auth.session-expired'
@@ -30,6 +31,30 @@ import { Route as AppComunicacionRouteImport } from './routes/_app.comunicacion'
 import { Route as AppAutomatizacionesRouteImport } from './routes/_app.automatizaciones'
 import { Route as AppApiRouteImport } from './routes/_app.api'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
+import { Route as AdminAdminUsuariosRouteImport } from './routes/_admin.admin.usuarios'
+import { Route as AdminAdminTarifasRouteImport } from './routes/_admin.admin.tarifas'
+import { Route as AdminAdminSistemaRouteImport } from './routes/_admin.admin.sistema'
+import { Route as AdminAdminSeguridadRouteImport } from './routes/_admin.admin.seguridad'
+import { Route as AdminAdminRolesRouteImport } from './routes/_admin.admin.roles'
+import { Route as AdminAdminRecargasRouteImport } from './routes/_admin.admin.recargas'
+import { Route as AdminAdminPromocionesRouteImport } from './routes/_admin.admin.promociones'
+import { Route as AdminAdminPlanesRouteImport } from './routes/_admin.admin.planes'
+import { Route as AdminAdminPermisosRouteImport } from './routes/_admin.admin.permisos'
+import { Route as AdminAdminPagosRouteImport } from './routes/_admin.admin.pagos'
+import { Route as AdminAdminNotificacionesRouteImport } from './routes/_admin.admin.notificaciones'
+import { Route as AdminAdminLogsRouteImport } from './routes/_admin.admin.logs'
+import { Route as AdminAdminLandingCmsRouteImport } from './routes/_admin.admin.landing-cms'
+import { Route as AdminAdminIntegracionesRouteImport } from './routes/_admin.admin.integraciones'
+import { Route as AdminAdminFeatureFlagsRouteImport } from './routes/_admin.admin.feature-flags'
+import { Route as AdminAdminEmpresasRouteImport } from './routes/_admin.admin.empresas'
+import { Route as AdminAdminDashboardRouteImport } from './routes/_admin.admin.dashboard'
+import { Route as AdminAdminConfigWhatsappRouteImport } from './routes/_admin.admin.config-whatsapp'
+import { Route as AdminAdminConfigSmsRouteImport } from './routes/_admin.admin.config-sms'
+import { Route as AdminAdminConfigNovaRouteImport } from './routes/_admin.admin.config-nova'
+import { Route as AdminAdminConfigGeneralRouteImport } from './routes/_admin.admin.config-general'
+import { Route as AdminAdminConfigApiRouteImport } from './routes/_admin.admin.config-api'
+import { Route as AdminAdminCommunicationRouteImport } from './routes/_admin.admin.communication'
+import { Route as AdminAdminAuditoriaRouteImport } from './routes/_admin.admin.auditoria'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -37,6 +62,10 @@ const AuthRoute = AuthRouteImport.update({
 } as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/_admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -134,6 +163,128 @@ const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminAdminUsuariosRoute = AdminAdminUsuariosRouteImport.update({
+  id: '/admin/usuarios',
+  path: '/admin/usuarios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminTarifasRoute = AdminAdminTarifasRouteImport.update({
+  id: '/admin/tarifas',
+  path: '/admin/tarifas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminSistemaRoute = AdminAdminSistemaRouteImport.update({
+  id: '/admin/sistema',
+  path: '/admin/sistema',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminSeguridadRoute = AdminAdminSeguridadRouteImport.update({
+  id: '/admin/seguridad',
+  path: '/admin/seguridad',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminRolesRoute = AdminAdminRolesRouteImport.update({
+  id: '/admin/roles',
+  path: '/admin/roles',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminRecargasRoute = AdminAdminRecargasRouteImport.update({
+  id: '/admin/recargas',
+  path: '/admin/recargas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminPromocionesRoute = AdminAdminPromocionesRouteImport.update({
+  id: '/admin/promociones',
+  path: '/admin/promociones',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminPlanesRoute = AdminAdminPlanesRouteImport.update({
+  id: '/admin/planes',
+  path: '/admin/planes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminPermisosRoute = AdminAdminPermisosRouteImport.update({
+  id: '/admin/permisos',
+  path: '/admin/permisos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminPagosRoute = AdminAdminPagosRouteImport.update({
+  id: '/admin/pagos',
+  path: '/admin/pagos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminNotificacionesRoute =
+  AdminAdminNotificacionesRouteImport.update({
+    id: '/admin/notificaciones',
+    path: '/admin/notificaciones',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminAdminLogsRoute = AdminAdminLogsRouteImport.update({
+  id: '/admin/logs',
+  path: '/admin/logs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminLandingCmsRoute = AdminAdminLandingCmsRouteImport.update({
+  id: '/admin/landing-cms',
+  path: '/admin/landing-cms',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminIntegracionesRoute = AdminAdminIntegracionesRouteImport.update({
+  id: '/admin/integraciones',
+  path: '/admin/integraciones',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminFeatureFlagsRoute = AdminAdminFeatureFlagsRouteImport.update({
+  id: '/admin/feature-flags',
+  path: '/admin/feature-flags',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminEmpresasRoute = AdminAdminEmpresasRouteImport.update({
+  id: '/admin/empresas',
+  path: '/admin/empresas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminDashboardRoute = AdminAdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminConfigWhatsappRoute =
+  AdminAdminConfigWhatsappRouteImport.update({
+    id: '/admin/config-whatsapp',
+    path: '/admin/config-whatsapp',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminAdminConfigSmsRoute = AdminAdminConfigSmsRouteImport.update({
+  id: '/admin/config-sms',
+  path: '/admin/config-sms',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminConfigNovaRoute = AdminAdminConfigNovaRouteImport.update({
+  id: '/admin/config-nova',
+  path: '/admin/config-nova',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminConfigGeneralRoute = AdminAdminConfigGeneralRouteImport.update({
+  id: '/admin/config-general',
+  path: '/admin/config-general',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminConfigApiRoute = AdminAdminConfigApiRouteImport.update({
+  id: '/admin/config-api',
+  path: '/admin/config-api',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminCommunicationRoute = AdminAdminCommunicationRouteImport.update({
+  id: '/admin/communication',
+  path: '/admin/communication',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminAuditoriaRoute = AdminAdminAuditoriaRouteImport.update({
+  id: '/admin/auditoria',
+  path: '/admin/auditoria',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -155,6 +306,30 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof AuthResetPasswordRoute
   '/session-expired': typeof AuthSessionExpiredRoute
   '/verify-email': typeof AuthVerifyEmailRoute
+  '/admin/auditoria': typeof AdminAdminAuditoriaRoute
+  '/admin/communication': typeof AdminAdminCommunicationRoute
+  '/admin/config-api': typeof AdminAdminConfigApiRoute
+  '/admin/config-general': typeof AdminAdminConfigGeneralRoute
+  '/admin/config-nova': typeof AdminAdminConfigNovaRoute
+  '/admin/config-sms': typeof AdminAdminConfigSmsRoute
+  '/admin/config-whatsapp': typeof AdminAdminConfigWhatsappRoute
+  '/admin/dashboard': typeof AdminAdminDashboardRoute
+  '/admin/empresas': typeof AdminAdminEmpresasRoute
+  '/admin/feature-flags': typeof AdminAdminFeatureFlagsRoute
+  '/admin/integraciones': typeof AdminAdminIntegracionesRoute
+  '/admin/landing-cms': typeof AdminAdminLandingCmsRoute
+  '/admin/logs': typeof AdminAdminLogsRoute
+  '/admin/notificaciones': typeof AdminAdminNotificacionesRoute
+  '/admin/pagos': typeof AdminAdminPagosRoute
+  '/admin/permisos': typeof AdminAdminPermisosRoute
+  '/admin/planes': typeof AdminAdminPlanesRoute
+  '/admin/promociones': typeof AdminAdminPromocionesRoute
+  '/admin/recargas': typeof AdminAdminRecargasRoute
+  '/admin/roles': typeof AdminAdminRolesRoute
+  '/admin/seguridad': typeof AdminAdminSeguridadRoute
+  '/admin/sistema': typeof AdminAdminSistemaRoute
+  '/admin/tarifas': typeof AdminAdminTarifasRoute
+  '/admin/usuarios': typeof AdminAdminUsuariosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -176,10 +351,35 @@ export interface FileRoutesByTo {
   '/reset-password': typeof AuthResetPasswordRoute
   '/session-expired': typeof AuthSessionExpiredRoute
   '/verify-email': typeof AuthVerifyEmailRoute
+  '/admin/auditoria': typeof AdminAdminAuditoriaRoute
+  '/admin/communication': typeof AdminAdminCommunicationRoute
+  '/admin/config-api': typeof AdminAdminConfigApiRoute
+  '/admin/config-general': typeof AdminAdminConfigGeneralRoute
+  '/admin/config-nova': typeof AdminAdminConfigNovaRoute
+  '/admin/config-sms': typeof AdminAdminConfigSmsRoute
+  '/admin/config-whatsapp': typeof AdminAdminConfigWhatsappRoute
+  '/admin/dashboard': typeof AdminAdminDashboardRoute
+  '/admin/empresas': typeof AdminAdminEmpresasRoute
+  '/admin/feature-flags': typeof AdminAdminFeatureFlagsRoute
+  '/admin/integraciones': typeof AdminAdminIntegracionesRoute
+  '/admin/landing-cms': typeof AdminAdminLandingCmsRoute
+  '/admin/logs': typeof AdminAdminLogsRoute
+  '/admin/notificaciones': typeof AdminAdminNotificacionesRoute
+  '/admin/pagos': typeof AdminAdminPagosRoute
+  '/admin/permisos': typeof AdminAdminPermisosRoute
+  '/admin/planes': typeof AdminAdminPlanesRoute
+  '/admin/promociones': typeof AdminAdminPromocionesRoute
+  '/admin/recargas': typeof AdminAdminRecargasRoute
+  '/admin/roles': typeof AdminAdminRolesRoute
+  '/admin/seguridad': typeof AdminAdminSeguridadRoute
+  '/admin/sistema': typeof AdminAdminSistemaRoute
+  '/admin/tarifas': typeof AdminAdminTarifasRoute
+  '/admin/usuarios': typeof AdminAdminUsuariosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_admin': typeof AdminRouteWithChildren
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
   '/_app/analytics': typeof AppAnalyticsRoute
@@ -200,6 +400,30 @@ export interface FileRoutesById {
   '/_auth/reset-password': typeof AuthResetPasswordRoute
   '/_auth/session-expired': typeof AuthSessionExpiredRoute
   '/_auth/verify-email': typeof AuthVerifyEmailRoute
+  '/_admin/admin/auditoria': typeof AdminAdminAuditoriaRoute
+  '/_admin/admin/communication': typeof AdminAdminCommunicationRoute
+  '/_admin/admin/config-api': typeof AdminAdminConfigApiRoute
+  '/_admin/admin/config-general': typeof AdminAdminConfigGeneralRoute
+  '/_admin/admin/config-nova': typeof AdminAdminConfigNovaRoute
+  '/_admin/admin/config-sms': typeof AdminAdminConfigSmsRoute
+  '/_admin/admin/config-whatsapp': typeof AdminAdminConfigWhatsappRoute
+  '/_admin/admin/dashboard': typeof AdminAdminDashboardRoute
+  '/_admin/admin/empresas': typeof AdminAdminEmpresasRoute
+  '/_admin/admin/feature-flags': typeof AdminAdminFeatureFlagsRoute
+  '/_admin/admin/integraciones': typeof AdminAdminIntegracionesRoute
+  '/_admin/admin/landing-cms': typeof AdminAdminLandingCmsRoute
+  '/_admin/admin/logs': typeof AdminAdminLogsRoute
+  '/_admin/admin/notificaciones': typeof AdminAdminNotificacionesRoute
+  '/_admin/admin/pagos': typeof AdminAdminPagosRoute
+  '/_admin/admin/permisos': typeof AdminAdminPermisosRoute
+  '/_admin/admin/planes': typeof AdminAdminPlanesRoute
+  '/_admin/admin/promociones': typeof AdminAdminPromocionesRoute
+  '/_admin/admin/recargas': typeof AdminAdminRecargasRoute
+  '/_admin/admin/roles': typeof AdminAdminRolesRoute
+  '/_admin/admin/seguridad': typeof AdminAdminSeguridadRoute
+  '/_admin/admin/sistema': typeof AdminAdminSistemaRoute
+  '/_admin/admin/tarifas': typeof AdminAdminTarifasRoute
+  '/_admin/admin/usuarios': typeof AdminAdminUsuariosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -223,6 +447,30 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/session-expired'
     | '/verify-email'
+    | '/admin/auditoria'
+    | '/admin/communication'
+    | '/admin/config-api'
+    | '/admin/config-general'
+    | '/admin/config-nova'
+    | '/admin/config-sms'
+    | '/admin/config-whatsapp'
+    | '/admin/dashboard'
+    | '/admin/empresas'
+    | '/admin/feature-flags'
+    | '/admin/integraciones'
+    | '/admin/landing-cms'
+    | '/admin/logs'
+    | '/admin/notificaciones'
+    | '/admin/pagos'
+    | '/admin/permisos'
+    | '/admin/planes'
+    | '/admin/promociones'
+    | '/admin/recargas'
+    | '/admin/roles'
+    | '/admin/seguridad'
+    | '/admin/sistema'
+    | '/admin/tarifas'
+    | '/admin/usuarios'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -244,9 +492,34 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/session-expired'
     | '/verify-email'
+    | '/admin/auditoria'
+    | '/admin/communication'
+    | '/admin/config-api'
+    | '/admin/config-general'
+    | '/admin/config-nova'
+    | '/admin/config-sms'
+    | '/admin/config-whatsapp'
+    | '/admin/dashboard'
+    | '/admin/empresas'
+    | '/admin/feature-flags'
+    | '/admin/integraciones'
+    | '/admin/landing-cms'
+    | '/admin/logs'
+    | '/admin/notificaciones'
+    | '/admin/pagos'
+    | '/admin/permisos'
+    | '/admin/planes'
+    | '/admin/promociones'
+    | '/admin/recargas'
+    | '/admin/roles'
+    | '/admin/seguridad'
+    | '/admin/sistema'
+    | '/admin/tarifas'
+    | '/admin/usuarios'
   id:
     | '__root__'
     | '/'
+    | '/_admin'
     | '/_app'
     | '/_auth'
     | '/_app/analytics'
@@ -267,10 +540,35 @@ export interface FileRouteTypes {
     | '/_auth/reset-password'
     | '/_auth/session-expired'
     | '/_auth/verify-email'
+    | '/_admin/admin/auditoria'
+    | '/_admin/admin/communication'
+    | '/_admin/admin/config-api'
+    | '/_admin/admin/config-general'
+    | '/_admin/admin/config-nova'
+    | '/_admin/admin/config-sms'
+    | '/_admin/admin/config-whatsapp'
+    | '/_admin/admin/dashboard'
+    | '/_admin/admin/empresas'
+    | '/_admin/admin/feature-flags'
+    | '/_admin/admin/integraciones'
+    | '/_admin/admin/landing-cms'
+    | '/_admin/admin/logs'
+    | '/_admin/admin/notificaciones'
+    | '/_admin/admin/pagos'
+    | '/_admin/admin/permisos'
+    | '/_admin/admin/planes'
+    | '/_admin/admin/promociones'
+    | '/_admin/admin/recargas'
+    | '/_admin/admin/roles'
+    | '/_admin/admin/seguridad'
+    | '/_admin/admin/sistema'
+    | '/_admin/admin/tarifas'
+    | '/_admin/admin/usuarios'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
 }
@@ -289,6 +587,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -424,8 +729,232 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAnalyticsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_admin/admin/usuarios': {
+      id: '/_admin/admin/usuarios'
+      path: '/admin/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AdminAdminUsuariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/tarifas': {
+      id: '/_admin/admin/tarifas'
+      path: '/admin/tarifas'
+      fullPath: '/admin/tarifas'
+      preLoaderRoute: typeof AdminAdminTarifasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/sistema': {
+      id: '/_admin/admin/sistema'
+      path: '/admin/sistema'
+      fullPath: '/admin/sistema'
+      preLoaderRoute: typeof AdminAdminSistemaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/seguridad': {
+      id: '/_admin/admin/seguridad'
+      path: '/admin/seguridad'
+      fullPath: '/admin/seguridad'
+      preLoaderRoute: typeof AdminAdminSeguridadRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/roles': {
+      id: '/_admin/admin/roles'
+      path: '/admin/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AdminAdminRolesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/recargas': {
+      id: '/_admin/admin/recargas'
+      path: '/admin/recargas'
+      fullPath: '/admin/recargas'
+      preLoaderRoute: typeof AdminAdminRecargasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/promociones': {
+      id: '/_admin/admin/promociones'
+      path: '/admin/promociones'
+      fullPath: '/admin/promociones'
+      preLoaderRoute: typeof AdminAdminPromocionesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/planes': {
+      id: '/_admin/admin/planes'
+      path: '/admin/planes'
+      fullPath: '/admin/planes'
+      preLoaderRoute: typeof AdminAdminPlanesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/permisos': {
+      id: '/_admin/admin/permisos'
+      path: '/admin/permisos'
+      fullPath: '/admin/permisos'
+      preLoaderRoute: typeof AdminAdminPermisosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/pagos': {
+      id: '/_admin/admin/pagos'
+      path: '/admin/pagos'
+      fullPath: '/admin/pagos'
+      preLoaderRoute: typeof AdminAdminPagosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/notificaciones': {
+      id: '/_admin/admin/notificaciones'
+      path: '/admin/notificaciones'
+      fullPath: '/admin/notificaciones'
+      preLoaderRoute: typeof AdminAdminNotificacionesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/logs': {
+      id: '/_admin/admin/logs'
+      path: '/admin/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AdminAdminLogsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/landing-cms': {
+      id: '/_admin/admin/landing-cms'
+      path: '/admin/landing-cms'
+      fullPath: '/admin/landing-cms'
+      preLoaderRoute: typeof AdminAdminLandingCmsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/integraciones': {
+      id: '/_admin/admin/integraciones'
+      path: '/admin/integraciones'
+      fullPath: '/admin/integraciones'
+      preLoaderRoute: typeof AdminAdminIntegracionesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/feature-flags': {
+      id: '/_admin/admin/feature-flags'
+      path: '/admin/feature-flags'
+      fullPath: '/admin/feature-flags'
+      preLoaderRoute: typeof AdminAdminFeatureFlagsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/empresas': {
+      id: '/_admin/admin/empresas'
+      path: '/admin/empresas'
+      fullPath: '/admin/empresas'
+      preLoaderRoute: typeof AdminAdminEmpresasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/dashboard': {
+      id: '/_admin/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminAdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/config-whatsapp': {
+      id: '/_admin/admin/config-whatsapp'
+      path: '/admin/config-whatsapp'
+      fullPath: '/admin/config-whatsapp'
+      preLoaderRoute: typeof AdminAdminConfigWhatsappRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/config-sms': {
+      id: '/_admin/admin/config-sms'
+      path: '/admin/config-sms'
+      fullPath: '/admin/config-sms'
+      preLoaderRoute: typeof AdminAdminConfigSmsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/config-nova': {
+      id: '/_admin/admin/config-nova'
+      path: '/admin/config-nova'
+      fullPath: '/admin/config-nova'
+      preLoaderRoute: typeof AdminAdminConfigNovaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/config-general': {
+      id: '/_admin/admin/config-general'
+      path: '/admin/config-general'
+      fullPath: '/admin/config-general'
+      preLoaderRoute: typeof AdminAdminConfigGeneralRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/config-api': {
+      id: '/_admin/admin/config-api'
+      path: '/admin/config-api'
+      fullPath: '/admin/config-api'
+      preLoaderRoute: typeof AdminAdminConfigApiRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/communication': {
+      id: '/_admin/admin/communication'
+      path: '/admin/communication'
+      fullPath: '/admin/communication'
+      preLoaderRoute: typeof AdminAdminCommunicationRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/auditoria': {
+      id: '/_admin/admin/auditoria'
+      path: '/admin/auditoria'
+      fullPath: '/admin/auditoria'
+      preLoaderRoute: typeof AdminAdminAuditoriaRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminAdminAuditoriaRoute: typeof AdminAdminAuditoriaRoute
+  AdminAdminCommunicationRoute: typeof AdminAdminCommunicationRoute
+  AdminAdminConfigApiRoute: typeof AdminAdminConfigApiRoute
+  AdminAdminConfigGeneralRoute: typeof AdminAdminConfigGeneralRoute
+  AdminAdminConfigNovaRoute: typeof AdminAdminConfigNovaRoute
+  AdminAdminConfigSmsRoute: typeof AdminAdminConfigSmsRoute
+  AdminAdminConfigWhatsappRoute: typeof AdminAdminConfigWhatsappRoute
+  AdminAdminDashboardRoute: typeof AdminAdminDashboardRoute
+  AdminAdminEmpresasRoute: typeof AdminAdminEmpresasRoute
+  AdminAdminFeatureFlagsRoute: typeof AdminAdminFeatureFlagsRoute
+  AdminAdminIntegracionesRoute: typeof AdminAdminIntegracionesRoute
+  AdminAdminLandingCmsRoute: typeof AdminAdminLandingCmsRoute
+  AdminAdminLogsRoute: typeof AdminAdminLogsRoute
+  AdminAdminNotificacionesRoute: typeof AdminAdminNotificacionesRoute
+  AdminAdminPagosRoute: typeof AdminAdminPagosRoute
+  AdminAdminPermisosRoute: typeof AdminAdminPermisosRoute
+  AdminAdminPlanesRoute: typeof AdminAdminPlanesRoute
+  AdminAdminPromocionesRoute: typeof AdminAdminPromocionesRoute
+  AdminAdminRecargasRoute: typeof AdminAdminRecargasRoute
+  AdminAdminRolesRoute: typeof AdminAdminRolesRoute
+  AdminAdminSeguridadRoute: typeof AdminAdminSeguridadRoute
+  AdminAdminSistemaRoute: typeof AdminAdminSistemaRoute
+  AdminAdminTarifasRoute: typeof AdminAdminTarifasRoute
+  AdminAdminUsuariosRoute: typeof AdminAdminUsuariosRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAdminAuditoriaRoute: AdminAdminAuditoriaRoute,
+  AdminAdminCommunicationRoute: AdminAdminCommunicationRoute,
+  AdminAdminConfigApiRoute: AdminAdminConfigApiRoute,
+  AdminAdminConfigGeneralRoute: AdminAdminConfigGeneralRoute,
+  AdminAdminConfigNovaRoute: AdminAdminConfigNovaRoute,
+  AdminAdminConfigSmsRoute: AdminAdminConfigSmsRoute,
+  AdminAdminConfigWhatsappRoute: AdminAdminConfigWhatsappRoute,
+  AdminAdminDashboardRoute: AdminAdminDashboardRoute,
+  AdminAdminEmpresasRoute: AdminAdminEmpresasRoute,
+  AdminAdminFeatureFlagsRoute: AdminAdminFeatureFlagsRoute,
+  AdminAdminIntegracionesRoute: AdminAdminIntegracionesRoute,
+  AdminAdminLandingCmsRoute: AdminAdminLandingCmsRoute,
+  AdminAdminLogsRoute: AdminAdminLogsRoute,
+  AdminAdminNotificacionesRoute: AdminAdminNotificacionesRoute,
+  AdminAdminPagosRoute: AdminAdminPagosRoute,
+  AdminAdminPermisosRoute: AdminAdminPermisosRoute,
+  AdminAdminPlanesRoute: AdminAdminPlanesRoute,
+  AdminAdminPromocionesRoute: AdminAdminPromocionesRoute,
+  AdminAdminRecargasRoute: AdminAdminRecargasRoute,
+  AdminAdminRolesRoute: AdminAdminRolesRoute,
+  AdminAdminSeguridadRoute: AdminAdminSeguridadRoute,
+  AdminAdminSistemaRoute: AdminAdminSistemaRoute,
+  AdminAdminTarifasRoute: AdminAdminTarifasRoute,
+  AdminAdminUsuariosRoute: AdminAdminUsuariosRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
   AppAnalyticsRoute: typeof AppAnalyticsRoute
@@ -481,6 +1010,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
 }
