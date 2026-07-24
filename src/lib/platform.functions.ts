@@ -446,7 +446,7 @@ export const duplicateCampaign = createServerFn({ method: "POST" })
     } = src as Record<string, unknown>;
     const { data: copy, error: e2 } = await context.supabase
       .from("campaigns")
-      .insert({ ...(rest as never), name: `${(src as { name: string }).name} (copia)`, status: "draft" })
+      .insert({ ...(rest as Record<string, unknown>), name: `${(src as { name: string }).name} (copia)`, status: "draft" } as never)
       .select()
       .single();
     if (e2) throw new Error(e2.message);
