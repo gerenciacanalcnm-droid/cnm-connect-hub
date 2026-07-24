@@ -1,6 +1,13 @@
 import type { Contact } from "@/types/contact";
 import type { Paginated, QueryParams } from "@/types/common";
-import { listContacts } from "@/lib/platform.functions";
+import {
+  listContacts,
+  createContact,
+  updateContact,
+  deleteContact,
+  getContactImportUploadUrl,
+  importContactsCsv,
+} from "@/lib/platform.functions";
 
 export interface ContactInput {
   firstName: string;
@@ -16,7 +23,7 @@ export interface ContactService {
   create(input: ContactInput): Promise<Contact>;
   update(id: string, patch: Partial<Contact>): Promise<Contact>;
   remove(id: string): Promise<void>;
-  bulkImport(rows: ContactInput[]): Promise<{ imported: number; duplicates: number }>;
+  bulkImport(file: File): Promise<{ imported: number; duplicates: number; errors: number }>;
 }
 
 type Row = {
@@ -43,10 +50,6 @@ function mapRow(r: Row): Contact {
   };
 }
 
-const notImpl = () => {
-  throw new Error("Escritura de contactos requiere auth (próximo sprint).");
-};
-
 export const contactService: ContactService = {
   async list(params) {
     const page = params?.page ?? 1;
@@ -67,16 +70,44 @@ export const contactService: ContactService = {
     const all = await this.list({ pageSize: 200 });
     return all.items.find((c) => c.id === id);
   },
-  async create() {
-    return notImpl();
+  async create(input) {
+    const row = (await createContact({
+      data: {
+        first_name: input.firstName,
+        last_name: input.lastName,
+        phone: input.phone,
+        email: input.email,
+        tags: input.tags ?? [],
+      },
+    })) as Row;
+    return mapRow(row);
   },
-  async update() {
-    return notImpl();
+  async update(id, patch) {
+    const row = (await updateContact({
+      data: {
+        id,
+        first_name: patch.firstName,
+        last_name: patch.lastName,
+        phone: patch.phone,
+        email: patch.email,
+        tags: patch.tags,
+      },
+    })) as Row;
+    return mapRow(row);
   },
-  async remove() {
-    return notImpl();
+  async remove(id) {
+    await deleteContact({ data: { id } });
   },
-  async bulkImport() {
-    return notImpl();
+  async bulkImport(file) {
+    const signed = (await getContactImportUploadUrl({
+      data: { filename: file.name },
+    })) as { path: string; token: string; signedUrl: string };
+    const put = await fetch(signed.signedUrl, { method: "PUT", body: file });
+    if (!put.ok) throw new Error(`Fallo la subida del CSV [${put.status}]`);
+    return (await importContactsCsv({ data: { path: signed.path } })) as {
+      imported: number;
+      duplicates: number;
+      errors: number;
+    };
   },
 };

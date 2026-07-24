@@ -1,5 +1,10 @@
 import type { Notification } from "@/types/notification";
-import { listNotifications } from "@/lib/platform.functions";
+import {
+  listNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  deleteNotification,
+} from "@/lib/platform.functions";
 
 type Row = {
   id: string;
@@ -21,37 +26,35 @@ function mapRow(r: Row): Notification {
   };
 }
 
-let CACHE: Notification[] | null = null;
-
-async function load(): Promise<Notification[]> {
-  if (CACHE) return CACHE;
-  const rows = (await listNotifications()) as Row[];
-  CACHE = rows.map(mapRow);
-  return CACHE;
-}
-
 export interface NotificationService {
   list(): Promise<Notification[]>;
   unreadCount(): Promise<number>;
   markAsRead(id: string): Promise<void>;
   markAllRead(): Promise<void>;
+  remove(id: string): Promise<void>;
 }
 
 export const notificationService: NotificationService = {
   async list() {
-    return load();
+    try {
+      const rows = (await listNotifications()) as Row[];
+      return rows.map(mapRow);
+    } catch (err) {
+      console.error("[notificationService] list:", err);
+      return [];
+    }
   },
   async unreadCount() {
-    const all = await load();
+    const all = await this.list();
     return all.filter((n) => !n.read).length;
   },
-  async markAsRead(nid) {
-    const all = await load();
-    const n = all.find((x) => x.id === nid);
-    if (n) n.read = true;
+  async markAsRead(id) {
+    await markNotificationRead({ data: { id } });
   },
   async markAllRead() {
-    const all = await load();
-    for (const n of all) n.read = true;
+    await markAllNotificationsRead();
+  },
+  async remove(id) {
+    await deleteNotification({ data: { id } });
   },
 };

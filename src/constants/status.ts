@@ -14,6 +14,7 @@ export const CAMPAIGN_STATUS = {
   running: "running",
   paused: "paused",
   completed: "completed",
+  canceled: "canceled",
   failed: "failed",
 } as const;
 export type CampaignStatus = (typeof CAMPAIGN_STATUS)[keyof typeof CAMPAIGN_STATUS];

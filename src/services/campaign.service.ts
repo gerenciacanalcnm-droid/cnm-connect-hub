@@ -1,7 +1,13 @@
 import type { Campaign } from "@/types/campaign";
 import type { CampaignStatus } from "@/constants/status";
 import type { Paginated, QueryParams } from "@/types/common";
-import { listCampaigns } from "@/lib/platform.functions";
+import {
+  listCampaigns,
+  upsertCampaign,
+  duplicateCampaign,
+  cancelCampaign,
+  deleteCampaign,
+} from "@/lib/platform.functions";
 
 export interface CampaignInput {
   name: string;
@@ -44,10 +50,6 @@ function mapRow(r: Row): Campaign {
   };
 }
 
-const notImpl = () => {
-  throw new Error("Escritura de campañas requiere auth (próximo sprint).");
-};
-
 export const campaignService: CampaignService = {
   async list(params) {
     const page = params?.page ?? 1;
@@ -68,19 +70,39 @@ export const campaignService: CampaignService = {
     const all = await this.list({ pageSize: 200 });
     return all.items.find((c) => c.id === id);
   },
-  async create() {
-    return notImpl();
+  async create(input) {
+    const row = (await upsertCampaign({
+      data: {
+        name: input.name,
+        message_body: input.message,
+        scheduled_at: input.scheduledAt,
+      },
+    })) as Row;
+    return mapRow(row);
   },
-  async update() {
-    return notImpl();
+  async update(id, patch) {
+    const row = (await upsertCampaign({
+      data: {
+        id,
+        name: patch.name,
+        message_body: patch.message,
+        scheduled_at: patch.scheduledAt,
+      },
+    })) as Row;
+    return mapRow(row);
   },
-  async remove() {
-    return notImpl();
+  async remove(id) {
+    await deleteCampaign({ data: { id } });
   },
-  async duplicate() {
-    return notImpl();
+  async duplicate(id) {
+    const row = (await duplicateCampaign({ data: { id } })) as Row;
+    return mapRow(row);
   },
-  async setStatus() {
-    return notImpl();
+  async setStatus(id, status) {
+    if (status === "canceled") {
+      await cancelCampaign({ data: { id } });
+    }
+    const row = (await upsertCampaign({ data: { id, status } })) as Row;
+    return mapRow(row);
   },
 };
