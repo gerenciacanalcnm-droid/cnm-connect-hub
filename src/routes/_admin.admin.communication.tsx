@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { adminConfig } from "@/config/admin.config";
+import { useAdminSms } from "@/hooks/use-admin-settings";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_admin/admin/communication")({
@@ -18,7 +18,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function CommPage() {
-  const s = adminConfig.sms;
+  const s = useAdminSms();
   return (
     <AdminPage
       title="Communication"

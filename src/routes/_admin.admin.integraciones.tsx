@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { defaultIntegrations, type Integration } from "@/config/admin.config";
+import { useAdminIntegrations } from "@/hooks/use-admin-settings";
+import type { Integration } from "@/services/admin-settings.service";
 import { Plug, Settings } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,7 +22,8 @@ export const Route = createFileRoute("/_admin/admin/integraciones")({
 });
 
 function IntPage() {
-  const [items, setItems] = useState<Integration[]>(defaultIntegrations);
+  const initial = useAdminIntegrations();
+  const [items, setItems] = useState<Integration[]>(initial);
   return (
     <AdminPage title="Integraciones" description="Conecta proveedores externos: SMS, WhatsApp, email, CRM y analytics.">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -3,7 +3,7 @@ import { AdminPage } from "@/components/admin/admin-page";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { adminConfig } from "@/config/admin.config";
+import { useAdminNotifications } from "@/hooks/use-admin-settings";
 import { Mail, Bell as BellIcon, Smartphone, MessageCircle, Monitor } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_admin/admin/notificaciones")({
 });
 
 function NotifPage() {
-  const n = adminConfig.notifications;
+  const n = useAdminNotifications();
   return (
     <AdminPage title="Notificaciones" description="Canales de comunicación con administradores y clientes." actions={<Button size="sm" onClick={() => toast.success("Guardado")}>Guardar</Button>}>
       <Card>

@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { defaultPaymentMethods, type PaymentMethod } from "@/config/admin.config";
+import { useAdminPaymentMethods } from "@/hooks/use-admin-settings";
+import type { PaymentMethod } from "@/services/admin-settings.service";
 import { CreditCard, Wallet, Landmark, Banknote, Settings } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,7 +23,8 @@ export const Route = createFileRoute("/_admin/admin/pagos")({
 });
 
 function PagosPage() {
-  const [methods, setMethods] = useState<PaymentMethod[]>(defaultPaymentMethods);
+  const initial = useAdminPaymentMethods();
+  const [methods, setMethods] = useState<PaymentMethod[]>(initial);
   return (
     <AdminPage title="Métodos de Pago" description="Habilita, prueba y configura pasarelas.">
       <div className="grid gap-4 md:grid-cols-2">

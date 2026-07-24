@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Copy, Pencil, Trash2 } from "lucide-react";
-import { defaultTariffs, type TariffTier } from "@/config/admin.config";
+import { useAdminTariffs } from "@/hooks/use-admin-settings";
+import type { TariffTier } from "@/services/admin-settings.service";
 import { formatCurrency } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -19,7 +20,8 @@ export const Route = createFileRoute("/_admin/admin/tarifas")({
 });
 
 function TarifasPage() {
-  const [data, setData] = useState<TariffTier[]>(defaultTariffs);
+  const initial = useAdminTariffs();
+  const [data, setData] = useState<TariffTier[]>(initial);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState({ from: 0, to: 0, price: 0 });
 
