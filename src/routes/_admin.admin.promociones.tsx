@@ -8,7 +8,8 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { defaultPromotions, type Promotion } from "@/config/admin.config";
+import { useAdminPromotions } from "@/hooks/use-admin-settings";
+import type { Promotion } from "@/services/admin-settings.service";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,7 +19,8 @@ export const Route = createFileRoute("/_admin/admin/promociones")({
 });
 
 function PromoPage() {
-  const [data, setData] = useState<Promotion[]>(defaultPromotions);
+  const initial = useAdminPromotions();
+  const [data, setData] = useState<Promotion[]>(initial);
   const [open, setOpen] = useState(false);
   const columns = useMemo<ColumnDef<Promotion, unknown>[]>(() => [
     { accessorKey: "name", header: "Nombre" },

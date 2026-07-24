@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { adminConfig } from "@/config/admin.config";
+import { useAdminSms } from "@/hooks/use-admin-settings";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_admin/admin/config-sms")({
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_admin/admin/config-sms")({
 });
 
 function ConfigSms() {
-  const s = adminConfig.sms;
+  const s = useAdminSms();
   return (
     <AdminPage title="Configuración SMS" description="Proveedor, credenciales, límites y horarios de envío." actions={<Button size="sm" onClick={() => toast.success("Guardado")}>Guardar</Button>}>
       <div className="grid gap-4 lg:grid-cols-2">

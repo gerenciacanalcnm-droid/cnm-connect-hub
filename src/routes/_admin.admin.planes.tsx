@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { defaultPlans, type Plan } from "@/config/admin.config";
+import { useAdminPlans } from "@/hooks/use-admin-settings";
+import type { Plan } from "@/services/admin-settings.service";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { Plus, Star, Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -20,7 +21,8 @@ export const Route = createFileRoute("/_admin/admin/planes")({
 });
 
 function PlanesPage() {
-  const [plans, setPlans] = useState<Plan[]>(defaultPlans);
+  const initial = useAdminPlans();
+  const [plans, setPlans] = useState<Plan[]>(initial);
   const [open, setOpen] = useState(false);
 
   return (

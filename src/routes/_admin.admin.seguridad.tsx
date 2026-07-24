@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { adminConfig } from "@/config/admin.config";
+import { useAdminSecurity } from "@/hooks/use-admin-settings";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_admin/admin/seguridad")({
@@ -23,7 +23,7 @@ function Row({ title, description, children }: { title: string; description?: st
 }
 
 function SecPage() {
-  const s = adminConfig.security;
+  const s = useAdminSecurity();
   return (
     <AdminPage title="Seguridad" description="Autenticación, contraseñas y políticas de sesión." actions={<Button size="sm" onClick={() => toast.success("Guardado")}>Guardar</Button>}>
       <div className="grid gap-4 lg:grid-cols-2">

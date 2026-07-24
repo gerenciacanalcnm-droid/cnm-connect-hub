@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { adminConfig } from "@/config/admin.config";
+import { useAdminApi } from "@/hooks/use-admin-settings";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_admin/admin/config-api")({
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_admin/admin/config-api")({
 });
 
 function ConfigApi() {
-  const a = adminConfig.api;
+  const a = useAdminApi();
   return (
     <AdminPage title="API" description="Rate limits, TTLs y allowlist. La documentación pública se administra en el módulo API del panel de usuario." actions={<Button size="sm" onClick={() => toast.success("Guardado")}>Guardar</Button>}>
       <div className="grid gap-4 lg:grid-cols-2">

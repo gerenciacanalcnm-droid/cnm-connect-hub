@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { adminConfig } from "@/config/admin.config";
+import { useAdminGeneral } from "@/hooks/use-admin-settings";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_admin/admin/config-general")({
@@ -17,7 +17,7 @@ function F({ label, children }: { label: string; children: React.ReactNode }) {
 }
 
 function ConfigGeneral() {
-  const g = adminConfig.general;
+  const g = useAdminGeneral();
   return (
     <AdminPage title="Configuración General" description="Identidad, contacto, localización y parámetros globales." actions={<Button size="sm" onClick={() => toast.success("Guardado")}>Guardar</Button>}>
       <div className="grid gap-4 lg:grid-cols-2">

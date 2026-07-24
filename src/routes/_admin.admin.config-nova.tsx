@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { adminConfig } from "@/config/admin.config";
+import { useAdminNova } from "@/hooks/use-admin-settings";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_admin/admin/config-nova")({
 });
 
 function NovaConfig() {
-  const n = adminConfig.nova;
+  const n = useAdminNova();
   const [temp, setTemp] = useState<number[]>([n.temperature * 10]);
   const [tokens, setTokens] = useState<number[]>([n.maxTokens]);
   return (
