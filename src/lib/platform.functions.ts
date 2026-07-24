@@ -15,7 +15,7 @@ async function admin() {
   return supabaseAdmin;
 }
 
-// ─── Global settings map ────────────────────────────────────────────
+// ─── Global settings map (returned as JSON string to survive RPC serialization) ───
 export const getGlobalSettings = createServerFn({ method: "GET" }).handler(async () => {
   const sb = await admin();
   const { data, error } = await sb
@@ -28,7 +28,7 @@ export const getGlobalSettings = createServerFn({ method: "GET" }).handler(async
     out[row.namespace] ??= {};
     out[row.namespace]![row.key] = row.value;
   }
-  return out;
+  return JSON.stringify(out);
 });
 
 // ─── Feature flags ──────────────────────────────────────────────────
