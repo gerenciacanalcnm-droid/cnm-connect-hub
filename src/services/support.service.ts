@@ -1,4 +1,4 @@
-import { supportMock } from "./mocks/support.mock";
+const NOT_CONNECTED = new Error("Próximamente: el módulo de soporte se conectará en la siguiente fase.");
 
 export interface SupportTicket {
   id: string;
@@ -7,25 +7,12 @@ export interface SupportTicket {
   createdAt: string;
 }
 
-const DATA: SupportTicket[] = supportMock.list();
-
 export interface SupportService {
   listTickets(): Promise<SupportTicket[]>;
   createTicket(input: { subject: string; message: string }): Promise<SupportTicket>;
 }
 
 export const supportService: SupportService = {
-  async listTickets() {
-    return DATA;
-  },
-  async createTicket(input) {
-    const item: SupportTicket = {
-      id: `tkt_${Math.random().toString(36).slice(2, 8)}`,
-      subject: input.subject,
-      status: "open",
-      createdAt: new Date().toISOString(),
-    };
-    DATA.unshift(item);
-    return item;
-  },
+  async listTickets() { return []; },
+  async createTicket() { throw NOT_CONNECTED; },
 };

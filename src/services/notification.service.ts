@@ -1,5 +1,4 @@
 import type { Notification } from "@/types/notification";
-import { notificationsMock } from "./mocks/notifications.mock";
 import { listNotifications } from "@/lib/platform.functions";
 
 type Row = {
@@ -26,14 +25,9 @@ let CACHE: Notification[] | null = null;
 
 async function load(): Promise<Notification[]> {
   if (CACHE) return CACHE;
-  try {
-    const rows = (await listNotifications()) as Row[];
-    CACHE = rows.length ? rows.map(mapRow) : notificationsMock.list();
-  } catch (err) {
-    console.error("[notificationService] fallback a mock:", err);
-    CACHE = notificationsMock.list();
-  }
-  return CACHE!;
+  const rows = (await listNotifications()) as Row[];
+  CACHE = rows.map(mapRow);
+  return CACHE;
 }
 
 export interface NotificationService {
@@ -58,6 +52,6 @@ export const notificationService: NotificationService = {
   },
   async markAllRead() {
     const all = await load();
-    all.forEach((n) => (n.read = true));
+    for (const n of all) n.read = true;
   },
 };

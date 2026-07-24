@@ -1,5 +1,3 @@
-import { novaMock } from "./mocks/nova.mock";
-
 export interface NovaMessage {
   from: "user" | "nova";
   text: string;
@@ -11,17 +9,21 @@ export interface NovaService {
   history(): Promise<NovaMessage[]>;
 }
 
-const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-
 export const novaService: NovaService = {
   async chat(prompt) {
-    await wait(600);
-    return novaMock.reply(prompt);
+    return {
+      from: "nova",
+      text: "Nova aún no está conectada a la IA. Muy pronto podré responder a: “" + prompt + "”.",
+    };
   },
   async suggestions() {
-    return novaMock.suggestions();
+    return [
+      "¿Cuál es el estado de mis campañas?",
+      "Muéstrame los KPIs de hoy",
+      "Recomiéndame acciones para mejorar la entregabilidad",
+    ];
   },
   async history() {
-    return novaMock.history();
+    return [];
   },
 };

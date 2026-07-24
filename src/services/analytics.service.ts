@@ -1,9 +1,6 @@
-import { analyticsMock, type AnalyticsBreakdown } from "./mocks/analytics.mock";
+import type { AnalyticsBreakdown, AnalyticsSeriesPoint } from "@/types/analytics";
 
-export interface AnalyticsSeriesPoint {
-  x: string;
-  y: number;
-}
+export type { AnalyticsBreakdown, AnalyticsSeriesPoint };
 
 export interface AnalyticsService {
   getDeliverySeries(): Promise<AnalyticsSeriesPoint[]>;
@@ -12,9 +9,9 @@ export interface AnalyticsService {
 
 export const analyticsService: AnalyticsService = {
   async getDeliverySeries() {
-    return analyticsMock.series();
+    return [];
   },
   async getBreakdown() {
-    return analyticsMock.breakdown();
+    return { byStatus: [], byCountry: [] };
   },
 };
