@@ -33,15 +33,17 @@ function AnalyticsPage() {
 
   const kpis = useMemo(() => {
     if (!data) return null;
-    const sent = data.delivery.reduce((a, b) => a + b.y, 0);
-    const failed = data.failures.reduce((a, b) => a + b.y, 0);
-    const cost = data.cost.reduce((a, b) => a + b.y, 0);
-    const rate = ((sent - failed) / sent) * 100;
+    const sent = data.delivery.reduce((a: number, b: { y: number }) => a + b.y, 0);
+    const failed = data.failures.reduce((a: number, b: { y: number }) => a + b.y, 0);
+    const cost = data.cost.reduce((a: number, b: { y: number }) => a + b.y, 0);
+    const rate = sent > 0 ? ((sent - failed) / sent) * 100 : 0;
     return { sent, failed, cost, rate };
   }, [data]);
 
   if (isLoading) return <div className="p-6"><SkeletonCards count={4} /></div>;
-  if (error || !data || !kpis) return <div className="p-6"><ErrorState onRetry={() => refetch()} /></div>;
+  if (error) return <div className="p-6"><ErrorState onRetry={() => refetch()} /></div>;
+  if (!data || !kpis) return <div className="p-6"><ErrorState onRetry={() => refetch()} /></div>;
+  const isEmpty = data.delivery.length === 0 && data.byCountry.length === 0;
 
   return (
     <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -69,11 +71,19 @@ function AnalyticsPage() {
         }
       />
 
+      {isEmpty && (
+        <Card>
+          <CardContent className="p-10 text-center text-sm text-muted-foreground">
+            Próximamente: las métricas se llenarán cuando el módulo SMS esté conectado a un proveedor.
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi icon={MessageSquare} label="SMS enviados" value={formatNumber(kpis.sent)} trend="+12.4%" up />
-        <Kpi icon={Percent} label="Tasa entrega" value={`${kpis.rate.toFixed(1)}%`} trend="+0.8%" up tone="emerald" />
-        <Kpi icon={AlertTriangle} label="Fallos" value={formatNumber(kpis.failed)} trend="-3.1%" up tone="amber" />
-        <Kpi icon={DollarSign} label="Costo total" value={formatCurrency(kpis.cost, "MXN", "es-MX")} trend="+8.2%" tone="nova" />
+        <Kpi icon={MessageSquare} label="SMS enviados" value={formatNumber(kpis.sent)} trend="+0%" up />
+        <Kpi icon={Percent} label="Tasa entrega" value={`${kpis.rate.toFixed(1)}%`} trend="+0%" up tone="emerald" />
+        <Kpi icon={AlertTriangle} label="Fallos" value={formatNumber(kpis.failed)} trend="+0%" up tone="amber" />
+        <Kpi icon={DollarSign} label="Costo total" value={formatCurrency(kpis.cost, "MXN", "es-MX")} trend="+0%" tone="nova" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
