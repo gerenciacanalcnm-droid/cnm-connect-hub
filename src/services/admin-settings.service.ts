@@ -85,8 +85,8 @@ export const adminSettingsService: AdminSettingsService = {
   async get() {
     const base = buildSnapshot();
     try {
-      const remote = (await getGlobalSettings()) as Record<string, Record<string, unknown>>;
-      const admin = remote.admin ?? {};
+      const raw = await getGlobalSettings();
+      const remote = JSON.parse(raw) as Record<string, Record<string, unknown>>;
       return {
         general: pick(admin.general, base.general),
         sms: pick(admin.sms, base.sms),
