@@ -19,6 +19,15 @@ import {
   type Integration,
 } from "@/config/admin.config";
 
+export type {
+  AdminConfig,
+  TariffTier,
+  Plan,
+  Promotion,
+  PaymentMethod,
+  Integration,
+} from "@/config/admin.config";
+
 export type AdminSettings = {
   general: AdminConfig["general"];
   sms: AdminConfig["sms"];
