@@ -1,10 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
 import { AdminPage } from "@/components/admin/admin-page";
-import { DataTable, type ColumnDef } from "@/components/common/data-table";
-import { Badge } from "@/components/ui/badge";
-import { generateAuditEntries, type AuditEntry } from "@/services/mocks/admin.mock";
-import { formatDateTime } from "@/lib/format";
+import { Card, CardContent } from "@/components/ui/card";
+import { History } from "lucide-react";
 
 export const Route = createFileRoute("/_admin/admin/auditoria")({
   head: () => ({ meta: [{ title: "Auditoría — Super Admin" }] }),
@@ -12,19 +9,19 @@ export const Route = createFileRoute("/_admin/admin/auditoria")({
 });
 
 function AuditoriaPage() {
-  const data = useMemo(() => generateAuditEntries(80), []);
-  const columns = useMemo<ColumnDef<AuditEntry, unknown>[]>(() => [
-    { accessorKey: "at", header: "Fecha", cell: (c) => formatDateTime(c.row.original.at) },
-    { accessorKey: "user", header: "Usuario" },
-    { accessorKey: "company", header: "Empresa" },
-    { accessorKey: "action", header: "Acción", cell: (c) => <Badge variant="outline">{c.row.original.action}</Badge> },
-    { accessorKey: "entity", header: "Entidad" },
-    { accessorKey: "ip", header: "IP", cell: (c) => <code className="text-xs">{c.row.original.ip}</code> },
-  ], []);
-
   return (
     <AdminPage title="Auditoría" description="Timeline inmutable de acciones críticas en la plataforma.">
-      <DataTable data={data} columns={columns} searchPlaceholder="Buscar por usuario, empresa o acción…" exportFilename="auditoria" pageSize={20} />
+      <Card>
+        <CardContent className="flex flex-col items-center gap-3 p-12 text-center">
+          <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
+            <History className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Próximamente</p>
+            <p className="text-xs text-muted-foreground">La auditoría se poblará cuando las acciones sensibles se registren en la base de datos.</p>
+          </div>
+        </CardContent>
+      </Card>
     </AdminPage>
   );
 }
