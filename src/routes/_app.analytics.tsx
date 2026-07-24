@@ -91,7 +91,7 @@ function AnalyticsPage() {
           <CardHeader><CardTitle>Entregas diarias</CardTitle></CardHeader>
           <CardContent className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.delivery.map(d => ({ date: d.x.slice(5), enviados: d.y }))}>
+              <AreaChart data={data.delivery.map((d: { x: string; y: number }) => ({ date: d.x.slice(5), enviados: d.y }))}>
                 <defs>
                   <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="oklch(0.58 0.22 300)" stopOpacity={0.4} />
@@ -113,7 +113,7 @@ function AnalyticsPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={data.byOperator} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
-                  {data.byOperator.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                  {data.byOperator.map((_: unknown, i: number) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                 </Pie>
                 <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -128,7 +128,7 @@ function AnalyticsPage() {
           <CardHeader><CardTitle>Fallos vs. entregas</CardTitle></CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data.delivery.map((d, i) => ({ date: d.x.slice(5), enviados: d.y, fallos: data.failures[i]?.y ?? 0 }))}>
+              <LineChart data={data.delivery.map((d: { x: string; y: number }, i: number) => ({ date: d.x.slice(5), enviados: d.y, fallos: data.failures[i]?.y ?? 0 }))}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.9 0 0 / 0.3)" vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
@@ -144,7 +144,7 @@ function AnalyticsPage() {
           <CardHeader><CardTitle>Costo diario (MXN)</CardTitle></CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.cost.map(d => ({ date: d.x.slice(5), costo: d.y }))}>
+              <BarChart data={data.cost.map((d: { x: string; y: number }) => ({ date: d.x.slice(5), costo: d.y }))}>
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.9 0 0 / 0.3)" vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
@@ -159,7 +159,7 @@ function AnalyticsPage() {
       <Card>
         <CardHeader><CardTitle>Distribución por país</CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          {data.byCountry.map((c) => (
+          {data.byCountry.map((c: { country: string; value: number }) => (
             <div key={c.country} className="space-y-1">
               <div className="flex justify-between text-sm"><span className="font-medium">{c.country}</span><span className="text-muted-foreground">{c.value}%</span></div>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
