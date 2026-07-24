@@ -84,15 +84,16 @@ export const getCurrentCompany = createServerFn({ method: "GET" }).handler(async
   return data;
 });
 
-// ─── Users (profiles + roles) ───────────────────────────────────────
+// ─── Users (profiles + roles as two queries to avoid FK-relation typing) ──
 export const listUsers = createServerFn({ method: "GET" }).handler(async () => {
   const sb = await admin();
-  const { data, error } = await sb
-    .from("profiles")
-    .select("id, email, full_name, avatar_url, created_at, user_roles(role)")
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  return data ?? [];
+  const [profiles, roles] = await Promise.all([
+    sb.from("profiles").select("id, email, full_name, avatar_url, created_at").order("created_at", { ascending: false }),
+    sb.from("user_roles").select("user_id, role"),
+  ]);
+  if (profiles.error) throw new Error(profiles.error.message);
+  if (roles.error) throw new Error(roles.error.message);
+  return { profiles: profiles.data ?? [], roles: roles.data ?? [] };
 });
 
 // ─── Contacts ───────────────────────────────────────────────────────
