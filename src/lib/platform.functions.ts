@@ -271,8 +271,6 @@ export const upsertContactGroup = createServerFn({ method: "POST" })
         name: z.string().min(1),
         description: z.string().optional(),
         color: z.string().optional(),
-        is_dynamic: z.boolean().default(false),
-        filter_criteria: z.record(z.string(), z.unknown()).default({}),
       })
       .parse(v),
   )
@@ -281,8 +279,6 @@ export const upsertContactGroup = createServerFn({ method: "POST" })
       name: data.name,
       description: data.description ?? null,
       color: data.color ?? null,
-      is_dynamic: data.is_dynamic,
-      filter_criteria: data.filter_criteria as never,
       company_id: CNM_COMPANY_ID,
     };
     const q = data.id
