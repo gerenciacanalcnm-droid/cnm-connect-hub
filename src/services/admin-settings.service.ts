@@ -87,19 +87,20 @@ export const adminSettingsService: AdminSettingsService = {
     try {
       const raw = await getGlobalSettings();
       const remote = JSON.parse(raw) as Record<string, Record<string, unknown>>;
+      const ns = remote.admin ?? {};
       return {
-        general: pick(admin.general, base.general),
-        sms: pick(admin.sms, base.sms),
-        whatsapp: pick(admin.whatsapp, base.whatsapp),
-        nova: pick(admin.nova, base.nova),
-        api: pick(admin.api, base.api),
-        security: pick(admin.security, base.security),
-        notifications: pick(admin.notifications, base.notifications),
-        tariffs: pickArray(admin.tariffs, base.tariffs),
-        plans: pickArray(admin.plans, base.plans),
-        promotions: pickArray(admin.promotions, base.promotions),
-        paymentMethods: pickArray(admin.payment_methods, base.paymentMethods),
-        integrations: pickArray(admin.integrations, base.integrations),
+        general: pick(ns.general, base.general),
+        sms: pick(ns.sms, base.sms),
+        whatsapp: pick(ns.whatsapp, base.whatsapp),
+        nova: pick(ns.nova, base.nova),
+        api: pick(ns.api, base.api),
+        security: pick(ns.security, base.security),
+        notifications: pick(ns.notifications, base.notifications),
+        tariffs: pickArray(ns.tariffs, base.tariffs),
+        plans: pickArray(ns.plans, base.plans),
+        promotions: pickArray(ns.promotions, base.promotions),
+        paymentMethods: pickArray(ns.payment_methods, base.paymentMethods),
+        integrations: pickArray(ns.integrations, base.integrations),
       };
     } catch (err) {
       console.error("[adminSettingsService] fallback a mock:", err);
