@@ -613,32 +613,161 @@ export type Database = {
           },
         ]
       }
+      nova_ai_logs: {
+        Row: {
+          company_id: string | null
+          conversation_id: string | null
+          cost: number
+          created_at: string
+          error: string | null
+          id: string
+          latency_ms: number
+          model: string
+          prompt: string
+          provider: string
+          response: string
+          status: string
+          tokens_input: number
+          tokens_output: number
+          tool_calls: Json
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          conversation_id?: string | null
+          cost?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          latency_ms?: number
+          model: string
+          prompt?: string
+          provider?: string
+          response?: string
+          status?: string
+          tokens_input?: number
+          tokens_output?: number
+          tool_calls?: Json
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          conversation_id?: string | null
+          cost?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          latency_ms?: number
+          model?: string
+          prompt?: string
+          provider?: string
+          response?: string
+          status?: string
+          tokens_input?: number
+          tokens_output?: number
+          tool_calls?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nova_ai_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nova_ai_logs_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "nova_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nova_chunks: {
+        Row: {
+          chunk_index: number
+          company_id: string | null
+          content: string
+          created_at: string
+          document_id: string
+          embedding: string | null
+          id: string
+          metadata: Json
+          token_count: number
+        }
+        Insert: {
+          chunk_index?: number
+          company_id?: string | null
+          content: string
+          created_at?: string
+          document_id: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json
+          token_count?: number
+        }
+        Update: {
+          chunk_index?: number
+          company_id?: string | null
+          content?: string
+          created_at?: string
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json
+          token_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nova_chunks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nova_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "nova_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nova_conversations: {
         Row: {
+          archived_at: string | null
           company_id: string | null
           context: Json
           created_at: string
           id: string
+          is_favorite: boolean
           model: string | null
           title: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
           company_id?: string | null
           context?: Json
           created_at?: string
           id?: string
+          is_favorite?: boolean
           model?: string | null
           title?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          archived_at?: string | null
           company_id?: string | null
           context?: Json
           created_at?: string
           id?: string
+          is_favorite?: boolean
           model?: string | null
           title?: string | null
           updated_at?: string
@@ -647,6 +776,118 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "nova_conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nova_documents: {
+        Row: {
+          author_id: string | null
+          category: string
+          chunk_count: number
+          company_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          metadata: Json
+          mime_type: string | null
+          name: string
+          size_bytes: number
+          source_type: string
+          source_url: string | null
+          status: string
+          storage_path: string | null
+          token_count: number
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          author_id?: string | null
+          category?: string
+          chunk_count?: number
+          company_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          metadata?: Json
+          mime_type?: string | null
+          name: string
+          size_bytes?: number
+          source_type?: string
+          source_url?: string | null
+          status?: string
+          storage_path?: string | null
+          token_count?: number
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          author_id?: string | null
+          category?: string
+          chunk_count?: number
+          company_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          metadata?: Json
+          mime_type?: string | null
+          name?: string
+          size_bytes?: number
+          source_type?: string
+          source_url?: string | null
+          status?: string
+          storage_path?: string | null
+          token_count?: number
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nova_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nova_memory: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          key: string
+          scope: string
+          updated_at: string
+          user_id: string | null
+          value: Json
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          key: string
+          scope?: string
+          updated_at?: string
+          user_id?: string | null
+          value?: Json
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          key?: string
+          scope?: string
+          updated_at?: string
+          user_id?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nova_memory_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -694,6 +935,136 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      nova_prompt_versions: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          prompt_id: string
+          version: number
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          prompt_id: string
+          version: number
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          prompt_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nova_prompt_versions_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "nova_prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nova_prompts: {
+        Row: {
+          company_id: string | null
+          content: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          company_id?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          company_id?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nova_prompts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nova_tools: {
+        Row: {
+          category: string
+          code: string
+          created_at: string
+          description: string
+          id: string
+          is_enabled: boolean
+          is_ready: boolean
+          min_role: Database["public"]["Enums"]["app_role"]
+          name: string
+          required_permission: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          code: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_enabled?: boolean
+          is_ready?: boolean
+          min_role?: Database["public"]["Enums"]["app_role"]
+          name: string
+          required_permission?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_enabled?: boolean
+          is_ready?: boolean
+          min_role?: Database["public"]["Enums"]["app_role"]
+          name?: string
+          required_permission?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       permissions: {
         Row: {
@@ -1360,6 +1731,19 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      match_nova_chunks: {
+        Args: {
+          match_company_id: string
+          match_count?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          document_id: string
+          id: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       app_role: "super_admin" | "company_admin" | "manager" | "agent" | "viewer"
