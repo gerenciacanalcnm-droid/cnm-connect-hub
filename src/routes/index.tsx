@@ -31,7 +31,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "SMS Masivos, Flash SMS, CRM y CNM Nova (IA) en una sola plataforma para empresas modernas.",
+          "SMS Masivos, Flash SMS, CRM, automatizaciones y CNM Nova (IA) en una sola plataforma. Envía millones de mensajes con la infraestructura de CNM Digital Media.",
       },
       { property: "og:url", content: canonical },
       { name: "twitter:card", content: "summary_large_image" },
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/")({
       {
         name: "twitter:description",
         content:
-          "SMS Masivos, Flash SMS, CRM y CNM Nova (IA) en una sola plataforma para empresas modernas.",
+          "SMS Masivos, Flash SMS, CRM, automatizaciones y CNM Nova (IA) en una sola plataforma. Envía millones de mensajes con la infraestructura de CNM Digital Media.",
       },
     ],
     links: [{ rel: "canonical", href: canonical }],
