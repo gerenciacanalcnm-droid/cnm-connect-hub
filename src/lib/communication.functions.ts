@@ -217,7 +217,7 @@ export const listConversations = createServerFn({ method: "GET" })
       .select("*")
       .order("last_message_at", { ascending: false, nullsFirst: false })
       .limit(200);
-    if (data.channel) q = q.eq("channel", data.channel);
+    if (data.channel && data.channel !== "email") q = q.eq("channel", data.channel);
     if (data.status) q = q.eq("status", data.status);
     if (data.search) {
       const s = `%${data.search}%`;
