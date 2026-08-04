@@ -34,4 +34,15 @@ export const queryKeys = {
   apiLogs: ["api-logs"] as const,
   users: ["users"] as const,
   currentUser: ["users", "current"] as const,
+  whatsapp: {
+    accounts: ["whatsapp", "accounts"] as const,
+    templates: ["whatsapp", "templates"] as const,
+    campaigns: ["whatsapp", "campaigns"] as const,
+  },
+  conversations: (params?: unknown) => ["conversations", params] as const,
+  conversationMessages: (id: string) => ["conversations", id, "messages"] as const,
+  communication: {
+    analytics: ["communication", "analytics"] as const,
+    settings: ["communication", "settings"] as const,
+  },
 };
