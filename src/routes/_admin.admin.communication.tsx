@@ -7,6 +7,10 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useAdminSms } from "@/hooks/use-admin-settings";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useCommunicationProviders } from "@/hooks/use-communication";
+import { useCompany } from "@/hooks/use-company";
 
 export const Route = createFileRoute("/_admin/admin/communication")({
   head: () => ({ meta: [{ title: "Communication — Super Admin" }] }),
@@ -19,6 +23,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function CommPage() {
   const s = useAdminSms();
+  const providers = useCommunicationProviders();
+  const { data: company } = useCompany();
+  const companyName = company?.name ?? "Todas";
   return (
     <AdminPage
       title="Communication"
@@ -62,6 +69,52 @@ function CommPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Communication Providers</CardTitle>
+          <CardDescription>
+            Registro global de proveedores por canal. La conexión real se habilita por integración oficial.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Canal</TableHead>
+                <TableHead>Proveedor</TableHead>
+                <TableHead>Empresa</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Conectado</TableHead>
+                <TableHead>Versión</TableHead>
+                <TableHead className="text-right">Logs</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {providers.map((p) => (
+                <TableRow key={p.channel}>
+                  <TableCell className="font-medium uppercase">{p.channel}</TableCell>
+                  <TableCell>{p.name}</TableCell>
+                  <TableCell>{companyName}</TableCell>
+                  <TableCell>
+                    <Badge variant={p.ready ? "default" : "secondary"}>
+                      {p.ready ? "Activo" : "Preparado"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{p.ready ? "Sí" : "No"}</TableCell>
+                  <TableCell>v1</TableCell>
+                  <TableCell className="text-right">
+                    <Button size="sm" variant="ghost" disabled>Ver logs</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Disponible en la siguiente actualización.
+          </p>
+        </CardContent>
+      </Card>
     </AdminPage>
   );
 }

@@ -54,6 +54,9 @@ export type LandingFeature = {
   description: string;
   icon:
     | "sms"
+    | "whatsapp"
+    | "email"
+    | "hub"
     | "flash"
     | "crm"
     | "analytics"
@@ -186,15 +189,15 @@ export const fallbackLandingContent: LandingContent = {
     signup: { label: "Crear Cuenta Gratis", href: "/dashboard" },
   },
   hero: {
-    eyebrow: "Plataforma SMS Enterprise · IA integrada",
-    title: "La plataforma inteligente para enviar",
-    highlight: "SMS empresariales.",
+    eyebrow: "Enterprise Omnichannel Communication Platform · IA integrada",
+    title: "Una sola plataforma para",
+    highlight: "SMS, WhatsApp y Email.",
     subtitle:
-      "Envía SMS Masivos, Flash SMS, automatiza campañas, administra clientes y utiliza Inteligencia Artificial para optimizar cada comunicación.",
+      "Communication Hub omnicanal: SMS Masivos, WhatsApp Business, Email Marketing, CRM, automatizaciones, analytics y CNM Nova AI en un único centro de control.",
     primaryCta: { label: "Crear Cuenta Gratis", href: "/dashboard" },
     secondaryCta: { label: "Solicitar Demo", href: "#contacto" },
     tertiaryCta: { label: "Ver API", href: "#api" },
-    trustLine: "Confiado por empresas que envían millones de mensajes al mes.",
+    trustLine: "Confiado por empresas que envían millones de mensajes omnicanal al mes.",
   },
   nova: {
     title: "Conoce CNM Nova",
@@ -223,12 +226,15 @@ export const fallbackLandingContent: LandingContent = {
     ],
   },
   features: [
-    { id: "sms", title: "SMS Masivos", description: "Envíos a millones de destinatarios con entrega verificada.", icon: "sms", tone: "primary" },
+    { id: "sms", title: "SMS Masivos", description: "Envíos a millones de destinatarios con entrega verificada y cobertura nacional.", icon: "sms", tone: "primary" },
+    { id: "whatsapp", title: "WhatsApp Business", description: "Multi-número por departamento, plantillas aprobadas, campañas y conversaciones.", icon: "whatsapp", tone: "success" },
+    { id: "email", title: "Email Marketing", description: "Campañas, listas, plantillas y automatizaciones de correo transaccional.", icon: "email", tone: "info" },
+    { id: "hub", title: "Communication Hub", description: "Un único centro omnicanal para operar SMS, WhatsApp y Email.", icon: "hub", tone: "nova" },
     { id: "flash", title: "Flash SMS", description: "Mensajes que aparecen directamente en pantalla, ideales para OTP y alertas.", icon: "flash", tone: "warning" },
-    { id: "crm", title: "CRM integrado", description: "Contactos, segmentos y ciclos de vida en un mismo lugar.", icon: "crm", tone: "info" },
-    { id: "analytics", title: "Analytics avanzado", description: "Reportes en tiempo real de entrega, apertura y conversión.", icon: "analytics", tone: "success" },
+    { id: "crm", title: "CRM integrado", description: "Contactos con canal preferido y timeline unificado de SMS, WhatsApp, Email e IA.", icon: "crm", tone: "info" },
+    { id: "analytics", title: "Analytics avanzado", description: "Reportes por canal en tiempo real: entrega, lectura, conversión y costo.", icon: "analytics", tone: "success" },
     { id: "automation", title: "Automatizaciones", description: "Flujos con disparadores, condiciones y esperas.", icon: "automation", tone: "primary" },
-    { id: "api", title: "API REST", description: "Integra SMS CNM en tu stack en menos de 5 minutos.", icon: "api", tone: "info" },
+    { id: "api", title: "API REST", description: "Integra SMS, WhatsApp y Email en tu stack en menos de 5 minutos.", icon: "api", tone: "info" },
     { id: "nova", title: "CNM Nova · IA", description: "Copiloto IA que crea, optimiza y ejecuta campañas por ti.", icon: "nova", tone: "nova" },
     { id: "help", title: "Centro de Ayuda", description: "Documentación, tutoriales y soporte 24/7.", icon: "help", tone: "info" },
     { id: "pwa", title: "PWA", description: "Instalable en cualquier dispositivo, funciona offline.", icon: "pwa", tone: "primary" },
@@ -240,7 +246,7 @@ export const fallbackLandingContent: LandingContent = {
     { step: 1, title: "Crear cuenta", description: "Regístrate en menos de 30 segundos, sin tarjeta." },
     { step: 2, title: "Recargar saldo", description: "Elige tu plan o recarga desde $150.000 COP." },
     { step: 3, title: "Importar contactos", description: "Sube tu base o conecta tu CRM en un clic." },
-    { step: 4, title: "Enviar campaña", description: "Crea, prueba y programa tus SMS con CNM Nova." },
+    { step: 4, title: "Elegir canal y enviar", description: "SMS, WhatsApp o Email: crea, prueba y programa con CNM Nova." },
     { step: 5, title: "Analizar resultados", description: "Mide entrega, respuestas y conversión en tiempo real." },
   ],
   plans: [
@@ -285,7 +291,7 @@ export const fallbackLandingContent: LandingContent = {
   api: {
     title: "Construido para desarrolladores.",
     description:
-      "Integra SMS CNM en tu producto con una API REST moderna, SDKs oficiales, webhooks confiables y ejemplos listos para copiar.",
+      "Integra SMS, WhatsApp Business y Email en tu producto con una API REST moderna, SDKs oficiales, webhooks confiables y ejemplos listos para copiar.",
     items: [
       { title: "REST API", description: "Endpoints simples, versionados y documentados." },
       { title: "SDKs oficiales", description: "Node.js, Python, PHP y más." },
@@ -303,6 +309,8 @@ export const fallbackLandingContent: LandingContent = {
   },
   faq: [
     { question: "¿Cuánto tiempo tarda la activación?", answer: "Menos de 5 minutos. Creas tu cuenta, recargas saldo y ya puedes enviar." },
+    { question: "¿Puedo usar WhatsApp Business en la plataforma?", answer: "Sí. La plataforma soporta múltiples números de WhatsApp Business por empresa y departamento (Ventas, Soporte, Cobranza, Marketing). La conexión oficial con Meta se activa mediante Embedded Signup, sin copiar credenciales manualmente." },
+    { question: "¿Incluye Email Marketing?", answer: "Sí. El Communication Hub incluye campañas, listas, plantillas y automatizaciones de email junto a SMS y WhatsApp." },
     { question: "¿Puedo integrar SMS CNM con mi CRM?", answer: "Sí. Ofrecemos API REST, Webhooks y conectores nativos para los CRMs más populares." },
     { question: "¿Qué es CNM Nova?", answer: "Es tu copiloto de IA. Analiza tu negocio, redacta SMS, segmenta clientes y programa campañas por ti." },
     { question: "¿Cómo funcionan los precios?", answer: "Pagas por volumen. Mientras más SMS compres, menor es el precio por unidad. Sin mensualidades ni permanencia." },
@@ -311,17 +319,20 @@ export const fallbackLandingContent: LandingContent = {
   ],
   ctaFinal: {
     title: "Empieza hoy mismo.",
-    subtitle: "Conecta con tus clientes en segundos.",
+    subtitle: "SMS, WhatsApp y Email desde un único Communication Hub.",
     primaryCta: { label: "Crear Cuenta Gratis", href: "/dashboard" },
     secondaryCta: { label: "Hablar con ventas", href: "#contacto" },
   },
   footer: {
-    tagline: "La plataforma SMS Enterprise inteligente para empresas modernas.",
+    tagline: "Enterprise Omnichannel Communication Platform: SMS, WhatsApp Business y Email con IA.",
     columns: [
       {
         title: "Producto",
         links: [
           { label: "Funciones", href: "#funciones" },
+          { label: "Communication Hub", href: "#funciones" },
+          { label: "WhatsApp Business", href: "#funciones" },
+          { label: "Email Marketing", href: "#funciones" },
           { label: "Planes", href: "#planes" },
           { label: "CNM Nova", href: "#nova" },
           { label: "Calculadora", href: "#calculadora" },

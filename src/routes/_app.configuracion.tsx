@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileSettings } from "@/components/configuracion/profile-settings";
 import { SecuritySettings } from "@/components/configuracion/security-settings";
 import { PreferencesSettings } from "@/components/configuracion/preferences-settings";
+import { WhatsAppChannelConfig } from "@/components/comunicacion/whatsapp-channel-config";
 
 export const Route = createFileRoute("/_app/configuracion")({
   head: () => ({
@@ -27,10 +28,12 @@ function ConfiguracionPage() {
           <TabsTrigger value="perfil">Perfil</TabsTrigger>
           <TabsTrigger value="seguridad">Seguridad</TabsTrigger>
           <TabsTrigger value="preferencias">Preferencias</TabsTrigger>
+          <TabsTrigger value="canales">Canales</TabsTrigger>
         </TabsList>
         <TabsContent value="perfil"><ProfileSettings /></TabsContent>
         <TabsContent value="seguridad"><SecuritySettings /></TabsContent>
         <TabsContent value="preferencias"><PreferencesSettings /></TabsContent>
+        <TabsContent value="canales"><WhatsAppChannelConfig /></TabsContent>
       </Tabs>
     </div>
   );

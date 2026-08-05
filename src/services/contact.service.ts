@@ -35,6 +35,10 @@ type Row = {
   email: string | null;
   tags: string[] | null;
   created_at: string;
+  preferred_channel?: string | null;
+  whatsapp_phone?: string | null;
+  status?: string | null;
+  last_conversation_at?: string | null;
 };
 
 function mapRow(r: Row): Contact {
@@ -47,6 +51,10 @@ function mapRow(r: Row): Contact {
     email: r.email ?? undefined,
     tags: r.tags ?? [],
     createdAt: r.created_at,
+    preferredChannel: (r.preferred_channel ?? "sms") as Contact["preferredChannel"],
+    whatsappPhone: r.whatsapp_phone ?? undefined,
+    status: r.status ?? "active",
+    lastConversationAt: r.last_conversation_at ?? undefined,
   };
 }
 
