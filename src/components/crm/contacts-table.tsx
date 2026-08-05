@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus, Mail, Phone } from "lucide-react";
+import { Plus, Mail, Phone, MessageCircle, MessageSquare } from "lucide-react";
 import type { ColumnDef } from "@/components/common/data-table";
 import { DataTable } from "@/components/common/data-table";
 import { SkeletonTable } from "@/components/common/skeleton-table";
@@ -39,6 +39,39 @@ export function ContactsTable() {
         ),
       },
       { accessorKey: "phone", header: "Teléfono" },
+      {
+        accessorKey: "preferredChannel",
+        header: "Canal preferido",
+        cell: ({ row }) => {
+          const ch = row.original.preferredChannel;
+          const Icon = ch === "whatsapp" ? MessageCircle : ch === "email" ? Mail : MessageSquare;
+          return (
+            <span className="inline-flex items-center gap-1.5 text-xs capitalize">
+              <Icon className="h-3.5 w-3.5 text-muted-foreground" /> {ch}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "whatsappPhone",
+        header: "WhatsApp",
+        cell: ({ row }) => row.original.whatsappPhone ?? "—",
+      },
+      {
+        accessorKey: "status",
+        header: "Estado",
+        cell: ({ row }) => (
+          <Badge variant="outline" className="text-[10px] capitalize">{row.original.status}</Badge>
+        ),
+      },
+      {
+        accessorKey: "lastConversationAt",
+        header: "Última conversación",
+        cell: ({ row }) =>
+          row.original.lastConversationAt
+            ? new Date(row.original.lastConversationAt).toLocaleDateString("es-CO")
+            : "—",
+      },
       {
         accessorKey: "tags",
         header: "Etiquetas",

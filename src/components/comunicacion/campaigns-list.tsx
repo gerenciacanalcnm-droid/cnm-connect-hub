@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus, Play, Pause, Copy, Trash2, MoreHorizontal } from "lucide-react";
+import { Plus, Play, Pause, Copy, Trash2, MoreHorizontal, MessageSquare, MessageCircle, Mail } from "lucide-react";
 import type { ColumnDef } from "@/components/common/data-table";
 import { DataTable } from "@/components/common/data-table";
 import { StatusBadge } from "@/components/common/status-badge";
@@ -19,12 +19,22 @@ import { useCampaigns } from "@/hooks/use-campaigns";
 import type { Campaign } from "@/types/campaign";
 import { formatNumber } from "@/lib/format";
 import { toast } from "sonner";
+import type { CommunicationChannel } from "@/types/communication";
+import { cn } from "@/lib/utils";
+
+const CHANNELS: Array<{ value: CommunicationChannel; label: string; icon: typeof MessageSquare }> = [
+  { value: "sms", label: "SMS", icon: MessageSquare },
+  { value: "whatsapp", label: "WhatsApp", icon: MessageCircle },
+  { value: "email", label: "Email", icon: Mail },
+];
 
 export function CampaignsList() {
   const { data, isLoading, error, refetch } = useCampaigns({ pageSize: 100 });
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [msg, setMsg] = useState("");
+  const [channel, setChannel] = useState<CommunicationChannel>("sms");
+  const [subject, setSubject] = useState("");
 
   const columns = useMemo<ColumnDef<Campaign>[]>(
     () => [
@@ -108,11 +118,49 @@ export function CampaignsList() {
               <Label>Nombre</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Black Friday 2026" />
             </div>
-            <SmsComposer value={msg} onChange={setMsg} />
+            <div className="space-y-2">
+              <Label>Canal</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {CHANNELS.map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setChannel(value)}
+                    className={cn(
+                      "flex items-center justify-center gap-1.5 rounded-md border px-3 py-2 text-sm transition-colors",
+                      channel === value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:bg-muted",
+                    )}
+                  >
+                    <Icon className="h-4 w-4" /> {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {channel === "sms" && <SmsComposer value={msg} onChange={setMsg} />}
+            {channel === "whatsapp" && (
+              <div className="space-y-2">
+                <Label>Plantilla aprobada</Label>
+                <Input placeholder="Selecciona una plantilla de WhatsApp" disabled />
+                <p className="text-xs text-muted-foreground">
+                  WhatsApp requiere plantillas aprobadas. Disponible en la siguiente actualización.
+                </p>
+              </div>
+            )}
+            {channel === "email" && (
+              <div className="space-y-2">
+                <Label>Asunto</Label>
+                <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Asunto del email" disabled />
+                <p className="text-xs text-muted-foreground">
+                  Email Marketing disponible en la siguiente actualización.
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreating(false)}>Cancelar</Button>
-            <Button onClick={() => { toast.success(`Campaña "${name}" creada`); setCreating(false); setName(""); setMsg(""); }}>
+            <Button disabled={channel !== "sms"} onClick={() => { toast.success(`Campaña "${name}" (${channel.toUpperCase()}) creada`); setCreating(false); setName(""); setMsg(""); setSubject(""); }}>
               Crear campaña
             </Button>
           </DialogFooter>

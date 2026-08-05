@@ -19,27 +19,27 @@ const canonical = siteConfig.url;
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SMS CNM — Plataforma inteligente de SMS empresariales" },
+      { title: "SMS CNM — Plataforma omnicanal: SMS, WhatsApp y Email" },
       {
         name: "description",
         content:
-          "SMS Masivos, Flash SMS, CRM, automatizaciones y CNM Nova (IA) en una sola plataforma. Envía millones de mensajes con la infraestructura de CNM Digital Media.",
+          "SMS Masivos, WhatsApp Business, Email Marketing, CRM, automatizaciones y CNM Nova (IA) en un único Communication Hub de CNM Digital Media.",
       },
-      { name: "keywords", content: "SMS masivos, Flash SMS, SMS empresarial, CRM SMS, API SMS, CNM Nova, Colombia" },
+      { name: "keywords", content: "SMS masivos, WhatsApp Business, Email Marketing, plataforma omnicanal, CRM, API SMS, CNM Nova, Colombia" },
       { property: "og:type", content: "website" },
-      { property: "og:title", content: "SMS CNM — Plataforma inteligente de SMS empresariales" },
+      { property: "og:title", content: "SMS CNM — Plataforma omnicanal: SMS, WhatsApp y Email" },
       {
         property: "og:description",
         content:
-          "SMS Masivos, Flash SMS, CRM, automatizaciones y CNM Nova (IA) en una sola plataforma. Envía millones de mensajes con la infraestructura de CNM Digital Media.",
+          "SMS Masivos, WhatsApp Business, Email Marketing, CRM, automatizaciones y CNM Nova (IA) en un único Communication Hub de CNM Digital Media.",
       },
       { property: "og:url", content: canonical },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "SMS CNM — Plataforma inteligente de SMS empresariales" },
+      { name: "twitter:title", content: "SMS CNM — Plataforma omnicanal: SMS, WhatsApp y Email" },
       {
         name: "twitter:description",
         content:
-          "SMS Masivos, Flash SMS, CRM, automatizaciones y CNM Nova (IA) en una sola plataforma. Envía millones de mensajes con la infraestructura de CNM Digital Media.",
+          "SMS Masivos, WhatsApp Business, Email Marketing, CRM, automatizaciones y CNM Nova (IA) en un único Communication Hub de CNM Digital Media.",
       },
     ],
     links: [{ rel: "canonical", href: canonical }],

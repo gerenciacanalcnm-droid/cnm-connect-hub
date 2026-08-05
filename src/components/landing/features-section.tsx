@@ -4,8 +4,12 @@ import {
   Bot,
   Code2,
   LifeBuoy,
+  Mail,
+  MessageCircle,
   MessageSquare,
+  Radio,
   Share2,
+
   Smartphone,
   Sparkles,
   Store,
@@ -20,6 +24,9 @@ import { cn } from "@/lib/utils";
 
 const ICONS: Record<LandingFeature["icon"], LucideIcon> = {
   sms: MessageSquare,
+  whatsapp: MessageCircle,
+  email: Mail,
+  hub: Radio,
   flash: Zap,
   crm: Users,
   analytics: BarChart3,

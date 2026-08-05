@@ -263,6 +263,56 @@ export const NOVA_TOOL_IMPLS: Record<string, NovaToolImpl> = {
     },
   },
 
+  get_whatsapp_conversations: {
+    code: "get_whatsapp_conversations",
+    parameters: obj({
+      status: str("Filtrar por estado: open, pending, closed, archived."),
+      limit: num("Número máximo de conversaciones (1-25)."),
+    }),
+    async run({ supabase, companyId }, args) {
+      const limit = Math.min(Number(args["limit"] ?? 10) || 10, 25);
+      let q = supabase
+        .from("whatsapp_conversations")
+        .select("id, contact_name, contact_phone, status, unread_count, last_message_at, last_message_preview")
+        .eq("company_id", companyId)
+        .order("last_message_at", { ascending: false })
+        .limit(limit);
+      if (typeof args["status"] === "string") q = q.eq("status", args["status"] as never);
+      const { data } = await q;
+      return data ?? [];
+    },
+  },
+
+  get_whatsapp_templates: {
+    code: "get_whatsapp_templates",
+    parameters: obj({ limit: num("Número máximo de plantillas (1-25).") }),
+    async run({ supabase, companyId }, args) {
+      const limit = Math.min(Number(args["limit"] ?? 10) || 10, 25);
+      const { data } = await supabase
+        .from("whatsapp_templates")
+        .select("id, name, category, language, status, body, variables, version")
+        .eq("company_id", companyId)
+        .order("updated_at", { ascending: false })
+        .limit(limit);
+      return data ?? [];
+    },
+  },
+
+  get_whatsapp_campaigns: {
+    code: "get_whatsapp_campaigns",
+    parameters: obj({ limit: num("Número máximo de campañas (1-25).") }),
+    async run({ supabase, companyId }, args) {
+      const limit = Math.min(Number(args["limit"] ?? 10) || 10, 25);
+      const { data } = await supabase
+        .from("whatsapp_campaigns")
+        .select("id, name, status, scheduled_at, total_recipients, total_sent, total_delivered, total_read, total_failed, cost")
+        .eq("company_id", companyId)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      return data ?? [];
+    },
+  },
+
   send_sms: {
     code: "send_sms",
     parameters: obj({ phone: str("Teléfono destino."), body: str("Mensaje a enviar.") }, ["phone", "body"]),

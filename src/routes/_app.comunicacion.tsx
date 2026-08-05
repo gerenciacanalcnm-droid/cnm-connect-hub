@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MessageSquare, MessageCircle } from "lucide-react";
+import { MessageSquare, MessageCircle, Mail, Inbox, Settings2 } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SendSms } from "@/components/comunicacion/send-sms";
@@ -13,6 +13,9 @@ import { CampaignsList } from "@/components/comunicacion/campaigns-list";
 import { ChannelOverview } from "@/components/comunicacion/channel-overview";
 import { WhatsAppAccounts } from "@/components/comunicacion/whatsapp-accounts";
 import { UnifiedTemplates } from "@/components/comunicacion/unified-templates";
+import { ConversationCenter } from "@/components/comunicacion/conversation-center";
+import { EmailMarketing } from "@/components/comunicacion/email-marketing";
+import { CommunicationSettings } from "@/components/comunicacion/communication-settings";
 
 export const Route = createFileRoute("/_app/comunicacion")({
   head: () => ({
@@ -41,7 +44,7 @@ function ComunicacionPage() {
       </div>
 
       <Tabs defaultValue="enviar" className="w-full">
-        <TabsList className="mb-6 grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4 lg:grid-cols-10">
+        <TabsList className="mb-6 grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4 lg:grid-cols-13">
           <TabsTrigger value="enviar">Enviar</TabsTrigger>
           <TabsTrigger value="masivo">Masivo</TabsTrigger>
           <TabsTrigger value="programar">Programar</TabsTrigger>
@@ -56,6 +59,15 @@ function ComunicacionPage() {
           <TabsTrigger value="campanas" className="gap-1.5">
             <MessageSquare className="h-3.5 w-3.5" /> Campañas
           </TabsTrigger>
+          <TabsTrigger value="conversaciones" className="gap-1.5">
+            <Inbox className="h-3.5 w-3.5" /> Conversaciones
+          </TabsTrigger>
+          <TabsTrigger value="email" className="gap-1.5">
+            <Mail className="h-3.5 w-3.5" /> Email
+          </TabsTrigger>
+          <TabsTrigger value="ajustes" className="gap-1.5">
+            <Settings2 className="h-3.5 w-3.5" /> Ajustes
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="enviar"><SendSms /></TabsContent>
         <TabsContent value="masivo"><BulkSend /></TabsContent>
@@ -67,6 +79,9 @@ function ComunicacionPage() {
         <TabsContent value="importar"><Importer /></TabsContent>
         <TabsContent value="whatsapp"><WhatsAppAccounts /></TabsContent>
         <TabsContent value="campanas"><CampaignsList /></TabsContent>
+        <TabsContent value="conversaciones"><ConversationCenter /></TabsContent>
+        <TabsContent value="email"><EmailMarketing /></TabsContent>
+        <TabsContent value="ajustes"><CommunicationSettings /></TabsContent>
       </Tabs>
     </div>
   );
