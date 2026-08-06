@@ -35,14 +35,13 @@ import {
 const CNM_COMPANY_ID = "00000000-0000-4000-8000-000000000001";
 const BUCKET = "nova-knowledge";
 
-type Sb = Parameters<typeof buildToolDefs> extends never ? never : never;
+/** Cliente Supabase con tipado laxo: las cadenas dinámicas de PostgREST
+ *  (namespaces/keys de settings, RPC) no son expresables con los tipos generados. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LooseSupabase = any;
 
 // ═══════════════════ CONFIGURACIÓN (Settings Engine) ═══════════════════
-async function readSection<T>(
-  supabase: { from: (t: string) => any },
-  key: string,
-  fallback: T,
-): Promise<T> {
+async function readSection<T>(supabase: LooseSupabase, key: string, fallback: T): Promise<T> {
   const { data } = await supabase
     .from("settings")
     .select("value")
