@@ -33,10 +33,6 @@ export function CommandPalette() {
   const { data: invoicesData } = useInvoices();
   const { data: smsData } = useSms();
 
-  const contacts = contactsData?.items ?? [];
-  const campaigns = campaignsData?.items ?? [];
-  const invoices = invoicesData ?? [];
-  const sms = smsData?.items ?? [];
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -54,10 +50,13 @@ export function CommandPalette() {
     setTimeout(fn, 50);
   }
 
-  const filteredContacts = useMemo(() => contacts.slice(0, 5), [contacts]);
-  const filteredCampaigns = useMemo(() => campaigns.slice(0, 5), [campaigns]);
-  const filteredInvoices = useMemo(() => invoices.slice(0, 5), [invoices]);
-  const filteredSms = useMemo(() => sms.slice(0, 5), [sms]);
+  const filteredContacts = useMemo(() => (contactsData?.items ?? []).slice(0, 5), [contactsData]);
+  const filteredCampaigns = useMemo(
+    () => (campaignsData?.items ?? []).slice(0, 5),
+    [campaignsData],
+  );
+  const filteredInvoices = useMemo(() => (invoicesData ?? []).slice(0, 5), [invoicesData]);
+  const filteredSms = useMemo(() => (smsData?.items ?? []).slice(0, 5), [smsData]);
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
