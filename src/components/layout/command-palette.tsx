@@ -33,7 +33,6 @@ export function CommandPalette() {
   const { data: invoicesData } = useInvoices();
   const { data: smsData } = useSms();
 
-
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
