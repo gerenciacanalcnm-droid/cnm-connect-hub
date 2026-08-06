@@ -682,7 +682,7 @@ export const deleteNovaMemory = createServerFn({ method: "POST" })
   });
 
 // ═══════════════════ CHAT (RAG + Tools) ═══════════════════
-async function resolveRole(sb: any, userId: string): Promise<string> {
+async function resolveRole(sb: LooseSupabase, userId: string): Promise<string> {
   const { data: superAdmin } = await sb.rpc("is_super_admin", { _user_id: userId });
   if (superAdmin) return "super_admin";
   const { data: member } = await sb
@@ -969,5 +969,3 @@ export const novaChat = createServerFn({ method: "POST" })
       throw new Error(message);
     }
   });
-
-export type { Sb };
