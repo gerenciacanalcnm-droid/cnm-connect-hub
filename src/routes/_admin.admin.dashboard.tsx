@@ -3,17 +3,48 @@ import { AdminPage } from "@/components/admin/admin-page";
 import { KpiCard } from "@/components/common/kpi-card";
 import { ChartCard } from "@/components/common/chart-card";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, MessageSquare, DollarSign, TrendingUp, AlertTriangle, Activity, Wallet, Send, MessageCircle, Zap, Package, RefreshCw, ServerCog } from "lucide-react";
-import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, Legend } from "recharts";
+import {
+  Building2,
+  Users,
+  MessageSquare,
+  DollarSign,
+  TrendingUp,
+  AlertTriangle,
+  Activity,
+  Wallet,
+  Send,
+  MessageCircle,
+  Zap,
+  Package,
+  RefreshCw,
+  ServerCog,
+} from "lucide-react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  BarChart,
+  Bar,
+  Legend,
+} from "recharts";
 import { StatusBadge } from "@/components/common/status-badge";
 
 export const Route = createFileRoute("/_admin/admin/dashboard")({
-  head: () => ({ meta: [{ title: "Super Dashboard — SMS CNM Admin" }, { name: "description", content: "Centro de control ejecutivo de SMS CNM." }] }),
+  head: () => ({
+    meta: [
+      { title: "Super Dashboard — SMS CNM Admin" },
+      { name: "description", content: "Centro de control ejecutivo de SMS CNM." },
+    ],
+  }),
   component: SuperDashboard,
 });
 
 const revenue = Array.from({ length: 12 }, (_, i) => ({
-  month: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][i],
+  month: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"][i],
   ingresos: 8_000_000 + Math.round(Math.random() * 4_000_000),
   recargas: 6_000_000 + Math.round(Math.random() * 3_500_000),
 }));
@@ -34,7 +65,10 @@ function SuperDashboard() {
       description="Métricas operativas y comerciales en tiempo real."
       actions={
         <div className="flex gap-2">
-          <Button variant="outline" size="sm"><RefreshCw className="mr-1.5 h-4 w-4" />Actualizar</Button>
+          <Button variant="outline" size="sm">
+            <RefreshCw className="mr-1.5 h-4 w-4" />
+            Actualizar
+          </Button>
           <Button size="sm">Exportar</Button>
         </div>
       }
@@ -43,16 +77,34 @@ function SuperDashboard() {
         <KpiCard label="Empresas" value="248" icon={Building2} delta={up} />
         <KpiCard label="Usuarios activos" value="1.842" icon={Users} delta={up} />
         <KpiCard label="Clientes" value="3.517" icon={Users} delta={up} />
-        <KpiCard label="Ingresos (mes)" value="$128.4M" icon={DollarSign} delta={up} tone="success" />
+        <KpiCard
+          label="Ingresos (mes)"
+          value="$128.4M"
+          icon={DollarSign}
+          delta={up}
+          tone="success"
+        />
         <KpiCard label="Saldo vendido" value="$412M" icon={Wallet} delta={up} />
         <KpiCard label="Saldo disponible" value="$78.2M" icon={Wallet} />
         <KpiCard label="SMS enviados hoy" value="184K" icon={Send} delta={up} />
-        <KpiCard label="WhatsApp enviados" value="21K" icon={MessageCircle} delta={up} tone="nova" />
+        <KpiCard
+          label="WhatsApp enviados"
+          value="21K"
+          icon={MessageCircle}
+          delta={up}
+          tone="nova"
+        />
         <KpiCard label="Campañas activas" value="132" icon={MessageSquare} />
         <KpiCard label="Recargas (mes)" value="612" icon={Package} delta={up} />
         <KpiCard label="Clientes nuevos" value="94" icon={TrendingUp} delta={up} tone="success" />
         <KpiCard label="Uso API" value="1.2M req" icon={Activity} />
-        <KpiCard label="Errores 24h" value="42" icon={AlertTriangle} tone="destructive" delta={down} />
+        <KpiCard
+          label="Errores 24h"
+          value="42"
+          icon={AlertTriangle}
+          tone="destructive"
+          delta={down}
+        />
         <KpiCard label="Alertas" value="7" icon={Zap} tone="destructive" />
         <KpiCard label="Facturación" value="$142.8M" icon={DollarSign} tone="success" />
         <KpiCard label="Sistema" value="Operativo" icon={ServerCog} tone="success" />
@@ -65,10 +117,16 @@ function SuperDashboard() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis dataKey="month" className="text-xs" />
               <YAxis className="text-xs" />
-              <Tooltip contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+              <Tooltip
+                contentStyle={{
+                  background: "hsl(var(--popover))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: 8,
+                }}
+              />
               <Legend />
-              <Bar dataKey="ingresos" fill="hsl(var(--primary))" radius={[4,4,0,0]} />
-              <Bar dataKey="recargas" fill="hsl(var(--nova))" radius={[4,4,0,0]} />
+              <Bar dataKey="ingresos" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="recargas" fill="hsl(var(--nova))" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -79,9 +137,25 @@ function SuperDashboard() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis dataKey="d" className="text-xs" />
               <YAxis className="text-xs" />
-              <Tooltip contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
-              <Area type="monotone" dataKey="sms" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
-              <Area type="monotone" dataKey="wa" stroke="hsl(var(--nova))" fill="hsl(var(--nova) / 0.2)" />
+              <Tooltip
+                contentStyle={{
+                  background: "hsl(var(--popover))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: 8,
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="sms"
+                stroke="hsl(var(--primary))"
+                fill="hsl(var(--primary) / 0.2)"
+              />
+              <Area
+                type="monotone"
+                dataKey="wa"
+                stroke="hsl(var(--nova))"
+                fill="hsl(var(--nova) / 0.2)"
+              />
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -106,9 +180,18 @@ function SuperDashboard() {
         </ChartCard>
         <ChartCard title="Alertas recientes" description="Últimas 24 horas">
           <ul className="space-y-3 text-sm">
-            <li className="flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" /> Rate limit del 92% para tenant "Retail Prime".</li>
-            <li className="flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" /> 3 recargas pendientes de aprobación &gt;24h.</li>
-            <li className="flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" /> Proveedor SMS reportó latencia elevada 03:12.</li>
+            <li className="flex gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" /> Rate limit del 92% para
+              tenant "Retail Prime".
+            </li>
+            <li className="flex gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" /> 3 recargas pendientes de
+              aprobación &gt;24h.
+            </li>
+            <li className="flex gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" /> Proveedor SMS reportó
+              latencia elevada 03:12.
+            </li>
           </ul>
         </ChartCard>
         <ChartCard title="Actividad" description="Últimos eventos">

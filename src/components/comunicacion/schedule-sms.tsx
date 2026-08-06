@@ -5,7 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SmsComposer } from "./sms-composer";
 import { toast } from "sonner";
 
@@ -37,7 +43,9 @@ export function ScheduleSms() {
             <div className="space-y-2">
               <Label>Zona horaria</Label>
               <Select value={tz} onValueChange={setTz}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="America/Mexico_City">CDMX (GMT-6)</SelectItem>
                   <SelectItem value="America/Bogota">Bogotá (GMT-5)</SelectItem>
@@ -50,7 +58,9 @@ export function ScheduleSms() {
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>
               <div className="text-sm font-medium">Envío recurrente</div>
-              <div className="text-xs text-muted-foreground">Repetir semanalmente en el mismo horario.</div>
+              <div className="text-xs text-muted-foreground">
+                Repetir semanalmente en el mismo horario.
+              </div>
             </div>
             <Switch checked={recurring} onCheckedChange={setRecurring} />
           </div>

@@ -15,14 +15,18 @@ export function Segments() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-end">
-        <Button className="gap-2"><Plus className="h-4 w-4" /> Nuevo segmento</Button>
+        <Button className="gap-2">
+          <Plus className="h-4 w-4" /> Nuevo segmento
+        </Button>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {SEGMENTS.map((s) => (
           <Card key={s.name} className="transition hover:shadow-md">
             <CardContent className="space-y-3 p-4">
               <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-primary/10 p-2 text-primary"><Users className="h-5 w-5" /></div>
+                <div className="rounded-lg bg-primary/10 p-2 text-primary">
+                  <Users className="h-5 w-5" />
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">{s.name}</div>
                   <div className="text-xs text-muted-foreground">{s.updated}</div>
@@ -35,7 +39,9 @@ export function Segments() {
                     <Filter className="h-3 w-3" /> {s.rules} reglas
                   </div>
                 </div>
-                <Button size="sm" variant="outline">Ver contactos</Button>
+                <Button size="sm" variant="outline">
+                  Ver contactos
+                </Button>
               </div>
             </CardContent>
           </Card>

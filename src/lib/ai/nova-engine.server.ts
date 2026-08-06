@@ -76,14 +76,18 @@ export class NovaEngineError extends Error {
 
 function apiKey(): string {
   const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new NovaEngineError("El motor de IA no está configurado (falta la clave del gateway).", 500);
+  if (!key)
+    throw new NovaEngineError(
+      "El motor de IA no está configurado (falta la clave del gateway).",
+      500,
+    );
   return key;
 }
 
 /** Sólo 429 y 5xx son reintentables; el resto es terminal. */
 async function gatewayFetch(path: string, body: unknown, timeoutSeconds: number, retries: number) {
   let attempt = 0;
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutSeconds * 1000);
@@ -106,9 +110,17 @@ async function gatewayFetch(path: string, body: unknown, timeoutSeconds: number,
         await new Promise((r) => setTimeout(r, 400 * attempt + Math.random() * 200));
         continue;
       }
-      if (res.status === 429) throw new NovaEngineError("Límite de solicitudes alcanzado. Intenta de nuevo en unos segundos.", 429);
-      if (res.status === 402) throw new NovaEngineError("Créditos de IA agotados. Recarga el saldo del workspace.", 402);
-      throw new NovaEngineError(`El motor de IA respondió ${res.status}: ${text.slice(0, 300)}`, res.status);
+      if (res.status === 429)
+        throw new NovaEngineError(
+          "Límite de solicitudes alcanzado. Intenta de nuevo en unos segundos.",
+          429,
+        );
+      if (res.status === 402)
+        throw new NovaEngineError("Créditos de IA agotados. Recarga el saldo del workspace.", 402);
+      throw new NovaEngineError(
+        `El motor de IA respondió ${res.status}: ${text.slice(0, 300)}`,
+        res.status,
+      );
     } catch (err) {
       if (err instanceof NovaEngineError) throw err;
       if (attempt < retries) {

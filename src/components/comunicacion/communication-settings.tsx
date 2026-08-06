@@ -61,17 +61,33 @@ export function CommunicationSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field label="Proveedor SMS"><Input defaultValue={settings.smsProvider} disabled /></Field>
-          <Field label="Proveedor WhatsApp"><Input defaultValue={settings.whatsappProvider} disabled /></Field>
-          <Field label="Proveedor Email"><Input defaultValue={settings.emailProvider} disabled /></Field>
-          <Field label="Horario inicio"><Input type="time" defaultValue={settings.scheduleStart} disabled /></Field>
-          <Field label="Horario fin"><Input type="time" defaultValue={settings.scheduleEnd} disabled /></Field>
+          <Field label="Proveedor SMS">
+            <Input defaultValue={settings.smsProvider} disabled />
+          </Field>
+          <Field label="Proveedor WhatsApp">
+            <Input defaultValue={settings.whatsappProvider} disabled />
+          </Field>
+          <Field label="Proveedor Email">
+            <Input defaultValue={settings.emailProvider} disabled />
+          </Field>
+          <Field label="Horario inicio">
+            <Input type="time" defaultValue={settings.scheduleStart} disabled />
+          </Field>
+          <Field label="Horario fin">
+            <Input type="time" defaultValue={settings.scheduleEnd} disabled />
+          </Field>
           <Field label="Rate limit (msg/min)">
             <Input type="number" defaultValue={settings.rateLimitPerMinute} disabled />
           </Field>
-          <Field label="Timeout (s)"><Input type="number" defaultValue={settings.timeoutSeconds} disabled /></Field>
-          <Field label="Reintentos"><Input type="number" defaultValue={settings.retries} disabled /></Field>
-          <Field label="Firma"><Input defaultValue={settings.signature} disabled /></Field>
+          <Field label="Timeout (s)">
+            <Input type="number" defaultValue={settings.timeoutSeconds} disabled />
+          </Field>
+          <Field label="Reintentos">
+            <Input type="number" defaultValue={settings.retries} disabled />
+          </Field>
+          <Field label="Firma">
+            <Input defaultValue={settings.signature} disabled />
+          </Field>
           <Field label="Plantilla por defecto">
             <Input defaultValue={settings.defaultTemplateId ?? ""} placeholder="—" disabled />
           </Field>

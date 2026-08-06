@@ -15,25 +15,41 @@ export function ProfileSettings() {
   const [saving, setSaving] = useState(false);
 
   if (isLoading || !user) return <Loader />;
-  const initials = user.name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+  const initials = user.name
+    .split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   const save = (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setTimeout(() => { setSaving(false); toast.success("Perfil actualizado"); }, 600);
+    setTimeout(() => {
+      setSaving(false);
+      toast.success("Perfil actualizado");
+    }, 600);
   };
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       <Card className="lg:col-span-1">
-        <CardHeader><CardTitle className="text-base">Foto de perfil</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-base">Foto de perfil</CardTitle>
+        </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
           <div className="relative">
             <Avatar className="h-28 w-28 border-4 border-background shadow-lg">
               <AvatarImage src={user.avatarUrl} />
-              <AvatarFallback className="text-2xl gradient-brand text-primary-foreground">{initials}</AvatarFallback>
+              <AvatarFallback className="text-2xl gradient-brand text-primary-foreground">
+                {initials}
+              </AvatarFallback>
             </Avatar>
-            <Button size="icon" variant="secondary" className="absolute bottom-0 right-0 h-8 w-8 rounded-full shadow">
+            <Button
+              size="icon"
+              variant="secondary"
+              className="absolute bottom-0 right-0 h-8 w-8 rounded-full shadow"
+            >
               <Camera className="h-4 w-4" />
             </Button>
           </div>
@@ -47,7 +63,9 @@ export function ProfileSettings() {
       <Card className="lg:col-span-2">
         <CardHeader>
           <CardTitle className="text-base">Información personal</CardTitle>
-          <CardDescription>Estos datos aparecerán en tus reportes y notificaciones.</CardDescription>
+          <CardDescription>
+            Estos datos aparecerán en tus reportes y notificaciones.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={save}>

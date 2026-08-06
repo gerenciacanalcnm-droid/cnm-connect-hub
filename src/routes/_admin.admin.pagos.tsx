@@ -34,19 +34,34 @@ function PagosPage() {
             <Card key={m.id}>
               <CardHeader className="flex-row items-start justify-between space-y-0">
                 <div className="flex items-start gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-md bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div>
+                  <div className="grid h-10 w-10 place-items-center rounded-md bg-primary/10 text-primary">
+                    <Icon className="h-5 w-5" />
+                  </div>
                   <div>
                     <CardTitle className="text-base">{m.name}</CardTitle>
                     <CardDescription className="mt-0.5 capitalize">{m.provider}</CardDescription>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {m.test && <Badge variant="outline" className="border-amber-500/30 text-amber-600">Test</Badge>}
-                  <Switch checked={m.enabled} onCheckedChange={(v) => { setMethods((ms) => ms.map((x) => x.id === m.id ? { ...x, enabled: v } : x)); toast.success(v ? `${m.name} activado` : `${m.name} desactivado`); }} />
+                  {m.test && (
+                    <Badge variant="outline" className="border-amber-500/30 text-amber-600">
+                      Test
+                    </Badge>
+                  )}
+                  <Switch
+                    checked={m.enabled}
+                    onCheckedChange={(v) => {
+                      setMethods((ms) => ms.map((x) => (x.id === m.id ? { ...x, enabled: v } : x)));
+                      toast.success(v ? `${m.name} activado` : `${m.name} desactivado`);
+                    }}
+                  />
                 </div>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" size="sm" className="w-full"><Settings className="mr-1.5 h-4 w-4" />Configurar credenciales</Button>
+                <Button variant="outline" size="sm" className="w-full">
+                  <Settings className="mr-1.5 h-4 w-4" />
+                  Configurar credenciales
+                </Button>
               </CardContent>
             </Card>
           );

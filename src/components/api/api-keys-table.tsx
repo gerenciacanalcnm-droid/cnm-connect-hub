@@ -12,7 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useApiKeys } from "@/hooks/use-api-keys";
 import { apiKeyRepository } from "@/repositories/api-key.repository";
@@ -27,58 +33,80 @@ export function ApiKeysTable() {
   const [scopes, setScopes] = useState("sms:send, sms:read");
   const [created, setCreated] = useState<string | null>(null);
 
-  const columns = useMemo<ColumnDef<ApiKey>[]>(() => [
-    {
-      accessorKey: "name", header: "Nombre",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-md bg-primary/10 text-primary">
-            <KeyRound className="h-3.5 w-3.5" />
+  const columns = useMemo<ColumnDef<ApiKey>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Nombre",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <div className="grid h-8 w-8 place-items-center rounded-md bg-primary/10 text-primary">
+              <KeyRound className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <div className="font-medium">{row.original.name}</div>
+              <div className="font-mono text-xs text-muted-foreground">{row.original.masked}</div>
+            </div>
           </div>
-          <div>
-            <div className="font-medium">{row.original.name}</div>
-            <div className="font-mono text-xs text-muted-foreground">{row.original.masked}</div>
+        ),
+      },
+      {
+        accessorKey: "scopes",
+        header: "Scopes",
+        cell: ({ row }) => (
+          <div className="flex flex-wrap gap-1">
+            {row.original.scopes.slice(0, 3).map((s) => (
+              <Badge key={s} variant="secondary" className="font-mono text-[10px]">
+                {s}
+              </Badge>
+            ))}
           </div>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "scopes", header: "Scopes",
-      cell: ({ row }) => (
-        <div className="flex flex-wrap gap-1">
-          {row.original.scopes.slice(0, 3).map((s) => (
-            <Badge key={s} variant="secondary" className="font-mono text-[10px]">{s}</Badge>
-          ))}
-        </div>
-      ),
-    },
-    { accessorKey: "status", header: "Estado", cell: ({ row }) => <StatusBadge status={row.original.status} /> },
-    {
-      accessorKey: "lastUsedAt", header: "Último uso",
-      cell: ({ row }) => row.original.lastUsedAt
-        ? new Date(row.original.lastUsedAt).toLocaleString("es-MX")
-        : <span className="text-muted-foreground">—</span>,
-    },
-    {
-      id: "actions", header: "",
-      cell: ({ row }) => (
-        <Button
-          size="sm" variant="ghost" className="gap-1.5 text-destructive"
-          disabled={row.original.status === "revoked"}
-          onClick={async (e) => {
-            e.stopPropagation();
-            await apiKeyRepository.revokeKey(row.original.id);
-            qc.invalidateQueries({ queryKey: queryKeys.apiKeys });
-            toast.success("Key revocada");
-          }}>
-          <ShieldOff className="h-3.5 w-3.5" /> Revocar
-        </Button>
-      ),
-    },
-  ], [qc]);
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Estado",
+        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      },
+      {
+        accessorKey: "lastUsedAt",
+        header: "Último uso",
+        cell: ({ row }) =>
+          row.original.lastUsedAt ? (
+            new Date(row.original.lastUsedAt).toLocaleString("es-MX")
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          ),
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) => (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5 text-destructive"
+            disabled={row.original.status === "revoked"}
+            onClick={async (e) => {
+              e.stopPropagation();
+              await apiKeyRepository.revokeKey(row.original.id);
+              qc.invalidateQueries({ queryKey: queryKeys.apiKeys });
+              toast.success("Key revocada");
+            }}
+          >
+            <ShieldOff className="h-3.5 w-3.5" /> Revocar
+          </Button>
+        ),
+      },
+    ],
+    [qc],
+  );
 
   const submit = async () => {
-    const scopeList = scopes.split(",").map((s) => s.trim()).filter(Boolean);
+    const scopeList = scopes
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
     const res = await apiKeyRepository.createKey({ name: name || "Nueva key", scopes: scopeList });
     setCreated(res.plainSecret);
     setName("");
@@ -91,9 +119,17 @@ export function ApiKeysTable() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setCreated(null); }}>
+        <Dialog
+          open={open}
+          onOpenChange={(v) => {
+            setOpen(v);
+            if (!v) setCreated(null);
+          }}
+        >
           <DialogTrigger asChild>
-            <Button className="gap-1.5"><Plus className="h-4 w-4" /> Nueva API key</Button>
+            <Button className="gap-1.5">
+              <Plus className="h-4 w-4" /> Nueva API key
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -107,8 +143,14 @@ export function ApiKeysTable() {
                 </p>
                 <div className="flex items-center gap-2 rounded-lg border bg-muted p-3">
                   <code className="flex-1 truncate font-mono text-xs">{created}</code>
-                  <Button size="sm" variant="ghost"
-                    onClick={() => { navigator.clipboard.writeText(created); toast.success("Copiado"); }}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      navigator.clipboard.writeText(created);
+                      toast.success("Copiado");
+                    }}
+                  >
                     <Copy className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -117,18 +159,37 @@ export function ApiKeysTable() {
               <div className="space-y-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="k-name">Nombre</Label>
-                  <Input id="k-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Backend producción" />
+                  <Input
+                    id="k-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Backend producción"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="k-scopes">Scopes</Label>
-                  <Input id="k-scopes" value={scopes} onChange={(e) => setScopes(e.target.value)} className="font-mono text-xs" />
+                  <Input
+                    id="k-scopes"
+                    value={scopes}
+                    onChange={(e) => setScopes(e.target.value)}
+                    className="font-mono text-xs"
+                  />
                 </div>
               </div>
             )}
             <DialogFooter>
-              {created
-                ? <Button onClick={() => { setOpen(false); setCreated(null); }}>Listo</Button>
-                : <Button onClick={submit}>Crear</Button>}
+              {created ? (
+                <Button
+                  onClick={() => {
+                    setOpen(false);
+                    setCreated(null);
+                  }}
+                >
+                  Listo
+                </Button>
+              ) : (
+                <Button onClick={submit}>Crear</Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>

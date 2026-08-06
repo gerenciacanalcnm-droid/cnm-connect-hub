@@ -30,11 +30,7 @@ export const rolePolicies: Record<Role, Permission[]> = {
     PERMISSIONS.billingRead,
     PERMISSIONS.usersRead,
   ],
-  [ROLES.operator]: [
-    PERMISSIONS.smsSend,
-    PERMISSIONS.smsRead,
-    PERMISSIONS.campaignRead,
-  ],
+  [ROLES.operator]: [PERMISSIONS.smsSend, PERMISSIONS.smsRead, PERMISSIONS.campaignRead],
   [ROLES.viewer]: [PERMISSIONS.smsRead, PERMISSIONS.analyticsRead, PERMISSIONS.campaignRead],
   [ROLES.affiliate]: [PERMISSIONS.analyticsRead],
   [ROLES.distributor]: [

@@ -22,9 +22,7 @@ export function NovaSection() {
           <h2 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">
             <span className="text-gradient-nova">{nova.title}</span>
           </h2>
-          <p className="mt-4 text-xl font-medium text-foreground/90">
-            {nova.subtitle}
-          </p>
+          <p className="mt-4 text-xl font-medium text-foreground/90">{nova.subtitle}</p>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
             {nova.description}
           </p>
@@ -72,10 +70,7 @@ export function NovaSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.4 }}
                   transition={{ delay: i * 0.15, duration: 0.4 }}
-                  className={cn(
-                    "flex",
-                    m.from === "user" ? "justify-end" : "justify-start",
-                  )}
+                  className={cn("flex", m.from === "user" ? "justify-end" : "justify-start")}
                 >
                   <div
                     className={cn(
@@ -93,9 +88,7 @@ export function NovaSection() {
 
             <div className="mt-4 flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2">
               <Sparkles className="h-4 w-4 text-nova" />
-              <span className="text-sm text-muted-foreground">
-                Pregúntale algo a CNM Nova…
-              </span>
+              <span className="text-sm text-muted-foreground">Pregúntale algo a CNM Nova…</span>
             </div>
           </div>
         </div>

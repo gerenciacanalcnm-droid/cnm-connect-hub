@@ -1,18 +1,11 @@
 import { motion } from "framer-motion";
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, type LucideIcon } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
 
 type Tone = "primary" | "success" | "warning" | "info" | "nova" | "destructive";
 
-const toneStyles: Record<
-  Tone,
-  { icon: string; ring: string; bar: string; spark: string }
-> = {
+const toneStyles: Record<Tone, { icon: string; ring: string; bar: string; spark: string }> = {
   primary: {
     icon: "bg-primary/10 text-primary ring-primary/20",
     ring: "ring-primary/15",
@@ -104,11 +97,7 @@ export function KpiCard({
             <span className="truncate text-2xl font-semibold tracking-tight text-foreground sm:text-[1.6rem]">
               {value}
             </span>
-            {unit && (
-              <span className="text-xs font-medium text-muted-foreground">
-                {unit}
-              </span>
-            )}
+            {unit && <span className="text-xs font-medium text-muted-foreground">{unit}</span>}
           </div>
         </div>
         <div
@@ -128,22 +117,16 @@ export function KpiCard({
               className={cn(
                 "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 font-semibold",
                 delta.direction === "up" && "bg-success/10 text-success",
-                delta.direction === "down" &&
-                  "bg-destructive/10 text-destructive",
-                delta.direction === "neutral" &&
-                  "bg-muted text-muted-foreground",
+                delta.direction === "down" && "bg-destructive/10 text-destructive",
+                delta.direction === "neutral" && "bg-muted text-muted-foreground",
               )}
             >
               {delta.direction === "up" && <ArrowUpRight className="h-3 w-3" />}
-              {delta.direction === "down" && (
-                <ArrowDownRight className="h-3 w-3" />
-              )}
+              {delta.direction === "down" && <ArrowDownRight className="h-3 w-3" />}
               {delta.value}
             </span>
           )}
-          {hint && (
-            <span className="truncate text-muted-foreground">{hint}</span>
-          )}
+          {hint && <span className="truncate text-muted-foreground">{hint}</span>}
         </div>
       )}
 
@@ -151,9 +134,7 @@ export function KpiCard({
         <div className="mt-4">
           <div className="mb-1.5 flex items-center justify-between text-[10px] font-medium text-muted-foreground">
             <span>{progress?.label ?? "Uso"}</span>
-            <span className="tabular-nums text-foreground">
-              {Math.round(pct)}%
-            </span>
+            <span className="tabular-nums text-foreground">{Math.round(pct)}%</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <motion.div
@@ -169,18 +150,9 @@ export function KpiCard({
       {data && (
         <div className="-mx-5 -mb-5 mt-4 h-14">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={data}
-              margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
-            >
+            <AreaChart data={data} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient
-                  id={`spark-${tone}-${index}`}
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
+                <linearGradient id={`spark-${tone}-${index}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={t.spark} stopOpacity={0.35} />
                   <stop offset="100%" stopColor={t.spark} stopOpacity={0} />
                 </linearGradient>

@@ -90,7 +90,9 @@ export const listFeatureFlags = createServerFn({ method: "GET" }).handler(async 
   const sb = await admin();
   const { data, error } = await sb
     .from("feature_flags")
-    .select("id, key, description, enabled_globally, rollout_percentage, target_companies, created_at, updated_at")
+    .select(
+      "id, key, description, enabled_globally, rollout_percentage, target_companies, created_at, updated_at",
+    )
     .order("key");
   if (error) throw new Error(error.message);
   return data ?? [];
@@ -138,14 +140,19 @@ export const deleteFeatureFlag = createServerFn({ method: "POST" })
 // ═══════════════════ PERMISSIONS / ROLES ═══════════════════
 export const listPermissions = createServerFn({ method: "GET" }).handler(async () => {
   const sb = await admin();
-  const { data, error } = await sb.from("permissions").select("id, code, module, description").order("module");
+  const { data, error } = await sb
+    .from("permissions")
+    .select("id, code, module, description")
+    .order("module");
   if (error) throw new Error(error.message);
   return data ?? [];
 });
 
 export const listRolePermissions = createServerFn({ method: "GET" }).handler(async () => {
   const sb = await admin();
-  const { data, error } = await sb.from("role_permissions").select("role, permission_id, permissions(code, module)");
+  const { data, error } = await sb
+    .from("role_permissions")
+    .select("role, permission_id, permissions(code, module)");
   if (error) throw new Error(error.message);
   return data ?? [];
 });
@@ -153,14 +160,21 @@ export const listRolePermissions = createServerFn({ method: "GET" }).handler(asy
 // ═══════════════════ COMPANIES ═══════════════════
 export const listCompanies = createServerFn({ method: "GET" }).handler(async () => {
   const sb = await admin();
-  const { data, error } = await sb.from("companies").select("*").order("created_at", { ascending: false });
+  const { data, error } = await sb
+    .from("companies")
+    .select("*")
+    .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   return data ?? [];
 });
 
 export const getCurrentCompany = createServerFn({ method: "GET" }).handler(async () => {
   const sb = await admin();
-  const { data, error } = await sb.from("companies").select("*").eq("slug", "cnm-digital-media").maybeSingle();
+  const { data, error } = await sb
+    .from("companies")
+    .select("*")
+    .eq("slug", "cnm-digital-media")
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return data;
 });
@@ -169,7 +183,10 @@ export const getCurrentCompany = createServerFn({ method: "GET" }).handler(async
 export const listUsers = createServerFn({ method: "GET" }).handler(async () => {
   const sb = await admin();
   const [profiles, roles] = await Promise.all([
-    sb.from("profiles").select("id, email, full_name, avatar_url, created_at").order("created_at", { ascending: false }),
+    sb
+      .from("profiles")
+      .select("id, email, full_name, avatar_url, created_at")
+      .order("created_at", { ascending: false }),
     sb.from("user_roles").select("user_id, role"),
   ]);
   if (profiles.error) throw new Error(profiles.error.message);
@@ -233,7 +250,9 @@ export const createContact = createServerFn({ method: "POST" })
 
 export const updateContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ id: z.string().uuid(), patch: ContactInputSchema.partial() }).parse(v))
+  .inputValidator((v) =>
+    z.object({ id: z.string().uuid(), patch: ContactInputSchema.partial() }).parse(v),
+  )
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("contacts")
@@ -257,7 +276,11 @@ export const deleteContact = createServerFn({ method: "POST" })
 // ─── Contact groups ─────────────────────────────────────────────────
 export const listContactGroups = createServerFn({ method: "GET" }).handler(async () => {
   const sb = await admin();
-  const { data, error } = await sb.from("contact_groups").select("*").eq("company_id", CNM_COMPANY_ID).order("name");
+  const { data, error } = await sb
+    .from("contact_groups")
+    .select("*")
+    .eq("company_id", CNM_COMPANY_ID)
+    .order("name");
   if (error) throw new Error(error.message);
   return data ?? [];
 });
@@ -408,19 +431,36 @@ const CampaignInputSchema = z.object({
   channel: z.enum(["sms", "whatsapp", "email"]).default("sms"),
   template_id: z.string().uuid().optional().nullable(),
   message_body: z.string().optional().nullable(),
-  status: z.enum(["draft", "scheduled", "sending", "completed", "failed", "canceled"]).default("draft"),
+  status: z
+    .enum(["draft", "scheduled", "sending", "completed", "failed", "canceled"])
+    .default("draft"),
   scheduled_at: z.string().datetime().optional().nullable(),
   metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const upsertCampaign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ id: z.string().uuid().optional(), input: CampaignInputSchema }).parse(v))
+  .inputValidator((v) =>
+    z.object({ id: z.string().uuid().optional(), input: CampaignInputSchema }).parse(v),
+  )
   .handler(async ({ data, context }) => {
-    const row = { ...data.input, company_id: CNM_COMPANY_ID, metadata: data.input.metadata as never };
+    const row = {
+      ...data.input,
+      company_id: CNM_COMPANY_ID,
+      metadata: data.input.metadata as never,
+    };
     const q = data.id
-      ? context.supabase.from("campaigns").update(row as never).eq("id", data.id).select().single()
-      : context.supabase.from("campaigns").insert(row as never).select().single();
+      ? context.supabase
+          .from("campaigns")
+          .update(row as never)
+          .eq("id", data.id)
+          .select()
+          .single()
+      : context.supabase
+          .from("campaigns")
+          .insert(row as never)
+          .select()
+          .single();
     const { data: saved, error } = await q;
     if (error) throw new Error(error.message);
     return saved;
@@ -430,7 +470,11 @@ export const duplicateCampaign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
-    const { data: src, error: e1 } = await context.supabase.from("campaigns").select("*").eq("id", data.id).single();
+    const { data: src, error: e1 } = await context.supabase
+      .from("campaigns")
+      .select("*")
+      .eq("id", data.id)
+      .single();
     if (e1) throw new Error(e1.message);
     const {
       id: _id,
@@ -446,7 +490,11 @@ export const duplicateCampaign = createServerFn({ method: "POST" })
     } = src as Record<string, unknown>;
     const { data: copy, error: e2 } = await context.supabase
       .from("campaigns")
-      .insert({ ...(rest as Record<string, unknown>), name: `${(src as { name: string }).name} (copia)`, status: "draft" } as never)
+      .insert({
+        ...(rest as Record<string, unknown>),
+        name: `${(src as { name: string }).name} (copia)`,
+        status: "draft",
+      } as never)
       .select()
       .single();
     if (e2) throw new Error(e2.message);
@@ -477,7 +525,11 @@ export const deleteCampaign = createServerFn({ method: "POST" })
 // ═══════════════════ TEMPLATES ═══════════════════
 export const listTemplates = createServerFn({ method: "GET" }).handler(async () => {
   const sb = await admin();
-  const { data, error } = await sb.from("templates").select("*").eq("company_id", CNM_COMPANY_ID).order("name");
+  const { data, error } = await sb
+    .from("templates")
+    .select("*")
+    .eq("company_id", CNM_COMPANY_ID)
+    .order("name");
   if (error) throw new Error(error.message);
   return data ?? [];
 });
@@ -493,12 +545,23 @@ const TemplateInputSchema = z.object({
 
 export const upsertTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ id: z.string().uuid().optional(), input: TemplateInputSchema }).parse(v))
+  .inputValidator((v) =>
+    z.object({ id: z.string().uuid().optional(), input: TemplateInputSchema }).parse(v),
+  )
   .handler(async ({ data, context }) => {
     const row = { ...data.input, company_id: CNM_COMPANY_ID };
     const q = data.id
-      ? context.supabase.from("templates").update(row as never).eq("id", data.id).select().single()
-      : context.supabase.from("templates").insert(row as never).select().single();
+      ? context.supabase
+          .from("templates")
+          .update(row as never)
+          .eq("id", data.id)
+          .select()
+          .single()
+      : context.supabase
+          .from("templates")
+          .insert(row as never)
+          .select()
+          .single();
     const { data: saved, error } = await q;
     if (error) throw new Error(error.message);
     return saved;
@@ -517,7 +580,10 @@ export const deleteTemplate = createServerFn({ method: "POST" })
 export const getDashboardSummary = createServerFn({ method: "GET" }).handler(async () => {
   const sb = await admin();
   const [contacts, campaigns, sms, company] = await Promise.all([
-    sb.from("contacts").select("id", { count: "exact", head: true }).eq("company_id", CNM_COMPANY_ID),
+    sb
+      .from("contacts")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", CNM_COMPANY_ID),
     sb.from("campaigns").select("id, total_sent, total_delivered").eq("company_id", CNM_COMPANY_ID),
     sb.from("sms_messages").select("id, status, cost").eq("company_id", CNM_COMPANY_ID),
     sb.from("companies").select("balance, currency").eq("id", CNM_COMPANY_ID).maybeSingle(),
@@ -685,12 +751,23 @@ const WebhookInputSchema = z.object({
 
 export const upsertWebhook = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ id: z.string().uuid().optional(), input: WebhookInputSchema }).parse(v))
+  .inputValidator((v) =>
+    z.object({ id: z.string().uuid().optional(), input: WebhookInputSchema }).parse(v),
+  )
   .handler(async ({ data, context }) => {
     const row = { ...data.input, company_id: CNM_COMPANY_ID };
     const q = data.id
-      ? context.supabase.from("webhooks").update(row as never).eq("id", data.id).select().single()
-      : context.supabase.from("webhooks").insert(row as never).select().single();
+      ? context.supabase
+          .from("webhooks")
+          .update(row as never)
+          .eq("id", data.id)
+          .select()
+          .single()
+      : context.supabase
+          .from("webhooks")
+          .insert(row as never)
+          .select()
+          .single();
     const { data: saved, error } = await q;
     if (error) throw new Error(error.message);
     return saved;

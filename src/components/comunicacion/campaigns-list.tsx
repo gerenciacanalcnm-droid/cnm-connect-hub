@@ -1,5 +1,15 @@
 import { useMemo, useState } from "react";
-import { Plus, Play, Pause, Copy, Trash2, MoreHorizontal, MessageSquare, MessageCircle, Mail } from "lucide-react";
+import {
+  Plus,
+  Play,
+  Pause,
+  Copy,
+  Trash2,
+  MoreHorizontal,
+  MessageSquare,
+  MessageCircle,
+  Mail,
+} from "lucide-react";
 import type { ColumnDef } from "@/components/common/data-table";
 import { DataTable } from "@/components/common/data-table";
 import { StatusBadge } from "@/components/common/status-badge";
@@ -7,10 +17,18 @@ import { SkeletonTable } from "@/components/common/skeleton-table";
 import { ErrorState } from "@/components/common/error-state";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,11 +40,12 @@ import { toast } from "sonner";
 import type { CommunicationChannel } from "@/types/communication";
 import { cn } from "@/lib/utils";
 
-const CHANNELS: Array<{ value: CommunicationChannel; label: string; icon: typeof MessageSquare }> = [
-  { value: "sms", label: "SMS", icon: MessageSquare },
-  { value: "whatsapp", label: "WhatsApp", icon: MessageCircle },
-  { value: "email", label: "Email", icon: Mail },
-];
+const CHANNELS: Array<{ value: CommunicationChannel; label: string; icon: typeof MessageSquare }> =
+  [
+    { value: "sms", label: "SMS", icon: MessageSquare },
+    { value: "whatsapp", label: "WhatsApp", icon: MessageCircle },
+    { value: "email", label: "Email", icon: Mail },
+  ];
 
 export function CampaignsList() {
   const { data, isLoading, error, refetch } = useCampaigns({ pageSize: 100 });
@@ -38,15 +57,30 @@ export function CampaignsList() {
 
   const columns = useMemo<ColumnDef<Campaign>[]>(
     () => [
-      { accessorKey: "name", header: "Campaña", cell: ({ row }) => <span className="font-medium">{row.original.name}</span> },
-      { accessorKey: "status", header: "Estado", cell: ({ row }) => <StatusBadge status={row.original.status} /> },
-      { accessorKey: "audienceSize", header: "Audiencia", cell: ({ row }) => formatNumber(row.original.audienceSize) },
+      {
+        accessorKey: "name",
+        header: "Campaña",
+        cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+      },
+      {
+        accessorKey: "status",
+        header: "Estado",
+        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      },
+      {
+        accessorKey: "audienceSize",
+        header: "Audiencia",
+        cell: ({ row }) => formatNumber(row.original.audienceSize),
+      },
       {
         accessorKey: "scheduledAt",
         header: "Programada",
         cell: ({ row }) =>
           row.original.scheduledAt
-            ? new Date(row.original.scheduledAt).toLocaleDateString("es-MX", { day: "2-digit", month: "short" })
+            ? new Date(row.original.scheduledAt).toLocaleDateString("es-MX", {
+                day: "2-digit",
+                month: "short",
+              })
             : "—",
       },
       {
@@ -81,7 +115,10 @@ export function CampaignsList() {
                   <Copy className="mr-2 h-4 w-4" /> Duplicar
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive" onClick={() => toast.success(`${c.name}: eliminada`)}>
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => toast.success(`${c.name}: eliminada`)}
+                >
                   <Trash2 className="mr-2 h-4 w-4" /> Eliminar
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -112,11 +149,17 @@ export function CampaignsList() {
       />
       <Dialog open={creating} onOpenChange={setCreating}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Nueva campaña</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Nueva campaña</DialogTitle>
+          </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Nombre</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Black Friday 2026" />
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ej: Black Friday 2026"
+              />
             </div>
             <div className="space-y-2">
               <Label>Canal</Label>
@@ -151,7 +194,12 @@ export function CampaignsList() {
             {channel === "email" && (
               <div className="space-y-2">
                 <Label>Asunto</Label>
-                <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Asunto del email" disabled />
+                <Input
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Asunto del email"
+                  disabled
+                />
                 <p className="text-xs text-muted-foreground">
                   Email Marketing disponible en la siguiente actualización.
                 </p>
@@ -159,8 +207,19 @@ export function CampaignsList() {
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreating(false)}>Cancelar</Button>
-            <Button disabled={channel !== "sms"} onClick={() => { toast.success(`Campaña "${name}" (${channel.toUpperCase()}) creada`); setCreating(false); setName(""); setMsg(""); setSubject(""); }}>
+            <Button variant="outline" onClick={() => setCreating(false)}>
+              Cancelar
+            </Button>
+            <Button
+              disabled={channel !== "sms"}
+              onClick={() => {
+                toast.success(`Campaña "${name}" (${channel.toUpperCase()}) creada`);
+                setCreating(false);
+                setName("");
+                setMsg("");
+                setSubject("");
+              }}
+            >
               Crear campaña
             </Button>
           </DialogFooter>

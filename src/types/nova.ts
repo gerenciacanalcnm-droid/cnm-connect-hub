@@ -153,10 +153,30 @@ export interface NovaMemoryEntry {
 }
 
 export const NOVA_MODEL_CATALOG = [
-  { id: "google/gemini-3.6-flash", label: "Gemini 3.6 Flash", provider: "google", note: "Rápido y equilibrado" },
-  { id: "google/gemini-3.1-flash-lite", label: "Gemini 3.1 Flash Lite", provider: "google", note: "Alto volumen, bajo costo" },
-  { id: "google/gemini-3.1-pro-preview", label: "Gemini 3.1 Pro", provider: "google", note: "Razonamiento avanzado" },
-  { id: "openai/gpt-5.4-mini", label: "GPT-5.4 Mini", provider: "openai", note: "Equilibrio costo/calidad" },
+  {
+    id: "google/gemini-3.6-flash",
+    label: "Gemini 3.6 Flash",
+    provider: "google",
+    note: "Rápido y equilibrado",
+  },
+  {
+    id: "google/gemini-3.1-flash-lite",
+    label: "Gemini 3.1 Flash Lite",
+    provider: "google",
+    note: "Alto volumen, bajo costo",
+  },
+  {
+    id: "google/gemini-3.1-pro-preview",
+    label: "Gemini 3.1 Pro",
+    provider: "google",
+    note: "Razonamiento avanzado",
+  },
+  {
+    id: "openai/gpt-5.4-mini",
+    label: "GPT-5.4 Mini",
+    provider: "openai",
+    note: "Equilibrio costo/calidad",
+  },
   { id: "openai/gpt-5.5", label: "GPT-5.5", provider: "openai", note: "Máxima calidad" },
 ] as const;
 

@@ -26,8 +26,7 @@ export const useUIStore = create<UIState>()(
       notificationsOpen: false,
       locale: "es",
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
-      toggleSidebar: () =>
-        set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+      toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setCommandOpen: (v) => set({ commandOpen: v }),
       setNovaOpen: (v) => set({ novaOpen: v }),
       setNotificationsOpen: (v) => set({ notificationsOpen: v }),

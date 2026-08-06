@@ -28,11 +28,20 @@ export function Importer() {
   const stats = useMemo(() => {
     if (!rows) return null;
     const seen = new Set<string>();
-    let dup = 0, invalid = 0, valid = 0;
+    let dup = 0,
+      invalid = 0,
+      valid = 0;
     for (const r of rows) {
-      if (!/^\+?\d{7,15}$/.test(r.phone)) { invalid++; continue; }
-      if (seen.has(r.phone)) { dup++; continue; }
-      seen.add(r.phone); valid++;
+      if (!/^\+?\d{7,15}$/.test(r.phone)) {
+        invalid++;
+        continue;
+      }
+      if (seen.has(r.phone)) {
+        dup++;
+        continue;
+      }
+      seen.add(r.phone);
+      valid++;
     }
     return { total: rows.length, valid, dup, invalid };
   }, [rows]);
@@ -49,7 +58,10 @@ export function Importer() {
     setProgress(1);
     const tick = () => {
       setProgress((p) => {
-        if (p >= 100) { toast.success(`${formatNumber(stats.valid)} contactos importados`); return 100; }
+        if (p >= 100) {
+          toast.success(`${formatNumber(stats.valid)} contactos importados`);
+          return 100;
+        }
         setTimeout(tick, 30);
         return Math.min(100, p + 4);
       });
@@ -77,7 +89,9 @@ export function Importer() {
             className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-10 text-center transition hover:bg-muted/50"
           >
             <UploadCloud className="h-10 w-10 text-muted-foreground" />
-            <p className="mt-3 text-sm font-medium">Arrastra tu archivo aquí o haz clic para seleccionar</p>
+            <p className="mt-3 text-sm font-medium">
+              Arrastra tu archivo aquí o haz clic para seleccionar
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">CSV, XLS, XLSX · hasta 20 MB</p>
             <input
               ref={inputRef}
@@ -94,7 +108,14 @@ export function Importer() {
                 <FileSpreadsheet className="h-4 w-4 text-primary" />
                 <span className="font-medium">{fileName}</span>
               </div>
-              <Button size="icon" variant="ghost" onClick={() => { setRows(null); setFileName(""); }}>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => {
+                  setRows(null);
+                  setFileName("");
+                }}
+              >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
@@ -105,16 +126,37 @@ export function Importer() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-sm">Análisis de deduplicación</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-sm">Análisis de deduplicación</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-3 text-sm">
           {!stats ? (
             <p className="text-muted-foreground">Sube un archivo para ver el análisis.</p>
           ) : (
             <>
-              <StatRow icon={<FileSpreadsheet className="h-4 w-4" />} label="Filas leídas" value={stats.total} />
-              <StatRow icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} label="Válidos únicos" value={stats.valid} tone="emerald" />
-              <StatRow icon={<AlertCircle className="h-4 w-4 text-amber-600" />} label="Duplicados" value={stats.dup} tone="amber" />
-              <StatRow icon={<AlertCircle className="h-4 w-4 text-destructive" />} label="Inválidos" value={stats.invalid} tone="rose" />
+              <StatRow
+                icon={<FileSpreadsheet className="h-4 w-4" />}
+                label="Filas leídas"
+                value={stats.total}
+              />
+              <StatRow
+                icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+                label="Válidos únicos"
+                value={stats.valid}
+                tone="emerald"
+              />
+              <StatRow
+                icon={<AlertCircle className="h-4 w-4 text-amber-600" />}
+                label="Duplicados"
+                value={stats.dup}
+                tone="amber"
+              />
+              <StatRow
+                icon={<AlertCircle className="h-4 w-4 text-destructive" />}
+                label="Inválidos"
+                value={stats.invalid}
+                tone="rose"
+              />
               <Button className="mt-2 w-full" onClick={importNow} disabled={!stats.valid}>
                 Importar {formatNumber(stats.valid)} contactos
               </Button>
@@ -126,13 +168,31 @@ export function Importer() {
   );
 }
 
-function StatRow({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: number; tone?: string }) {
-  const cls = tone === "emerald" ? "text-emerald-700 dark:text-emerald-400"
-    : tone === "amber" ? "text-amber-700 dark:text-amber-400"
-    : tone === "rose" ? "text-destructive" : "text-foreground";
+function StatRow({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  tone?: string;
+}) {
+  const cls =
+    tone === "emerald"
+      ? "text-emerald-700 dark:text-emerald-400"
+      : tone === "amber"
+        ? "text-amber-700 dark:text-amber-400"
+        : tone === "rose"
+          ? "text-destructive"
+          : "text-foreground";
   return (
     <div className="flex items-center justify-between rounded-md border border-border/60 p-2">
-      <div className="flex items-center gap-2 text-muted-foreground">{icon}<span>{label}</span></div>
+      <div className="flex items-center gap-2 text-muted-foreground">
+        {icon}
+        <span>{label}</span>
+      </div>
       <span className={`font-semibold ${cls}`}>{formatNumber(value)}</span>
     </div>
   );

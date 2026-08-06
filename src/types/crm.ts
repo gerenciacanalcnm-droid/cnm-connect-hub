@@ -1,12 +1,6 @@
 import type { ID } from "./common";
 
-export type DealStage =
-  | "lead"
-  | "qualified"
-  | "proposal"
-  | "negotiation"
-  | "won"
-  | "lost";
+export type DealStage = "lead" | "qualified" | "proposal" | "negotiation" | "won" | "lost";
 
 export interface Deal {
   id: ID;

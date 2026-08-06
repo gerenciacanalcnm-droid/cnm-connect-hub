@@ -50,17 +50,13 @@ export function ActivityTimeline({ items }: { items: TimelineItem[] }) {
             </div>
             <div className="min-w-0 flex-1 pt-1">
               <div className="flex items-baseline justify-between gap-2">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {item.title}
-                </p>
+                <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
                 <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
                   {item.time}
                 </span>
               </div>
               {item.description && (
-                <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                  {item.description}
-                </p>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">{item.description}</p>
               )}
             </div>
           </motion.li>

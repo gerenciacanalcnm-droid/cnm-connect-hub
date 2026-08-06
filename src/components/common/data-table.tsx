@@ -163,12 +163,7 @@ export function DataTable<T>({
         <div className="flex items-center gap-2">
           {toolbar}
           {exportFilename && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExport}
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
               <Download className="h-4 w-4" />
               Exportar
             </Button>
@@ -267,9 +262,7 @@ export function DataTable<T>({
 
       <div className="flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <div>
-          {enableSelection && selectedCount > 0
-            ? `${selectedCount} seleccionadas · `
-            : ""}
+          {enableSelection && selectedCount > 0 ? `${selectedCount} seleccionadas · ` : ""}
           {totalRows} resultados
         </div>
         <div className="flex items-center gap-2">

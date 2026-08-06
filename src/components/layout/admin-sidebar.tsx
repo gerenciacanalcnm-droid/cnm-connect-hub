@@ -30,7 +30,10 @@ export function AdminSidebar() {
         <div className={cn("flex h-14 items-center gap-2 px-2", collapsed && "justify-center")}>
           <Logo showWordmark={!collapsed} />
           {!collapsed && (
-            <Badge variant="outline" className="ml-auto border-primary/40 bg-primary/10 text-[10px] font-semibold uppercase tracking-wider text-primary">
+            <Badge
+              variant="outline"
+              className="ml-auto border-primary/40 bg-primary/10 text-[10px] font-semibold uppercase tracking-wider text-primary"
+            >
               <Shield className="mr-1 h-3 w-3" /> Admin
             </Badge>
           )}
@@ -63,7 +66,10 @@ export function AdminSidebar() {
                         <item.icon className="h-4 w-4 shrink-0" />
                         <span className="truncate">{item.title}</span>
                         {item.badge && !collapsed && (
-                          <Badge variant="outline" className="ml-auto h-4 border-amber-500/40 bg-amber-500/10 px-1.5 text-[9px] font-semibold text-amber-600 dark:text-amber-400">
+                          <Badge
+                            variant="outline"
+                            className="ml-auto h-4 border-amber-500/40 bg-amber-500/10 px-1.5 text-[9px] font-semibold text-amber-600 dark:text-amber-400"
+                          >
                             {item.badge}
                           </Badge>
                         )}
@@ -80,7 +86,11 @@ export function AdminSidebar() {
       <SidebarFooter className="border-t border-sidebar-border p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Volver a la plataforma" className="h-9 gap-2.5 rounded-md text-sm font-medium">
+            <SidebarMenuButton
+              asChild
+              tooltip="Volver a la plataforma"
+              className="h-9 gap-2.5 rounded-md text-sm font-medium"
+            >
               <Link to="/dashboard">
                 <ArrowLeft className="h-4 w-4 shrink-0" />
                 <span className="truncate">Volver a la plataforma</span>

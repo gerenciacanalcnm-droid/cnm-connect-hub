@@ -61,9 +61,7 @@ export const adminNavigation: AdminNavSection[] = [
   },
   {
     label: "Contenido",
-    items: [
-      { title: "Landing CMS", to: "/admin/landing-cms", icon: FileText },
-    ],
+    items: [{ title: "Landing CMS", to: "/admin/landing-cms", icon: FileText }],
   },
   {
     label: "Configuración",

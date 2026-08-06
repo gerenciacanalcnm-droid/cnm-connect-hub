@@ -11,14 +11,7 @@ export type MetricCardProps = {
   className?: string;
 };
 
-export function MetricCard({
-  label,
-  value,
-  delta,
-  icon: Icon,
-  hint,
-  className,
-}: MetricCardProps) {
+export function MetricCard({ label, value, delta, icon: Icon, hint, className }: MetricCardProps) {
   return (
     <Card
       className={cn(
@@ -48,20 +41,13 @@ export function MetricCard({
               <span
                 className={cn(
                   "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 font-medium",
-                  delta.direction === "up" &&
-                    "bg-success/10 text-success",
-                  delta.direction === "down" &&
-                    "bg-destructive/10 text-destructive",
-                  delta.direction === "neutral" &&
-                    "bg-muted text-muted-foreground",
+                  delta.direction === "up" && "bg-success/10 text-success",
+                  delta.direction === "down" && "bg-destructive/10 text-destructive",
+                  delta.direction === "neutral" && "bg-muted text-muted-foreground",
                 )}
               >
-                {delta.direction === "up" && (
-                  <ArrowUpRight className="h-3 w-3" />
-                )}
-                {delta.direction === "down" && (
-                  <ArrowDownRight className="h-3 w-3" />
-                )}
+                {delta.direction === "up" && <ArrowUpRight className="h-3 w-3" />}
+                {delta.direction === "down" && <ArrowDownRight className="h-3 w-3" />}
                 {delta.value}
               </span>
             )}

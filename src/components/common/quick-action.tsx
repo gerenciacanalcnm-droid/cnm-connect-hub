@@ -18,13 +18,7 @@ const toneStyles: Record<NonNullable<QuickAction["tone"]>, string> = {
   neutral: "text-foreground bg-muted ring-border",
 };
 
-export function QuickActionButton({
-  action,
-  index = 0,
-}: {
-  action: QuickAction;
-  index?: number;
-}) {
+export function QuickActionButton({ action, index = 0 }: { action: QuickAction; index?: number }) {
   const Icon = action.icon;
   return (
     <motion.button
@@ -46,13 +40,9 @@ export function QuickActionButton({
         <Icon className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-foreground">
-          {action.label}
-        </p>
+        <p className="truncate text-sm font-semibold text-foreground">{action.label}</p>
         {action.description && (
-          <p className="mt-0.5 truncate text-xs text-muted-foreground">
-            {action.description}
-          </p>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">{action.description}</p>
         )}
       </div>
     </motion.button>

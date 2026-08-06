@@ -25,7 +25,11 @@ export const Route = createFileRoute("/")({
         content:
           "SMS Masivos, WhatsApp Business, Email Marketing, CRM, automatizaciones y CNM Nova (IA) en un único Communication Hub de CNM Digital Media.",
       },
-      { name: "keywords", content: "SMS masivos, WhatsApp Business, Email Marketing, plataforma omnicanal, CRM, API SMS, CNM Nova, Colombia" },
+      {
+        name: "keywords",
+        content:
+          "SMS masivos, WhatsApp Business, Email Marketing, plataforma omnicanal, CRM, API SMS, CNM Nova, Colombia",
+      },
       { property: "og:type", content: "website" },
       { property: "og:title", content: "SMS CNM — Plataforma omnicanal: SMS, WhatsApp y Email" },
       {

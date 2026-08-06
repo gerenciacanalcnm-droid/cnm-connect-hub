@@ -14,14 +14,10 @@ export function useNotifications() {
   useEffect(() => {
     const channel = supabase
       .channel("notifications-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "notifications" },
-        () => {
-          qc.invalidateQueries({ queryKey: queryKeys.notifications });
-          qc.invalidateQueries({ queryKey: queryKeys.notificationsUnread });
-        },
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, () => {
+        qc.invalidateQueries({ queryKey: queryKeys.notifications });
+        qc.invalidateQueries({ queryKey: queryKeys.notificationsUnread });
+      })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);

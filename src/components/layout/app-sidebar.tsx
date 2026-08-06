@@ -21,18 +21,12 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const isActive = (to: string) =>
-    pathname === to || pathname.startsWith(to + "/");
+  const isActive = (to: string) => pathname === to || pathname.startsWith(to + "/");
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border">
-        <div
-          className={cn(
-            "flex h-14 items-center px-2",
-            collapsed && "justify-center",
-          )}
-        >
+        <div className={cn("flex h-14 items-center px-2", collapsed && "justify-center")}>
           <Logo showWordmark={!collapsed} />
         </div>
       </SidebarHeader>
@@ -75,9 +69,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border p-3">
         {!collapsed ? (
           <div className="rounded-lg border border-sidebar-border bg-sidebar-accent/60 p-3">
-            <p className="text-xs font-semibold text-sidebar-foreground">
-              Plan Business
-            </p>
+            <p className="text-xs font-semibold text-sidebar-foreground">Plan Business</p>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
               12.480 SMS restantes este mes
             </p>

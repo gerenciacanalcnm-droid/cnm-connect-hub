@@ -4,7 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SmsComposer } from "./sms-composer";
 import { formatNumber } from "@/lib/format";
 import { toast } from "sonner";
@@ -38,7 +44,9 @@ export function BulkSend() {
           <div className="space-y-2">
             <Label>Audiencia</Label>
             <Select value={audience} onValueChange={setAudience}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {AUDIENCES.map((a) => (
                   <SelectItem key={a.id} value={a.id}>

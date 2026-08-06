@@ -10,7 +10,10 @@ export const Route = createFileRoute("/_admin/admin/logs")({
 
 function LogsPage() {
   return (
-    <AdminPage title="Logs del sistema" description="Trazabilidad de eventos por canal y severidad.">
+    <AdminPage
+      title="Logs del sistema"
+      description="Trazabilidad de eventos por canal y severidad."
+    >
       <Card>
         <CardContent className="flex flex-col items-center gap-3 p-12 text-center">
           <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
@@ -18,7 +21,9 @@ function LogsPage() {
           </div>
           <div>
             <p className="text-sm font-medium">Próximamente</p>
-            <p className="text-xs text-muted-foreground">Los logs del sistema se listarán aquí cuando el pipeline de eventos esté activo.</p>
+            <p className="text-xs text-muted-foreground">
+              Los logs del sistema se listarán aquí cuando el pipeline de eventos esté activo.
+            </p>
           </div>
         </CardContent>
       </Card>

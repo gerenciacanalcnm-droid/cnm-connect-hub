@@ -33,10 +33,7 @@ export function configureAuthTokenProvider(fn: () => string | null) {
   authTokenProvider = fn;
 }
 
-export async function apiRequest<T>(
-  path: string,
-  options: RequestOptions = {},
-): Promise<T> {
+export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { body, auth = true, headers, ...rest } = options;
 
   const finalHeaders: HeadersInit = {
@@ -76,8 +73,7 @@ export async function apiRequest<T>(
 }
 
 export const api = {
-  get: <T>(path: string, opts?: RequestOptions) =>
-    apiRequest<T>(path, { ...opts, method: "GET" }),
+  get: <T>(path: string, opts?: RequestOptions) => apiRequest<T>(path, { ...opts, method: "GET" }),
   post: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
     apiRequest<T>(path, { ...opts, method: "POST", body }),
   put: <T>(path: string, body?: unknown, opts?: RequestOptions) =>

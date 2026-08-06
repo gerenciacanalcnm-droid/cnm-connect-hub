@@ -1,13 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function Loader({
-  className,
-  label,
-}: {
-  className?: string;
-  label?: string;
-}) {
+export function Loader({ className, label }: { className?: string; label?: string }) {
   return (
     <div
       className={cn(

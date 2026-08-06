@@ -33,10 +33,19 @@ export function EmailMarketing() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard label="Enviados" value={String(email?.sent ?? 0)} icon={Send} />
-        <KpiCard label="Entregados" value={String(email?.delivered ?? 0)} icon={Mail} tone="success" />
+        <KpiCard
+          label="Entregados"
+          value={String(email?.delivered ?? 0)}
+          icon={Mail}
+          tone="success"
+        />
         <KpiCard label="Aperturas" value={String(email?.read ?? 0)} icon={BarChart3} tone="info" />
-        <KpiCard label="Fallidos" value={String(email?.failed ?? 0)} icon={Workflow} tone="warning" />
-
+        <KpiCard
+          label="Fallidos"
+          value={String(email?.failed ?? 0)}
+          icon={Workflow}
+          tone="warning"
+        />
       </div>
 
       <Tabs defaultValue="campanas">

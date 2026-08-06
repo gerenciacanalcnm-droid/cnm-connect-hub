@@ -10,7 +10,10 @@ export const Route = createFileRoute("/_app/api")({
   head: () => ({
     meta: [
       { title: "API Center · SMS CNM" },
-      { name: "description", content: "API keys, webhooks, logs y documentación de la API SMS CNM." },
+      {
+        name: "description",
+        content: "API keys, webhooks, logs y documentación de la API SMS CNM.",
+      },
     ],
   }),
   component: ApiPage,
@@ -30,10 +33,18 @@ function ApiPage() {
           <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
-        <TabsContent value="docs"><ApiDocs /></TabsContent>
-        <TabsContent value="keys"><ApiKeysTable /></TabsContent>
-        <TabsContent value="webhooks"><WebhooksTable /></TabsContent>
-        <TabsContent value="logs"><ApiLogsTable /></TabsContent>
+        <TabsContent value="docs">
+          <ApiDocs />
+        </TabsContent>
+        <TabsContent value="keys">
+          <ApiKeysTable />
+        </TabsContent>
+        <TabsContent value="webhooks">
+          <WebhooksTable />
+        </TabsContent>
+        <TabsContent value="logs">
+          <ApiLogsTable />
+        </TabsContent>
       </Tabs>
     </div>
   );

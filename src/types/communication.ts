@@ -19,12 +19,7 @@ export type WhatsAppAccountStatus =
   | "error"
   | "suspended";
 
-export type WhatsAppDepartment =
-  | "ventas"
-  | "soporte"
-  | "cobranza"
-  | "marketing"
-  | "general";
+export type WhatsAppDepartment = "ventas" | "soporte" | "cobranza" | "marketing" | "general";
 
 export const DEPARTMENT_LABEL: Record<WhatsAppDepartment, string> = {
   ventas: "Ventas",
@@ -67,11 +62,7 @@ export interface WhatsAppAccountInput {
   isPrimary?: boolean;
 }
 
-export type CommunicationTemplateStatus =
-  | "draft"
-  | "pending"
-  | "approved"
-  | "rejected";
+export type CommunicationTemplateStatus = "draft" | "pending" | "approved" | "rejected";
 
 export interface CommunicationTemplate {
   id: ID;
@@ -109,12 +100,7 @@ export interface Conversation {
   createdAt: string;
 }
 
-export type ConversationMessageKind =
-  | "text"
-  | "image"
-  | "audio"
-  | "video"
-  | "document";
+export type ConversationMessageKind = "text" | "image" | "audio" | "video" | "document";
 
 export interface ConversationMessage {
   id: ID;

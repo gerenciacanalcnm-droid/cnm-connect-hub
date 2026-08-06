@@ -54,10 +54,7 @@ export function CommandPalette() {
     setTimeout(fn, 50);
   }
 
-  const filteredContacts = useMemo(
-    () => contacts.slice(0, 5),
-    [contacts],
-  );
+  const filteredContacts = useMemo(() => contacts.slice(0, 5), [contacts]);
   const filteredCampaigns = useMemo(() => campaigns.slice(0, 5), [campaigns]);
   const filteredInvoices = useMemo(() => invoices.slice(0, 5), [invoices]);
   const filteredSms = useMemo(() => sms.slice(0, 5), [sms]);
@@ -91,17 +88,19 @@ export function CommandPalette() {
         <CommandSeparator />
 
         <CommandGroup heading="Navegación">
-          {primaryNavigation.flatMap((s) => s.items).map((item) => (
-            <CommandItem
-              key={item.to}
-              value={`nav ${item.title} ${item.to}`}
-              onSelect={() => run(() => navigate({ to: item.to }))}
-            >
-              <item.icon className="mr-2 h-4 w-4" />
-              {item.title}
-              <span className="ml-auto text-xs text-muted-foreground">{item.to}</span>
-            </CommandItem>
-          ))}
+          {primaryNavigation
+            .flatMap((s) => s.items)
+            .map((item) => (
+              <CommandItem
+                key={item.to}
+                value={`nav ${item.title} ${item.to}`}
+                onSelect={() => run(() => navigate({ to: item.to }))}
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.title}
+                <span className="ml-auto text-xs text-muted-foreground">{item.to}</span>
+              </CommandItem>
+            ))}
         </CommandGroup>
 
         {filteredContacts.length > 0 && (

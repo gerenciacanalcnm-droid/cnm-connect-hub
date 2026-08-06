@@ -14,7 +14,13 @@ const CNM = "00000000-0000-4000-8000-000000000001";
 export const userService: UserService = {
   async list() {
     const { profiles, roles } = (await listUsers()) as {
-      profiles: { id: string; email: string | null; full_name: string | null; avatar_url: string | null; created_at: string }[];
+      profiles: {
+        id: string;
+        email: string | null;
+        full_name: string | null;
+        avatar_url: string | null;
+        created_at: string;
+      }[];
       roles: { user_id: string; role: string }[];
     };
     const rolesByUser = new Map<string, Role[]>();

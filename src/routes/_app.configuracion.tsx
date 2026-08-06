@@ -30,10 +30,18 @@ function ConfiguracionPage() {
           <TabsTrigger value="preferencias">Preferencias</TabsTrigger>
           <TabsTrigger value="canales">Canales</TabsTrigger>
         </TabsList>
-        <TabsContent value="perfil"><ProfileSettings /></TabsContent>
-        <TabsContent value="seguridad"><SecuritySettings /></TabsContent>
-        <TabsContent value="preferencias"><PreferencesSettings /></TabsContent>
-        <TabsContent value="canales"><WhatsAppChannelConfig /></TabsContent>
+        <TabsContent value="perfil">
+          <ProfileSettings />
+        </TabsContent>
+        <TabsContent value="seguridad">
+          <SecuritySettings />
+        </TabsContent>
+        <TabsContent value="preferencias">
+          <PreferencesSettings />
+        </TabsContent>
+        <TabsContent value="canales">
+          <WhatsAppChannelConfig />
+        </TabsContent>
       </Tabs>
     </div>
   );

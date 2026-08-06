@@ -1,4 +1,6 @@
-const NOT_CONNECTED = new Error("Próximamente: el módulo de soporte se conectará en la siguiente fase.");
+const NOT_CONNECTED = new Error(
+  "Próximamente: el módulo de soporte se conectará en la siguiente fase.",
+);
 
 export interface SupportTicket {
   id: string;
@@ -13,6 +15,10 @@ export interface SupportService {
 }
 
 export const supportService: SupportService = {
-  async listTickets() { return []; },
-  async createTicket() { throw NOT_CONNECTED; },
+  async listTickets() {
+    return [];
+  },
+  async createTicket() {
+    throw NOT_CONNECTED;
+  },
 };

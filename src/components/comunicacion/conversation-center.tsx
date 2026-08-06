@@ -26,7 +26,11 @@ import {
 } from "@/components/ui/select";
 import { EmptyState } from "@/components/common/empty-state";
 import { Loader } from "@/components/common/loader";
-import { useConversations, useConversationMessages, useUpdateConversation } from "@/hooks/use-communication";
+import {
+  useConversations,
+  useConversationMessages,
+  useUpdateConversation,
+} from "@/hooks/use-communication";
 import type { CommunicationChannel, Conversation, ConversationStatus } from "@/types/communication";
 import { cn } from "@/lib/utils";
 
@@ -86,7 +90,9 @@ export function ConversationCenter() {
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Select value={channel} onValueChange={(v) => setChannel(v as typeof channel)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los canales</SelectItem>
                 <SelectItem value="sms">SMS</SelectItem>
@@ -95,7 +101,9 @@ export function ConversationCenter() {
               </SelectContent>
             </Select>
             <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="open">Abiertas</SelectItem>
@@ -108,7 +116,9 @@ export function ConversationCenter() {
         </div>
         <ScrollArea className="h-[420px] lg:h-[560px]">
           {isLoading ? (
-            <div className="p-6"><Loader /></div>
+            <div className="p-6">
+              <Loader />
+            </div>
           ) : conversations.length === 0 ? (
             <div className="p-6">
               <EmptyState
@@ -157,16 +167,24 @@ export function ConversationCenter() {
               </div>
               <div className="flex items-center gap-2">
                 {active.tags.map((t) => (
-                  <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
+                  <Badge key={t} variant="secondary" className="text-[10px]">
+                    {t}
+                  </Badge>
                 ))}
                 <Select
                   value={active.status}
-                  onValueChange={(v) => updateConv.mutate({ id: active.id, status: v as ConversationStatus })}
+                  onValueChange={(v) =>
+                    updateConv.mutate({ id: active.id, status: v as ConversationStatus })
+                  }
                 >
-                  <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-8 w-[140px] text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {(Object.keys(STATUS_LABEL) as ConversationStatus[]).map((s) => (
-                      <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>
+                      <SelectItem key={s} value={s}>
+                        {STATUS_LABEL[s]}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -183,7 +201,10 @@ export function ConversationCenter() {
                   {messages.map((m) => (
                     <div
                       key={m.id}
-                      className={cn("flex", m.direction === "outbound" ? "justify-end" : "justify-start")}
+                      className={cn(
+                        "flex",
+                        m.direction === "outbound" ? "justify-end" : "justify-start",
+                      )}
                     >
                       <div
                         className={cn(

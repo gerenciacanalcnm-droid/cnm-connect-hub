@@ -89,10 +89,7 @@ export const deleteWhatsAppAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
-      .from("whatsapp_accounts")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("whatsapp_accounts").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -149,10 +146,7 @@ export const deleteWhatsAppTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
-      .from("whatsapp_templates")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("whatsapp_templates").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

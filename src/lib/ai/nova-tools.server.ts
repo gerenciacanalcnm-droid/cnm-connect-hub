@@ -59,7 +59,9 @@ export const NOVA_TOOL_IMPLS: Record<string, NovaToolImpl> = {
     async run({ supabase, companyId }, args) {
       let q = supabase
         .from("campaigns")
-        .select("name, channel, status, total_recipients, total_sent, total_delivered, total_failed, cost, scheduled_at, created_at")
+        .select(
+          "name, channel, status, total_recipients, total_sent, total_delivered, total_failed, cost, scheduled_at, created_at",
+        )
         .eq("company_id", companyId)
         .order("created_at", { ascending: false })
         .limit(Math.min(Number(args["limit"] ?? 10), 25));
@@ -85,11 +87,13 @@ export const NOVA_TOOL_IMPLS: Record<string, NovaToolImpl> = {
         .limit(Math.min(Number(args["limit"] ?? 10), 25));
       const search = args["search"];
       if (typeof search === "string" && search.trim()) {
-        q = q.or(`phone.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`);
+        q = q.or(
+          `phone.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`,
+        );
       }
       if (typeof args["tag"] === "string") q = q.contains("tags", [args["tag"]]);
       const { data, count } = await q;
-      return { contacts: data ?? [], count: count ?? (data?.length ?? 0) };
+      return { contacts: data ?? [], count: count ?? data?.length ?? 0 };
     },
   },
 
@@ -98,8 +102,15 @@ export const NOVA_TOOL_IMPLS: Record<string, NovaToolImpl> = {
     parameters: obj({}),
     async run({ supabase, companyId }) {
       const [groups, contacts] = await Promise.all([
-        supabase.from("contact_groups").select("name, description").eq("company_id", companyId).limit(20),
-        supabase.from("contacts").select("id", { count: "exact", head: true }).eq("company_id", companyId),
+        supabase
+          .from("contact_groups")
+          .select("name, description")
+          .eq("company_id", companyId)
+          .limit(20),
+        supabase
+          .from("contacts")
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", companyId),
       ]);
       return { groups: groups.data ?? [], totalContacts: contacts.count ?? 0 };
     },
@@ -111,9 +122,18 @@ export const NOVA_TOOL_IMPLS: Record<string, NovaToolImpl> = {
     async run({ supabase, companyId }) {
       const [company, campaigns, contacts, sms] = await Promise.all([
         supabase.from("companies").select("balance, currency").eq("id", companyId).maybeSingle(),
-        supabase.from("campaigns").select("id", { count: "exact", head: true }).eq("company_id", companyId),
-        supabase.from("contacts").select("id", { count: "exact", head: true }).eq("company_id", companyId),
-        supabase.from("sms_messages").select("id", { count: "exact", head: true }).eq("company_id", companyId),
+        supabase
+          .from("campaigns")
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", companyId),
+        supabase
+          .from("contacts")
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", companyId),
+        supabase
+          .from("sms_messages")
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", companyId),
       ]);
       return {
         balance: company.data?.balance ?? 0,
@@ -253,7 +273,9 @@ export const NOVA_TOOL_IMPLS: Record<string, NovaToolImpl> = {
     async run({ supabase, companyId }, args) {
       let q = supabase
         .from("recharges")
-        .select("amount, currency, status, payment_method, payment_reference, created_at, completed_at")
+        .select(
+          "amount, currency, status, payment_method, payment_reference, created_at, completed_at",
+        )
         .eq("company_id", companyId)
         .order("created_at", { ascending: false })
         .limit(10);
@@ -273,7 +295,9 @@ export const NOVA_TOOL_IMPLS: Record<string, NovaToolImpl> = {
       const limit = Math.min(Number(args["limit"] ?? 10) || 10, 25);
       let q = supabase
         .from("whatsapp_conversations")
-        .select("id, contact_name, contact_phone, status, unread_count, last_message_at, last_message_preview")
+        .select(
+          "id, contact_name, contact_phone, status, unread_count, last_message_at, last_message_preview",
+        )
         .eq("company_id", companyId)
         .order("last_message_at", { ascending: false })
         .limit(limit);
@@ -305,7 +329,9 @@ export const NOVA_TOOL_IMPLS: Record<string, NovaToolImpl> = {
       const limit = Math.min(Number(args["limit"] ?? 10) || 10, 25);
       const { data } = await supabase
         .from("whatsapp_campaigns")
-        .select("id, name, status, scheduled_at, total_recipients, total_sent, total_delivered, total_read, total_failed, cost")
+        .select(
+          "id, name, status, scheduled_at, total_recipients, total_sent, total_delivered, total_read, total_failed, cost",
+        )
         .eq("company_id", companyId)
         .order("created_at", { ascending: false })
         .limit(limit);
@@ -315,17 +341,31 @@ export const NOVA_TOOL_IMPLS: Record<string, NovaToolImpl> = {
 
   send_sms: {
     code: "send_sms",
-    parameters: obj({ phone: str("Teléfono destino."), body: str("Mensaje a enviar.") }, ["phone", "body"]),
+    parameters: obj({ phone: str("Teléfono destino."), body: str("Mensaje a enviar.") }, [
+      "phone",
+      "body",
+    ]),
     async run() {
-      return { ok: false, reason: "El envío de SMS estará disponible al conectar el proveedor. Informa esto al usuario." };
+      return {
+        ok: false,
+        reason:
+          "El envío de SMS estará disponible al conectar el proveedor. Informa esto al usuario.",
+      };
     },
   },
 
   send_whatsapp: {
     code: "send_whatsapp",
-    parameters: obj({ phone: str("Teléfono destino."), body: str("Mensaje a enviar.") }, ["phone", "body"]),
+    parameters: obj({ phone: str("Teléfono destino."), body: str("Mensaje a enviar.") }, [
+      "phone",
+      "body",
+    ]),
     async run() {
-      return { ok: false, reason: "El envío de WhatsApp estará disponible al conectar el proveedor. Informa esto al usuario." };
+      return {
+        ok: false,
+        reason:
+          "El envío de WhatsApp estará disponible al conectar el proveedor. Informa esto al usuario.",
+      };
     },
   },
 };

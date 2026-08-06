@@ -9,7 +9,6 @@ import {
   MessageSquare,
   Radio,
   Share2,
-
   Smartphone,
   Sparkles,
   Store,
@@ -55,9 +54,7 @@ export function FeaturesSection() {
     <section id="funciones" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Funciones
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Funciones</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
             Todo lo que necesitas para escalar tu comunicación.
           </h2>
@@ -87,9 +84,7 @@ export function FeaturesSection() {
                 >
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="mt-4 text-base font-semibold text-foreground">
-                  {f.title}
-                </h3>
+                <h3 className="mt-4 text-base font-semibold text-foreground">{f.title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                   {f.description}
                 </p>

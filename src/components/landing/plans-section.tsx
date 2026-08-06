@@ -5,10 +5,21 @@ import { formatCurrency, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { LandingPlan, LandingPlanBadge } from "@/config/landing-content";
 
-const BADGES: Record<Exclude<LandingPlanBadge, null>, { label: string; icon: typeof Sparkles; className: string }> = {
-  "top-seller": { label: "Más vendido", icon: Sparkles, className: "bg-primary text-primary-foreground" },
+const BADGES: Record<
+  Exclude<LandingPlanBadge, null>,
+  { label: string; icon: typeof Sparkles; className: string }
+> = {
+  "top-seller": {
+    label: "Más vendido",
+    icon: Sparkles,
+    className: "bg-primary text-primary-foreground",
+  },
   "best-price": { label: "Mejor precio", icon: Trophy, className: "gradient-nova text-white" },
-  "best-saving": { label: "Mayor ahorro", icon: TrendingDown, className: "bg-success text-success-foreground" },
+  "best-saving": {
+    label: "Mayor ahorro",
+    icon: TrendingDown,
+    className: "bg-success text-success-foreground",
+  },
 };
 
 function PlanCard({ plan, index }: { plan: LandingPlan; index: number }) {
@@ -23,13 +34,16 @@ function PlanCard({ plan, index }: { plan: LandingPlan; index: number }) {
       transition={{ delay: index * 0.04, duration: 0.4 }}
       className={cn(
         "relative flex flex-col rounded-2xl border bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg",
-        highlight
-          ? "border-primary/50 ring-1 ring-primary/30"
-          : "border-border/70",
+        highlight ? "border-primary/50 ring-1 ring-primary/30" : "border-border/70",
       )}
     >
       {Badge && (
-        <div className={cn("absolute -top-3 right-4 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider shadow-sm", Badge.className)}>
+        <div
+          className={cn(
+            "absolute -top-3 right-4 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider shadow-sm",
+            Badge.className,
+          )}
+        >
           <Badge.icon className="h-3 w-3" />
           {Badge.label}
         </div>
@@ -79,9 +93,7 @@ export function PlansSection() {
     <section id="planes" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Planes
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Planes</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
             Precios por volumen, sin sorpresas.
           </h2>

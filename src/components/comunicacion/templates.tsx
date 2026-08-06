@@ -5,12 +5,48 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 const TEMPLATES = [
-  { id: "1", name: "OTP Login", category: "Verificación", body: "Tu código de acceso es {{codigo}}. Válido por 5 minutos.", used: 12480 },
-  { id: "2", name: "Recordatorio cita", category: "Recordatorios", body: "Hola {{nombre}}, te esperamos mañana a las {{hora}}. Responde SI para confirmar.", used: 4210 },
-  { id: "3", name: "Promo Black Friday", category: "Marketing", body: "{{nombre}}, 30% OFF hoy en {{tienda}}. Compra: {{url}}", used: 8104 },
-  { id: "4", name: "Envío en camino", category: "Notificaciones", body: "Tu pedido #{{orden}} está en camino. Rastréalo: {{url}}", used: 6820 },
-  { id: "5", name: "Encuesta NPS", category: "Feedback", body: "¿Nos recomendarías del 0 al 10? Responde con el número.", used: 1560 },
-  { id: "6", name: "Recuperación carrito", category: "Marketing", body: "{{nombre}}, olvidaste algo. Termina tu compra: {{url}}", used: 2340 },
+  {
+    id: "1",
+    name: "OTP Login",
+    category: "Verificación",
+    body: "Tu código de acceso es {{codigo}}. Válido por 5 minutos.",
+    used: 12480,
+  },
+  {
+    id: "2",
+    name: "Recordatorio cita",
+    category: "Recordatorios",
+    body: "Hola {{nombre}}, te esperamos mañana a las {{hora}}. Responde SI para confirmar.",
+    used: 4210,
+  },
+  {
+    id: "3",
+    name: "Promo Black Friday",
+    category: "Marketing",
+    body: "{{nombre}}, 30% OFF hoy en {{tienda}}. Compra: {{url}}",
+    used: 8104,
+  },
+  {
+    id: "4",
+    name: "Envío en camino",
+    category: "Notificaciones",
+    body: "Tu pedido #{{orden}} está en camino. Rastréalo: {{url}}",
+    used: 6820,
+  },
+  {
+    id: "5",
+    name: "Encuesta NPS",
+    category: "Feedback",
+    body: "¿Nos recomendarías del 0 al 10? Responde con el número.",
+    used: 1560,
+  },
+  {
+    id: "6",
+    name: "Recuperación carrito",
+    category: "Marketing",
+    body: "{{nombre}}, olvidaste algo. Termina tu compra: {{url}}",
+    used: 2340,
+  },
 ];
 
 export function Templates() {
@@ -32,7 +68,9 @@ export function Templates() {
                   </div>
                   <div>
                     <div className="font-medium leading-tight">{t.name}</div>
-                    <Badge variant="secondary" className="mt-1 text-[10px]">{t.category}</Badge>
+                    <Badge variant="secondary" className="mt-1 text-[10px]">
+                      {t.category}
+                    </Badge>
                   </div>
                 </div>
                 <div className="text-right text-xs text-muted-foreground">

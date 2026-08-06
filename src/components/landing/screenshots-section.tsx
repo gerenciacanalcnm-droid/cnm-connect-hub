@@ -26,7 +26,13 @@ const ICONS: Record<LandingScreenshot["surface"], LucideIcon> = {
   api: Code2,
 };
 
-function SurfaceMockup({ surface, title }: { surface: LandingScreenshot["surface"]; title: string }) {
+function SurfaceMockup({
+  surface,
+  title,
+}: {
+  surface: LandingScreenshot["surface"];
+  title: string;
+}) {
   const Icon = ICONS[surface];
   return (
     <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl border border-border/70 bg-background">
@@ -60,9 +66,7 @@ export function ScreenshotsSection() {
     <section className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Producto
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Producto</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
             Diseñado con obsesión por el detalle.
           </h2>
@@ -82,16 +86,14 @@ export function ScreenshotsSection() {
               <SurfaceMockup surface={current.surface} title={current.title} />
               <div className="mt-4 flex items-center justify-between gap-3 px-1">
                 <div>
-                  <div className="text-sm font-semibold text-foreground">
-                    {current.title}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {current.description}
-                  </div>
+                  <div className="text-sm font-semibold text-foreground">{current.title}</div>
+                  <div className="text-xs text-muted-foreground">{current.description}</div>
                 </div>
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => setIndex((i) => (i - 1 + screenshots.length) % screenshots.length)}
+                    onClick={() =>
+                      setIndex((i) => (i - 1 + screenshots.length) % screenshots.length)
+                    }
                     className="grid h-9 w-9 place-items-center rounded-lg border border-border bg-background text-foreground hover:bg-accent"
                     aria-label="Anterior"
                   >

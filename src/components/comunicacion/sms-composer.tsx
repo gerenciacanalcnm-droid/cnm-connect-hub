@@ -35,10 +35,13 @@ export function SmsComposer({
             <strong className="text-foreground">{s.units}</strong> / {s.cap} caracteres
           </span>
           <span>
-            Partes: <strong className={cn(warn && "text-amber-600 dark:text-amber-400")}>{s.parts}</strong>
+            Partes:{" "}
+            <strong className={cn(warn && "text-amber-600 dark:text-amber-400")}>{s.parts}</strong>
           </span>
         </div>
-        {warn && <span className="text-amber-600 dark:text-amber-400">Se enviará como {s.parts} SMS</span>}
+        {warn && (
+          <span className="text-amber-600 dark:text-amber-400">Se enviará como {s.parts} SMS</span>
+        )}
       </div>
     </div>
   );

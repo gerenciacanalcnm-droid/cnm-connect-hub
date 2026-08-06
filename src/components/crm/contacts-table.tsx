@@ -8,7 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
 } from "@/components/ui/sheet";
 import { useContacts } from "@/hooks/use-contacts";
 import type { Contact } from "@/types/contact";
@@ -30,9 +34,13 @@ export function ContactsTable() {
         accessorFn: (c) => `${c.firstName} ${c.lastName ?? ""}`,
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8"><AvatarFallback className="text-xs">{initials(row.original)}</AvatarFallback></Avatar>
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="text-xs">{initials(row.original)}</AvatarFallback>
+            </Avatar>
             <div className="min-w-0">
-              <div className="truncate font-medium">{row.original.firstName} {row.original.lastName}</div>
+              <div className="truncate font-medium">
+                {row.original.firstName} {row.original.lastName}
+              </div>
               <div className="truncate text-xs text-muted-foreground">{row.original.email}</div>
             </div>
           </div>
@@ -61,7 +69,9 @@ export function ContactsTable() {
         accessorKey: "status",
         header: "Estado",
         cell: ({ row }) => (
-          <Badge variant="outline" className="text-[10px] capitalize">{row.original.status}</Badge>
+          <Badge variant="outline" className="text-[10px] capitalize">
+            {row.original.status}
+          </Badge>
         ),
       },
       {
@@ -78,7 +88,9 @@ export function ContactsTable() {
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
             {row.original.tags.slice(0, 3).map((t) => (
-              <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
+              <Badge key={t} variant="secondary" className="text-[10px]">
+                {t}
+              </Badge>
             ))}
           </div>
         ),
@@ -116,17 +128,25 @@ export function ContactsTable() {
             <>
               <SheetHeader className="border-b border-border pb-4">
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12"><AvatarFallback>{initials(selected)}</AvatarFallback></Avatar>
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback>{initials(selected)}</AvatarFallback>
+                  </Avatar>
                   <div>
-                    <SheetTitle>{selected.firstName} {selected.lastName}</SheetTitle>
+                    <SheetTitle>
+                      {selected.firstName} {selected.lastName}
+                    </SheetTitle>
                     <SheetDescription>{selected.email}</SheetDescription>
                   </div>
                 </div>
               </SheetHeader>
               <div className="space-y-4 py-4">
                 <div className="flex gap-2">
-                  <Button size="sm" className="gap-1.5"><Phone className="h-3.5 w-3.5" /> Llamar</Button>
-                  <Button size="sm" variant="outline" className="gap-1.5"><Mail className="h-3.5 w-3.5" /> Email</Button>
+                  <Button size="sm" className="gap-1.5">
+                    <Phone className="h-3.5 w-3.5" /> Llamar
+                  </Button>
+                  <Button size="sm" variant="outline" className="gap-1.5">
+                    <Mail className="h-3.5 w-3.5" /> Email
+                  </Button>
                 </div>
                 <div className="rounded-lg border border-border p-3 text-sm">
                   <div className="text-xs uppercase text-muted-foreground">Teléfono</div>
@@ -135,7 +155,11 @@ export function ContactsTable() {
                 <div>
                   <div className="mb-2 text-xs uppercase text-muted-foreground">Etiquetas</div>
                   <div className="flex flex-wrap gap-1">
-                    {selected.tags.map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
+                    {selected.tags.map((t) => (
+                      <Badge key={t} variant="secondary">
+                        {t}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               </div>

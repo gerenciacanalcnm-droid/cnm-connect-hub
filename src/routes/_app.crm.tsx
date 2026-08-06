@@ -30,10 +30,18 @@ function CrmPage() {
           <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
         </TabsList>
-        <TabsContent value="contactos"><ContactsTable /></TabsContent>
-        <TabsContent value="segmentos"><Segments /></TabsContent>
-        <TabsContent value="pipeline"><Pipeline /></TabsContent>
-        <TabsContent value="timeline"><UnifiedTimeline /></TabsContent>
+        <TabsContent value="contactos">
+          <ContactsTable />
+        </TabsContent>
+        <TabsContent value="segmentos">
+          <Segments />
+        </TabsContent>
+        <TabsContent value="pipeline">
+          <Pipeline />
+        </TabsContent>
+        <TabsContent value="timeline">
+          <UnifiedTimeline />
+        </TabsContent>
       </Tabs>
     </div>
   );

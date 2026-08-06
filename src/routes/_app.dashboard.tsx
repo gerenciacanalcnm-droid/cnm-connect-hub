@@ -20,14 +20,8 @@ import {
 import { motion } from "framer-motion";
 import { NovaHero } from "@/components/common/nova-hero";
 import { KpiCard } from "@/components/common/kpi-card";
-import {
-  QuickActionButton,
-  type QuickAction,
-} from "@/components/common/quick-action";
-import {
-  ActivityTimeline,
-  type TimelineItem,
-} from "@/components/common/activity-timeline";
+import { QuickActionButton, type QuickAction } from "@/components/common/quick-action";
+import { ActivityTimeline, type TimelineItem } from "@/components/common/activity-timeline";
 import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/store/ui-store";
 
@@ -58,7 +52,12 @@ function DashboardPage() {
   const quickActions: QuickAction[] = [
     { label: "Enviar SMS", description: "Mensaje rápido", icon: Send, tone: "primary" },
     { label: "Crear campaña", description: "Nuevo envío masivo", icon: Rocket, tone: "nova" },
-    { label: "Importar Excel", description: "Cargar contactos", icon: FileSpreadsheet, tone: "info" },
+    {
+      label: "Importar Excel",
+      description: "Cargar contactos",
+      icon: FileSpreadsheet,
+      tone: "info",
+    },
     { label: "Nuevo cliente", description: "Añadir al CRM", icon: UserPlus, tone: "success" },
     { label: "Ir al CRM", description: "Gestionar contactos", icon: Users, tone: "neutral" },
     { label: "Recargar saldo", description: "Añadir créditos", icon: CreditCard, tone: "primary" },
@@ -139,11 +138,7 @@ function DashboardPage() {
       </motion.header>
 
       {/* CNM Nova hero */}
-      <NovaHero
-        greeting={getGreeting()}
-        userName="Nicolás"
-        onOpenNova={() => setNovaOpen(true)}
-      />
+      <NovaHero greeting={getGreeting()} userName="Nicolás" onOpenNova={() => setNovaOpen(true)} />
 
       {/* KPIs */}
       <section aria-labelledby="kpis-title">
@@ -154,9 +149,7 @@ function DashboardPage() {
           >
             Indicadores clave
           </h2>
-          <span className="text-[11px] text-muted-foreground">
-            Últimos 30 días
-          </span>
+          <span className="text-[11px] text-muted-foreground">Últimos 30 días</span>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <KpiCard
@@ -250,9 +243,7 @@ function DashboardPage() {
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               Acciones rápidas
             </h2>
-            <span className="text-[11px] text-muted-foreground">
-              Atajos frecuentes
-            </span>
+            <span className="text-[11px] text-muted-foreground">Atajos frecuentes</span>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {quickActions.map((a, i) => (
@@ -272,9 +263,7 @@ function DashboardPage() {
               <div className="grid h-7 w-7 place-items-center rounded-md bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
                 <Sparkles className="h-3.5 w-3.5" />
               </div>
-              <h2 className="text-sm font-semibold text-foreground">
-                Actividad reciente
-              </h2>
+              <h2 className="text-sm font-semibold text-foreground">Actividad reciente</h2>
             </div>
             <button
               type="button"

@@ -1,4 +1,11 @@
-import { Instagram, Linkedin, MessageCircle, Twitter, Youtube, type LucideIcon } from "lucide-react";
+import {
+  Instagram,
+  Linkedin,
+  MessageCircle,
+  Twitter,
+  Youtube,
+  type LucideIcon,
+} from "lucide-react";
 import { useLandingContent } from "@/hooks/use-landing-content";
 
 const SOCIAL_ICONS: Record<string, LucideIcon> = {
@@ -22,9 +29,7 @@ export function LandingFooter() {
               className="h-9 w-auto"
               loading="lazy"
             />
-            <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-              {footer.tagline}
-            </p>
+            <p className="mt-4 max-w-sm text-sm text-muted-foreground">{footer.tagline}</p>
             <div className="mt-5 flex items-center gap-2">
               {footer.social.map((s) => {
                 const Icon = SOCIAL_ICONS[s.kind] ?? MessageCircle;
