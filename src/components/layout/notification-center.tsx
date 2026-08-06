@@ -87,7 +87,9 @@ export function NotificationCenter() {
               <div className="grid h-12 w-12 place-items-center rounded-full bg-muted">
                 <Sparkles className="h-5 w-5 text-muted-foreground" />
               </div>
-              <p className="text-sm text-muted-foreground">Estás al día. Sin notificaciones nuevas.</p>
+              <p className="text-sm text-muted-foreground">
+                Estás al día. Sin notificaciones nuevas.
+              </p>
             </div>
           ) : (
             <ul className="divide-y divide-border">
@@ -101,18 +103,28 @@ export function NotificationCenter() {
                       !n.read && "bg-primary/5",
                     )}
                   >
-                    <span className={cn("mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-background ring-1 ring-border", className)}>
+                    <span
+                      className={cn(
+                        "mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-background ring-1 ring-border",
+                        className,
+                      )}
+                    >
                       <Icon className="h-3.5 w-3.5" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <p className="truncate text-sm font-medium text-foreground">{n.title}</p>
-                        {!n.read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
+                        {!n.read && (
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                        )}
                       </div>
                       <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.body}</p>
                       <div className="mt-2 flex items-center justify-between gap-2">
                         <span className="text-[11px] text-muted-foreground">
-                          {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: es })}
+                          {formatDistanceToNow(new Date(n.createdAt), {
+                            addSuffix: true,
+                            locale: es,
+                          })}
                         </span>
                         {!n.read && (
                           <button

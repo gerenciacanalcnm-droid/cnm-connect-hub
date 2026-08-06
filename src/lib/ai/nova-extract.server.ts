@@ -4,9 +4,26 @@
  */
 import { engineChat, type NovaEngineConfig } from "./nova-engine.server";
 
-export const TEXT_EXTENSIONS = ["txt", "md", "markdown", "csv", "json", "html", "htm", "xml", "log"];
+export const TEXT_EXTENSIONS = [
+  "txt",
+  "md",
+  "markdown",
+  "csv",
+  "json",
+  "html",
+  "htm",
+  "xml",
+  "log",
+];
 export const AI_EXTRACT_EXTENSIONS = ["pdf"];
-export const KNOWN_EXTENSIONS = [...TEXT_EXTENSIONS, ...AI_EXTRACT_EXTENSIONS, "doc", "docx", "xls", "xlsx"];
+export const KNOWN_EXTENSIONS = [
+  ...TEXT_EXTENSIONS,
+  ...AI_EXTRACT_EXTENSIONS,
+  "doc",
+  "docx",
+  "xls",
+  "xlsx",
+];
 
 export function extensionOf(name: string): string {
   return name.split(".").pop()?.toLowerCase() ?? "";
@@ -27,7 +44,10 @@ export function stripHtml(html: string): string {
 
 /** Trocea el texto en fragmentos con solapamiento, respetando párrafos. */
 export function chunkText(text: string, size = 1200, overlap = 150): string[] {
-  const clean = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  const clean = text
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
   if (!clean) return [];
   const paragraphs = clean.split(/\n\n+/);
   const chunks: string[] = [];

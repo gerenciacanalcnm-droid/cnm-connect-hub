@@ -18,7 +18,9 @@ function RecargasPage() {
           </div>
           <div>
             <p className="text-sm font-medium">Próximamente</p>
-            <p className="text-xs text-muted-foreground">Las solicitudes de recarga aparecerán aquí cuando el módulo de pagos esté conectado.</p>
+            <p className="text-xs text-muted-foreground">
+              Las solicitudes de recarga aparecerán aquí cuando el módulo de pagos esté conectado.
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -44,9 +44,7 @@ export function DashboardMockup({ className }: { className?: string }) {
             <div className="grid h-6 w-6 place-items-center rounded-md gradient-brand text-[10px] font-bold text-primary-foreground">
               C
             </div>
-            <span className="text-[11px] font-semibold text-sidebar-foreground">
-              SMS CNM
-            </span>
+            <span className="text-[11px] font-semibold text-sidebar-foreground">SMS CNM</span>
           </div>
           <div className="mt-3 space-y-0.5">
             {[
@@ -113,9 +111,7 @@ export function DashboardMockup({ className }: { className?: string }) {
                     {k.delta}
                   </span>
                 </div>
-                <div className="mt-1 text-[13px] font-semibold text-foreground">
-                  {k.value}
-                </div>
+                <div className="mt-1 text-[13px] font-semibold text-foreground">{k.value}</div>
                 {/* Sparkline */}
                 <svg viewBox="0 0 100 24" className="mt-1.5 h-6 w-full">
                   <defs>
@@ -146,9 +142,7 @@ export function DashboardMockup({ className }: { className?: string }) {
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Envíos últimos 7 días
                 </div>
-                <div className="mt-0.5 text-sm font-semibold text-foreground">
-                  248.930
-                </div>
+                <div className="mt-0.5 text-sm font-semibold text-foreground">248.930</div>
               </div>
               <div className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-background px-2 py-1 text-[10px] text-muted-foreground">
                 <Send className="h-3 w-3" />

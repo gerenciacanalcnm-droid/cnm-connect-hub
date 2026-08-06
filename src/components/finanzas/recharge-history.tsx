@@ -18,25 +18,54 @@ export function RechargeHistory() {
   const columns = useMemo<ColumnDef<Recharge>[]>(
     () => [
       {
-        accessorKey: "createdAt", header: "Fecha",
-        cell: ({ row }) => new Date(row.original.createdAt).toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" }),
+        accessorKey: "createdAt",
+        header: "Fecha",
+        cell: ({ row }) =>
+          new Date(row.original.createdAt).toLocaleString("es-MX", {
+            dateStyle: "short",
+            timeStyle: "short",
+          }),
       },
-      { accessorKey: "reference", header: "Referencia", cell: ({ row }) => <span className="font-mono text-xs">{row.original.reference}</span> },
       {
-        accessorKey: "amount", header: "Monto",
-        cell: ({ row }) => <span className="font-semibold">{formatCurrency(row.original.amount, row.original.currency, "es-MX")}</span>,
+        accessorKey: "reference",
+        header: "Referencia",
+        cell: ({ row }) => <span className="font-mono text-xs">{row.original.reference}</span>,
       },
-      { accessorKey: "smsCredits", header: "SMS", cell: ({ row }) => formatNumber(row.original.smsCredits) },
       {
-        accessorKey: "method", header: "Método",
+        accessorKey: "amount",
+        header: "Monto",
+        cell: ({ row }) => (
+          <span className="font-semibold">
+            {formatCurrency(row.original.amount, row.original.currency, "es-MX")}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "smsCredits",
+        header: "SMS",
+        cell: ({ row }) => formatNumber(row.original.smsCredits),
+      },
+      {
+        accessorKey: "method",
+        header: "Método",
         cell: ({ row }) => {
           const Icon = METHOD_ICON[row.original.method];
-          return <span className="inline-flex items-center gap-1.5 text-sm"><Icon className="h-3.5 w-3.5 text-muted-foreground" />{METHOD_LABEL[row.original.method]}</span>;
+          return (
+            <span className="inline-flex items-center gap-1.5 text-sm">
+              <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+              {METHOD_LABEL[row.original.method]}
+            </span>
+          );
         },
       },
       {
-        accessorKey: "status", header: "Estado",
-        cell: ({ row }) => <StatusBadge status={row.original.status === "completed" ? "completed" : row.original.status} />,
+        accessorKey: "status",
+        header: "Estado",
+        cell: ({ row }) => (
+          <StatusBadge
+            status={row.original.status === "completed" ? "completed" : row.original.status}
+          />
+        ),
       },
     ],
     [],

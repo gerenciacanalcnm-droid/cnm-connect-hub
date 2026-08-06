@@ -1,0 +1,4 @@
+UPDATE public.settings
+SET value = '[{"id":"in1","name":"Infobip","category":"sms","enabled":true,"status":"connected"},{"id":"in2","name":"Twilio","category":"sms","enabled":false,"status":"disconnected"},{"id":"in3","name":"Meta WhatsApp","category":"whatsapp","enabled":false,"status":"disconnected"},{"id":"in4","name":"Amazon SES","category":"email","enabled":false,"status":"disconnected"},{"id":"in5","name":"HubSpot","category":"crm","enabled":false,"status":"disconnected"},{"id":"in6","name":"Google Analytics 4","category":"analytics","enabled":true,"status":"connected"}]'::jsonb,
+    updated_at = now()
+WHERE company_id IS NULL AND namespace = 'admin' AND key = 'integrations';

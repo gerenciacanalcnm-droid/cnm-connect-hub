@@ -28,9 +28,15 @@ function SoportePage() {
           <TabsTrigger value="ayuda">Centro de ayuda</TabsTrigger>
           <TabsTrigger value="estado">Estado del servicio</TabsTrigger>
         </TabsList>
-        <TabsContent value="tickets"><SupportTickets /></TabsContent>
-        <TabsContent value="ayuda"><HelpCenter /></TabsContent>
-        <TabsContent value="estado"><ServiceStatus /></TabsContent>
+        <TabsContent value="tickets">
+          <SupportTickets />
+        </TabsContent>
+        <TabsContent value="ayuda">
+          <HelpCenter />
+        </TabsContent>
+        <TabsContent value="estado">
+          <ServiceStatus />
+        </TabsContent>
       </Tabs>
     </div>
   );

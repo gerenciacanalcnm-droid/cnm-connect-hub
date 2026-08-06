@@ -9,9 +9,24 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 
 const SESSIONS = [
-  { device: "MacBook Pro · Chrome", location: "Ciudad de México, MX", lastSeen: "Ahora", current: true },
-  { device: "iPhone 15 · Safari", location: "Ciudad de México, MX", lastSeen: "hace 2 horas", current: false },
-  { device: "Windows · Firefox", location: "Guadalajara, MX", lastSeen: "hace 3 días", current: false },
+  {
+    device: "MacBook Pro · Chrome",
+    location: "Ciudad de México, MX",
+    lastSeen: "Ahora",
+    current: true,
+  },
+  {
+    device: "iPhone 15 · Safari",
+    location: "Ciudad de México, MX",
+    lastSeen: "hace 2 horas",
+    current: false,
+  },
+  {
+    device: "Windows · Firefox",
+    location: "Guadalajara, MX",
+    lastSeen: "hace 3 días",
+    current: false,
+  },
 ];
 
 export function SecuritySettings() {
@@ -27,8 +42,13 @@ export function SecuritySettings() {
           <CardDescription>Cámbiala periódicamente para mantener tu cuenta segura.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-4 sm:grid-cols-3"
-            onSubmit={(e) => { e.preventDefault(); toast.success("Contraseña actualizada"); }}>
+          <form
+            className="grid gap-4 sm:grid-cols-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              toast.success("Contraseña actualizada");
+            }}
+          >
             <div className="space-y-1.5">
               <Label htmlFor="s-cur">Actual</Label>
               <Input id="s-cur" type="password" />
@@ -57,9 +77,17 @@ export function SecuritySettings() {
         <CardContent className="flex items-center justify-between">
           <div>
             <div className="font-medium">Aplicación autenticadora</div>
-            <div className="text-sm text-muted-foreground">Genera códigos temporales con Google Authenticator o 1Password.</div>
+            <div className="text-sm text-muted-foreground">
+              Genera códigos temporales con Google Authenticator o 1Password.
+            </div>
           </div>
-          <Switch checked={twoFA} onCheckedChange={(v) => { setTwoFA(v); toast.success(v ? "2FA activado" : "2FA desactivado"); }} />
+          <Switch
+            checked={twoFA}
+            onCheckedChange={(v) => {
+              setTwoFA(v);
+              toast.success(v ? "2FA activado" : "2FA desactivado");
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -75,13 +103,23 @@ export function SecuritySettings() {
               <div>
                 <div className="flex items-center gap-2 text-sm font-medium">
                   {s.device}
-                  {s.current && <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600">Actual</Badge>}
+                  {s.current && (
+                    <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600">
+                      Actual
+                    </Badge>
+                  )}
                 </div>
-                <div className="text-xs text-muted-foreground">{s.location} · {s.lastSeen}</div>
+                <div className="text-xs text-muted-foreground">
+                  {s.location} · {s.lastSeen}
+                </div>
               </div>
               {!s.current && (
-                <Button size="sm" variant="ghost" className="text-destructive"
-                  onClick={() => toast.success("Sesión cerrada")}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-destructive"
+                  onClick={() => toast.success("Sesión cerrada")}
+                >
                   Cerrar
                 </Button>
               )}

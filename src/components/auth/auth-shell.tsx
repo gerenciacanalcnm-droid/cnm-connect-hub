@@ -55,9 +55,8 @@ export function AuthShell({
               Con precisión de ingeniería.
             </h2>
             <p className="mt-4 max-w-md text-sm text-white/70">
-              Infraestructura de mensajería para equipos que no aceptan
-              interrupciones. Automatización, analítica y CNM Nova, en un solo
-              lugar.
+              Infraestructura de mensajería para equipos que no aceptan interrupciones.
+              Automatización, analítica y CNM Nova, en un solo lugar.
             </p>
           </div>
 
@@ -97,19 +96,13 @@ export function AuthShell({
                 {eyebrow}
               </p>
             )}
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-              {title}
-            </h1>
-            {description && (
-              <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-            )}
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">{title}</h1>
+            {description && <p className="mt-2 text-sm text-muted-foreground">{description}</p>}
 
             <div className="mt-8">{children}</div>
 
             {footer && (
-              <div className="mt-8 text-center text-sm text-muted-foreground">
-                {footer}
-              </div>
+              <div className="mt-8 text-center text-sm text-muted-foreground">{footer}</div>
             )}
           </div>
         </div>

@@ -11,15 +11,11 @@ type ThemeProviderState = {
 
 const STORAGE_KEY = "sms-cnm-theme";
 
-const ThemeProviderContext = createContext<ThemeProviderState | undefined>(
-  undefined,
-);
+const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
 
 function getSystemTheme(): ResolvedTheme {
   if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 export function ThemeProvider({
@@ -74,11 +70,7 @@ export function ThemeProvider({
     [theme, resolvedTheme],
   );
 
-  return (
-    <ThemeProviderContext.Provider value={value}>
-      {children}
-    </ThemeProviderContext.Provider>
-  );
+  return <ThemeProviderContext.Provider value={value}>{children}</ThemeProviderContext.Provider>;
 }
 
 export function useTheme() {

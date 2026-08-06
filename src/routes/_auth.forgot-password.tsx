@@ -52,7 +52,10 @@ function ForgotPage() {
           : "Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña."
       }
       footer={
-        <Link to="/login" className="inline-flex items-center gap-1 font-medium text-primary hover:underline">
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+        >
           <ArrowLeft className="h-3.5 w-3.5" /> Volver a iniciar sesión
         </Link>
       }
@@ -64,7 +67,10 @@ function ForgotPage() {
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             ¿No recibiste el correo?{" "}
-            <button className="font-medium text-primary hover:underline" onClick={() => setSent(null)}>
+            <button
+              className="font-medium text-primary hover:underline"
+              onClick={() => setSent(null)}
+            >
               Intentar de nuevo
             </button>
           </p>
@@ -73,7 +79,12 @@ function ForgotPage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="tu@empresa.com" {...form.register("email")} />
+            <Input
+              id="email"
+              type="email"
+              placeholder="tu@empresa.com"
+              {...form.register("email")}
+            />
             {form.formState.errors.email && (
               <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
             )}

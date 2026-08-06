@@ -34,13 +34,11 @@ export function ModulePlaceholder({
             <Icon className="h-6 w-6" />
           </div>
           <div className="max-w-xl space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight">
-              Módulo listo para desarrollo
-            </h2>
+            <h2 className="text-xl font-semibold tracking-tight">Módulo listo para desarrollo</h2>
             <p className="text-sm text-muted-foreground">
               La arquitectura base de <span className="font-medium text-foreground">{title}</span>{" "}
-              está preparada. Este módulo se construirá sobre el sistema de diseño,
-              rutas, autenticación y servicios comunes de SMS CNM.
+              está preparada. Este módulo se construirá sobre el sistema de diseño, rutas,
+              autenticación y servicios comunes de SMS CNM.
             </p>
           </div>
           <div className="grid w-full max-w-2xl gap-2 sm:grid-cols-2">

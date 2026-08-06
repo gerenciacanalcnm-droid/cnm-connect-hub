@@ -69,21 +69,46 @@ function ComunicacionPage() {
             <Settings2 className="h-3.5 w-3.5" /> Ajustes
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="enviar"><SendSms /></TabsContent>
-        <TabsContent value="masivo"><BulkSend /></TabsContent>
-        <TabsContent value="programar"><ScheduleSms /></TabsContent>
-        <TabsContent value="historial"><SmsHistory /></TabsContent>
-        <TabsContent value="plantillas"><Templates /></TabsContent>
-        <TabsContent value="unificadas"><UnifiedTemplates /></TabsContent>
-        <TabsContent value="grupos"><Groups /></TabsContent>
-        <TabsContent value="importar"><Importer /></TabsContent>
-        <TabsContent value="whatsapp"><WhatsAppAccounts /></TabsContent>
-        <TabsContent value="campanas"><CampaignsList /></TabsContent>
-        <TabsContent value="conversaciones"><ConversationCenter /></TabsContent>
-        <TabsContent value="email"><EmailMarketing /></TabsContent>
-        <TabsContent value="ajustes"><CommunicationSettings /></TabsContent>
+        <TabsContent value="enviar">
+          <SendSms />
+        </TabsContent>
+        <TabsContent value="masivo">
+          <BulkSend />
+        </TabsContent>
+        <TabsContent value="programar">
+          <ScheduleSms />
+        </TabsContent>
+        <TabsContent value="historial">
+          <SmsHistory />
+        </TabsContent>
+        <TabsContent value="plantillas">
+          <Templates />
+        </TabsContent>
+        <TabsContent value="unificadas">
+          <UnifiedTemplates />
+        </TabsContent>
+        <TabsContent value="grupos">
+          <Groups />
+        </TabsContent>
+        <TabsContent value="importar">
+          <Importer />
+        </TabsContent>
+        <TabsContent value="whatsapp">
+          <WhatsAppAccounts />
+        </TabsContent>
+        <TabsContent value="campanas">
+          <CampaignsList />
+        </TabsContent>
+        <TabsContent value="conversaciones">
+          <ConversationCenter />
+        </TabsContent>
+        <TabsContent value="email">
+          <EmailMarketing />
+        </TabsContent>
+        <TabsContent value="ajustes">
+          <CommunicationSettings />
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
-

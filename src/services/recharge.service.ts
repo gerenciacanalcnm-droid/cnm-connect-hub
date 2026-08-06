@@ -10,8 +10,16 @@ export interface RechargeService {
 }
 
 export const rechargeService: RechargeService = {
-  async list() { return []; },
-  async balance() { return { amount: 0, currency: "USD", smsCredits: 0 }; },
-  async packages() { return []; },
-  async purchase() { throw NOT_CONNECTED; },
+  async list() {
+    return [];
+  },
+  async balance() {
+    return { amount: 0, currency: "USD", smsCredits: 0 };
+  },
+  async packages() {
+    return [];
+  },
+  async purchase() {
+    throw NOT_CONNECTED;
+  },
 };

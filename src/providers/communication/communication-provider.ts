@@ -7,10 +7,7 @@
  *
  * SOLID: Interface Segregation + Dependency Inversion.
  */
-import type {
-  ChannelAnalytics,
-  CommunicationChannel,
-} from "@/types/communication";
+import type { ChannelAnalytics, CommunicationChannel } from "@/types/communication";
 
 export interface SendPayload {
   to: string;

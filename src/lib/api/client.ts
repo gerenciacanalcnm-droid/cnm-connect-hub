@@ -91,11 +91,7 @@ class ApiClient {
     return qs ? `${base}${base.includes("?") ? "&" : "?"}${qs}` : base;
   }
 
-  private async request<T>(
-    method: HttpMethod,
-    path: string,
-    cfg: RequestConfig = {},
-  ): Promise<T> {
+  private async request<T>(method: HttpMethod, path: string, cfg: RequestConfig = {}): Promise<T> {
     const {
       body,
       auth = true,

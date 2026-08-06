@@ -42,7 +42,11 @@ function mapConv(r: ConvRow): Conversation {
 }
 
 export interface ConversationService {
-  list(filters?: { channel?: Conversation["channel"]; status?: Conversation["status"]; search?: string }): Promise<Conversation[]>;
+  list(filters?: {
+    channel?: Conversation["channel"];
+    status?: Conversation["status"];
+    search?: string;
+  }): Promise<Conversation[]>;
   messages(conversationId: string): Promise<ConversationMessage[]>;
   update(input: {
     id: string;

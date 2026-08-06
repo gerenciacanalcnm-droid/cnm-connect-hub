@@ -10,25 +10,16 @@ export function ApiSection() {
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
             API & Desarrolladores
           </p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
-            {api.title}
-          </h2>
+          <h2 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">{api.title}</h2>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             {api.description}
           </p>
 
           <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {api.items.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-xl border border-border/70 bg-card p-4"
-              >
-                <div className="text-sm font-semibold text-foreground">
-                  {item.title}
-                </div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {item.description}
-                </div>
+              <div key={item.title} className="rounded-xl border border-border/70 bg-card p-4">
+                <div className="text-sm font-semibold text-foreground">{item.title}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{item.description}</div>
               </div>
             ))}
           </div>

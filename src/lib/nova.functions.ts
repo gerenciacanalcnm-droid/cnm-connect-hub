@@ -35,14 +35,13 @@ import {
 const CNM_COMPANY_ID = "00000000-0000-4000-8000-000000000001";
 const BUCKET = "nova-knowledge";
 
-type Sb = Parameters<typeof buildToolDefs> extends never ? never : never;
+/** Cliente Supabase con tipado laxo: las cadenas dinámicas de PostgREST
+ *  (namespaces/keys de settings, RPC) no son expresables con los tipos generados. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LooseSupabase = any;
 
 // ═══════════════════ CONFIGURACIÓN (Settings Engine) ═══════════════════
-async function readSection<T>(
-  supabase: { from: (t: string) => any },
-  key: string,
-  fallback: T,
-): Promise<T> {
+async function readSection<T>(supabase: LooseSupabase, key: string, fallback: T): Promise<T> {
   const { data } = await supabase
     .from("settings")
     .select("value")
@@ -158,11 +157,18 @@ export const processNovaDocument = createServerFn({ method: "POST" })
   .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase;
-    const { data: doc, error } = await sb.from("nova_documents").select("*").eq("id", data.id).single();
+    const { data: doc, error } = await sb
+      .from("nova_documents")
+      .select("*")
+      .eq("id", data.id)
+      .single();
     if (error) throw new Error(error.message);
 
     const fail = async (message: string, status = "error") => {
-      await sb.from("nova_documents").update({ status, error: message, chunk_count: 0 }).eq("id", data.id);
+      await sb
+        .from("nova_documents")
+        .update({ status, error: message, chunk_count: 0 })
+        .eq("id", data.id);
       return { ok: false, error: message };
     };
 
@@ -180,7 +186,9 @@ export const processNovaDocument = createServerFn({ method: "POST" })
         if (!res.ok) return await fail(`La URL respondió ${res.status}.`);
         text = stripHtml(await res.text());
       } else if (doc.storage_path) {
-        const { data: file, error: dlErr } = await sb.storage.from(BUCKET).download(doc.storage_path);
+        const { data: file, error: dlErr } = await sb.storage
+          .from(BUCKET)
+          .download(doc.storage_path);
         if (dlErr || !file) return await fail(dlErr?.message ?? "No se pudo descargar el archivo.");
         const ext = extensionOf(doc.name);
         if (TEXT_EXTENSIONS.includes(ext)) {
@@ -191,7 +199,12 @@ export const processNovaDocument = createServerFn({ method: "POST" })
           if (buffer.byteLength > 12 * 1024 * 1024) {
             return await fail("El PDF supera 12 MB. Divídelo antes de subirlo.");
           }
-          text = await extractWithAi(cfg, arrayBufferToBase64(buffer), doc.mime_type ?? "application/pdf", doc.name);
+          text = await extractWithAi(
+            cfg,
+            arrayBufferToBase64(buffer),
+            doc.mime_type ?? "application/pdf",
+            doc.name,
+          );
         } else {
           return await fail(
             `El formato .${ext} aún no tiene extractor automático. Conviértelo a PDF, TXT, MD o CSV y vuelve a subirlo.`,
@@ -230,7 +243,9 @@ export const processNovaDocument = createServerFn({ method: "POST" })
         .eq("id", data.id);
       return { ok: true, chunks: stored, tokens };
     } catch (err) {
-      return await fail(err instanceof Error ? err.message : "Error desconocido al procesar el documento.");
+      return await fail(
+        err instanceof Error ? err.message : "Error desconocido al procesar el documento.",
+      );
     }
   });
 
@@ -355,7 +370,11 @@ export const duplicateNovaPrompt = createServerFn({ method: "POST" })
   .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase;
-    const { data: src, error } = await sb.from("nova_prompts").select("*").eq("id", data.id).single();
+    const { data: src, error } = await sb
+      .from("nova_prompts")
+      .select("*")
+      .eq("id", data.id)
+      .single();
     if (error) throw new Error(error.message);
     const { data: copy, error: insErr } = await sb
       .from("nova_prompts")
@@ -383,7 +402,9 @@ export const duplicateNovaPrompt = createServerFn({ method: "POST" })
 
 export const restoreNovaPromptVersion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ promptId: z.string().uuid(), versionId: z.string().uuid() }).parse(v))
+  .inputValidator((v) =>
+    z.object({ promptId: z.string().uuid(), versionId: z.string().uuid() }).parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase;
     const { data: version, error } = await sb
@@ -392,9 +413,16 @@ export const restoreNovaPromptVersion = createServerFn({ method: "POST" })
       .eq("id", data.versionId)
       .single();
     if (error) throw new Error(error.message);
-    const { data: prompt } = await sb.from("nova_prompts").select("version").eq("id", data.promptId).single();
+    const { data: prompt } = await sb
+      .from("nova_prompts")
+      .select("version")
+      .eq("id", data.promptId)
+      .single();
     const nextVersion = (prompt?.version ?? 1) + 1;
-    await sb.from("nova_prompts").update({ content: version.content, version: nextVersion }).eq("id", data.promptId);
+    await sb
+      .from("nova_prompts")
+      .update({ content: version.content, version: nextVersion })
+      .eq("id", data.promptId);
     await sb.from("nova_prompt_versions").insert({
       prompt_id: data.promptId,
       version: nextVersion,
@@ -442,7 +470,10 @@ export const updateNovaTool = createServerFn({ method: "POST" })
     const patch: Record<string, unknown> = {};
     if (data.is_enabled !== undefined) patch["is_enabled"] = data.is_enabled;
     if (data.min_role) patch["min_role"] = data.min_role;
-    const { error } = await context.supabase.from("nova_tools").update(patch as never).eq("id", data.id);
+    const { error } = await context.supabase
+      .from("nova_tools")
+      .update(patch as never)
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -476,7 +507,9 @@ export const listNovaLogs = createServerFn({ method: "POST" })
 
 export const getNovaAnalytics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ days: z.number().int().min(1).max(90).default(30) }).parse(v ?? {}))
+  .inputValidator((v) =>
+    z.object({ days: z.number().int().min(1).max(90).default(30) }).parse(v ?? {}),
+  )
   .handler(async ({ data, context }) => {
     const since = new Date(Date.now() - data.days * 86400000).toISOString();
     const { data: rows, error } = await context.supabase
@@ -524,8 +557,12 @@ export const getNovaAnalytics = createServerFn({ method: "POST" })
       activeUsers: users.size,
       avgLatencyMs: list.length ? Math.round(latency / list.length) : 0,
       errors,
-      daily: [...dailyMap.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([date, v]) => ({ date, ...v })),
-      byModel: [...modelMap.entries()].map(([model, v]) => ({ model, ...v })).sort((a, b) => b.requests - a.requests),
+      daily: [...dailyMap.entries()]
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, v]) => ({ date, ...v })),
+      byModel: [...modelMap.entries()]
+        .map(([model, v]) => ({ model, ...v }))
+        .sort((a, b) => b.requests - a.requests),
     };
   });
 
@@ -573,7 +610,8 @@ export const updateNovaConversation = createServerFn({ method: "POST" })
     const patch: Record<string, unknown> = {};
     if (data.title !== undefined) patch["title"] = data.title;
     if (data.isFavorite !== undefined) patch["is_favorite"] = data.isFavorite;
-    if (data.archived !== undefined) patch["archived_at"] = data.archived ? new Date().toISOString() : null;
+    if (data.archived !== undefined)
+      patch["archived_at"] = data.archived ? new Date().toISOString() : null;
     const { error } = await context.supabase
       .from("nova_conversations")
       .update(patch as never)
@@ -644,7 +682,7 @@ export const deleteNovaMemory = createServerFn({ method: "POST" })
   });
 
 // ═══════════════════ CHAT (RAG + Tools) ═══════════════════
-async function resolveRole(sb: any, userId: string): Promise<string> {
+async function resolveRole(sb: LooseSupabase, userId: string): Promise<string> {
   const { data: superAdmin } = await sb.rpc("is_super_admin", { _user_id: userId });
   if (superAdmin) return "super_admin";
   const { data: member } = await sb
@@ -686,10 +724,14 @@ export const novaChat = createServerFn({ method: "POST" })
     const todayCount = todayLogs?.length ?? 0;
     const todayCost = (todayLogs ?? []).reduce((a, r) => a + Number(r.cost ?? 0), 0);
     if (todayCount >= limits.dailyRequests) {
-      throw new Error("Se alcanzó el límite diario de consultas a la IA configurado por el administrador.");
+      throw new Error(
+        "Se alcanzó el límite diario de consultas a la IA configurado por el administrador.",
+      );
     }
     if (todayCost >= limits.dailyCost) {
-      throw new Error("Se alcanzó el límite diario de costo de IA configurado por el administrador.");
+      throw new Error(
+        "Se alcanzó el límite diario de costo de IA configurado por el administrador.",
+      );
     }
 
     // ── Conversación ──────────────────────────────────────────────
@@ -747,7 +789,11 @@ export const novaChat = createServerFn({ method: "POST" })
             match_company_id: CNM_COMPANY_ID,
             match_count: cfg.ragTopK,
           });
-          const rows = (matches ?? []) as { document_id: string; content: string; similarity: number }[];
+          const rows = (matches ?? []) as {
+            document_id: string;
+            content: string;
+            similarity: number;
+          }[];
           if (rows.length > 0) {
             const ids = [...new Set(rows.map((r) => r.document_id))];
             const { data: docs } = await sb.from("nova_documents").select("id, name").in("id", ids);
@@ -760,7 +806,9 @@ export const novaChat = createServerFn({ method: "POST" })
               });
             }
             ragText = rows
-              .map((r, i) => `[${i + 1}] (${nameOf.get(r.document_id) ?? "Documento"})\n${r.content}`)
+              .map(
+                (r, i) => `[${i + 1}] (${nameOf.get(r.document_id) ?? "Documento"})\n${r.content}`,
+              )
               .join("\n\n");
           }
         }
@@ -773,12 +821,15 @@ export const novaChat = createServerFn({ method: "POST" })
     const role = await resolveRole(sb, context.userId);
     let toolDefs: ReturnType<typeof buildToolDefs> = [];
     if (cfg.toolsEnabled) {
-      const { data: toolRows } = await sb.from("nova_tools").select("code, name, description, min_role, is_enabled, is_ready");
+      const { data: toolRows } = await sb
+        .from("nova_tools")
+        .select("code, name, description, min_role, is_enabled, is_ready");
       toolDefs = buildToolDefs((toolRows ?? []) as ToolRow[], role);
     }
 
     const system = [
-      promptText || "Eres CNM Nova, el copiloto de IA de la plataforma SMS CNM. Responde en español, breve y accionable.",
+      promptText ||
+        "Eres CNM Nova, el copiloto de IA de la plataforma SMS CNM. Responde en español, breve y accionable.",
       `Rol del usuario actual: ${role}. No reveles información fuera de su alcance.`,
       memoryText ? `Memoria relevante:\n${memoryText}` : "",
       ragText
@@ -814,7 +865,11 @@ export const novaChat = createServerFn({ method: "POST" })
           break;
         }
 
-        messages.push({ role: "assistant", content: result.message.content ?? "", tool_calls: calls });
+        messages.push({
+          role: "assistant",
+          content: result.message.content ?? "",
+          tool_calls: calls,
+        });
         for (const call of calls) {
           const impl = NOVA_TOOL_IMPLS[call.function.name];
           let output: unknown;
@@ -829,7 +884,9 @@ export const novaChat = createServerFn({ method: "POST" })
                 args,
               );
             } catch (err) {
-              output = { error: err instanceof Error ? err.message : "Fallo al ejecutar la herramienta." };
+              output = {
+                error: err instanceof Error ? err.message : "Fallo al ejecutar la herramienta.",
+              };
             }
           }
           messages.push({
@@ -840,7 +897,8 @@ export const novaChat = createServerFn({ method: "POST" })
         }
       }
 
-      if (!answer) answer = "No pude completar la respuesta. Reformula la pregunta o inténtalo de nuevo.";
+      if (!answer)
+        answer = "No pude completar la respuesta. Reformula la pregunta o inténtalo de nuevo.";
 
       const latencyMs = Date.now() - started;
       const cost = estimateCost(cfg.model, tokensInput, tokensOutput);
@@ -888,7 +946,11 @@ export const novaChat = createServerFn({ method: "POST" })
       };
     } catch (err) {
       const message =
-        err instanceof NovaEngineError ? err.message : err instanceof Error ? err.message : "Error del motor de IA.";
+        err instanceof NovaEngineError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : "Error del motor de IA.";
       await sb.from("nova_ai_logs").insert({
         company_id: CNM_COMPANY_ID,
         user_id: context.userId,
@@ -907,5 +969,3 @@ export const novaChat = createServerFn({ method: "POST" })
       throw new Error(message);
     }
   });
-
-export type { Sb };

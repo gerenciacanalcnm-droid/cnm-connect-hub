@@ -10,9 +10,7 @@ export function Logo({
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
       <div className="relative grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-lg gradient-brand shadow-sm">
-        <span className="text-[13px] font-bold leading-none text-primary-foreground">
-          C
-        </span>
+        <span className="text-[13px] font-bold leading-none text-primary-foreground">C</span>
         <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
       </div>
       {showWordmark && (

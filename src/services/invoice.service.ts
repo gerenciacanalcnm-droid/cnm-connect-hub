@@ -6,6 +6,10 @@ export interface InvoiceService {
 }
 
 export const invoiceService: InvoiceService = {
-  async list() { return []; },
-  async getById() { return undefined; },
+  async list() {
+    return [];
+  },
+  async getById() {
+    return undefined;
+  },
 };

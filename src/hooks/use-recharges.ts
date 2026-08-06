@@ -6,7 +6,10 @@ export function useRecharges() {
   return useQuery({ queryKey: queryKeys.recharges, queryFn: () => rechargeRepository.list() });
 }
 export function useRechargePackages() {
-  return useQuery({ queryKey: queryKeys.rechargePackages, queryFn: () => rechargeRepository.packages() });
+  return useQuery({
+    queryKey: queryKeys.rechargePackages,
+    queryFn: () => rechargeRepository.packages(),
+  });
 }
 export function useBalance() {
   return useQuery({ queryKey: queryKeys.balance, queryFn: () => rechargeRepository.balance() });

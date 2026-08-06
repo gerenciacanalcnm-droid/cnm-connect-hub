@@ -57,7 +57,8 @@ export function ApiDocs() {
   const [copied, setCopied] = useState(false);
   const copy = () => {
     navigator.clipboard.writeText(SNIPPETS[lang]);
-    setCopied(true); toast.success("Copiado");
+    setCopied(true);
+    toast.success("Copiado");
     setTimeout(() => setCopied(false), 1500);
   };
 
@@ -91,15 +92,26 @@ export function ApiDocs() {
       </Card>
 
       <Card className="lg:col-span-2">
-        <CardHeader><CardTitle className="text-base">Endpoints</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-base">Endpoints</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-2">
           {ENDPOINTS.map((e) => (
-            <div key={e.path} className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50">
-              <Badge variant="outline" className={cn(
-                "font-mono text-[10px]",
-                e.method === "GET" ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                  : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-              )}>{e.method}</Badge>
+            <div
+              key={e.path}
+              className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50"
+            >
+              <Badge
+                variant="outline"
+                className={cn(
+                  "font-mono text-[10px]",
+                  e.method === "GET"
+                    ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                    : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+                )}
+              >
+                {e.method}
+              </Badge>
               <div className="min-w-0 flex-1">
                 <code className="block truncate font-mono text-xs font-medium">{e.path}</code>
                 <p className="text-xs text-muted-foreground">{e.desc}</p>

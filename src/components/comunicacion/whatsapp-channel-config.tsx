@@ -38,10 +38,18 @@ export function WhatsAppChannelConfig() {
           <Badge variant="secondary">{SOON}</Badge>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
-          <Button className="gap-1.5" disabled><Link2 className="h-4 w-4" /> Conectar con Meta</Button>
-          <Button variant="outline" className="gap-1.5" disabled><Pencil className="h-4 w-4" /> Editar</Button>
-          <Button variant="outline" className="gap-1.5" disabled><Activity className="h-4 w-4" /> Probar conexión</Button>
-          <Button variant="destructive" className="gap-1.5" disabled><Unplug className="h-4 w-4" /> Desconectar</Button>
+          <Button className="gap-1.5" disabled>
+            <Link2 className="h-4 w-4" /> Conectar con Meta
+          </Button>
+          <Button variant="outline" className="gap-1.5" disabled>
+            <Pencil className="h-4 w-4" /> Editar
+          </Button>
+          <Button variant="outline" className="gap-1.5" disabled>
+            <Activity className="h-4 w-4" /> Probar conexión
+          </Button>
+          <Button variant="destructive" className="gap-1.5" disabled>
+            <Unplug className="h-4 w-4" /> Desconectar
+          </Button>
         </CardContent>
       </Card>
 
@@ -80,7 +88,9 @@ export function WhatsAppChannelConfig() {
                 <Separator />
                 <Row
                   label="Última sincronización"
-                  value={a.lastSyncedAt ? new Date(a.lastSyncedAt).toLocaleString("es-CO") : "Nunca"}
+                  value={
+                    a.lastSyncedAt ? new Date(a.lastSyncedAt).toLocaleString("es-CO") : "Nunca"
+                  }
                 />
               </CardContent>
             </Card>

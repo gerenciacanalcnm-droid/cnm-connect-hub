@@ -4,7 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SmsComposer } from "./sms-composer";
 import { toast } from "sonner";
 
@@ -34,7 +40,9 @@ export function SendSms() {
             <div className="space-y-2">
               <Label>Remitente</Label>
               <Select value={from} onValueChange={setFrom}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="CNM">CNM</SelectItem>
                   <SelectItem value="CNMBank">CNMBank</SelectItem>
@@ -44,7 +52,11 @@ export function SendSms() {
             </div>
             <div className="space-y-2">
               <Label>Destinatario</Label>
-              <Input value={to} onChange={(e) => setTo(e.target.value)} placeholder="+52 55 1234 5678" />
+              <Input
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                placeholder="+52 55 1234 5678"
+              />
             </div>
           </div>
           <SmsComposer value={msg} onChange={setMsg} />
@@ -72,7 +84,8 @@ export function SendSms() {
             </div>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            Usa <code className="rounded bg-muted px-1">{`{{nombre}}`}</code> para variables dinámicas.
+            Usa <code className="rounded bg-muted px-1">{`{{nombre}}`}</code> para variables
+            dinámicas.
           </p>
         </CardContent>
       </Card>

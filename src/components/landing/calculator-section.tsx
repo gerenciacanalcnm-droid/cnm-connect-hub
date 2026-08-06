@@ -10,9 +10,7 @@ export function CalculatorSection() {
 
   const { pricePerSms, quantity, saving, baseTotal } = useMemo(() => {
     const sorted = [...calculator.tiers].sort((a, b) => a.minAmount - b.minAmount);
-    const applicable = sorted
-      .filter((t) => amount >= t.minAmount)
-      .pop() ?? sorted[0];
+    const applicable = sorted.filter((t) => amount >= t.minAmount).pop() ?? sorted[0];
     const base = sorted[0];
     const qty = applicable ? Math.floor(amount / applicable.pricePerSms) : 0;
     const baseQty = base ? Math.floor(amount / base.pricePerSms) : 0;
@@ -63,10 +61,7 @@ export function CalculatorSection() {
                 Simulador
               </div>
 
-              <label
-                htmlFor="invest"
-                className="mt-5 block text-sm font-medium text-foreground"
-              >
+              <label htmlFor="invest" className="mt-5 block text-sm font-medium text-foreground">
                 ¿Cuánto deseas invertir?
               </label>
 
@@ -134,9 +129,7 @@ export function CalculatorSection() {
                   <div className="mt-1 text-xl font-semibold text-success">
                     {formatCurrency(saving, calculator.currency)}
                   </div>
-                  <div className="text-[11px] text-success/80">
-                    vs. tarifa base
-                  </div>
+                  <div className="text-[11px] text-success/80">vs. tarifa base</div>
                 </div>
               </div>
 
@@ -150,8 +143,7 @@ export function CalculatorSection() {
                 <Sparkles className="h-4 w-4 opacity-80" />
               </a>
               <p className="text-[11px] text-muted-foreground">
-                Valor total base a esta tarifa:{" "}
-                {formatCurrency(baseTotal, calculator.currency)}
+                Valor total base a esta tarifa: {formatCurrency(baseTotal, calculator.currency)}
               </p>
             </div>
           </div>

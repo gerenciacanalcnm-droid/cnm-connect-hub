@@ -53,7 +53,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const uid = current.user.id;
     const [pRes, rRes, mRes] = await Promise.all([
-      supabase.from("profiles").select("id, email, full_name, avatar_url").eq("id", uid).maybeSingle(),
+      supabase
+        .from("profiles")
+        .select("id, email, full_name, avatar_url")
+        .eq("id", uid)
+        .maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
       supabase
         .from("company_members")
@@ -61,12 +65,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("user_id", uid)
         .eq("is_active", true),
     ]);
-    setProfile((pRes.data as AuthProfile | null) ?? {
-      id: uid,
-      email: current.user.email ?? null,
-      full_name: (current.user.user_metadata?.full_name as string) ?? null,
-      avatar_url: (current.user.user_metadata?.avatar_url as string) ?? null,
-    });
+    setProfile(
+      (pRes.data as AuthProfile | null) ?? {
+        id: uid,
+        email: current.user.email ?? null,
+        full_name: (current.user.user_metadata?.full_name as string) ?? null,
+        avatar_url: (current.user.user_metadata?.avatar_url as string) ?? null,
+      },
+    );
     setRoles((rRes.data ?? []).map((r) => r.role as string));
     setCompanies((mRes.data ?? []) as unknown as AuthCompanyMembership[]);
     setLoading(false);

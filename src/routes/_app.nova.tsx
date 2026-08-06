@@ -8,7 +8,10 @@ export const Route = createFileRoute("/_app/nova")({
   head: () => ({
     meta: [
       { title: "CNM Nova · SMS CNM" },
-      { name: "description", content: "Tu copiloto con IA para segmentar, optimizar y analizar campañas." },
+      {
+        name: "description",
+        content: "Tu copiloto con IA para segmentar, optimizar y analizar campañas.",
+      },
     ],
   }),
   component: NovaPage,

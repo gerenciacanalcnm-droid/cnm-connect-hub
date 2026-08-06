@@ -29,7 +29,9 @@ export function NovaDrawer() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const el = scrollRef.current?.querySelector<HTMLDivElement>("[data-radix-scroll-area-viewport]");
+    const el = scrollRef.current?.querySelector<HTMLDivElement>(
+      "[data-radix-scroll-area-viewport]",
+    );
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, typing, open]);
 
@@ -70,10 +72,7 @@ export function NovaDrawer() {
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={cn(
-                  "flex items-start gap-2.5",
-                  m.from === "user" && "flex-row-reverse",
-                )}
+                className={cn("flex items-start gap-2.5", m.from === "user" && "flex-row-reverse")}
               >
                 <div
                   className={cn(
@@ -83,7 +82,11 @@ export function NovaDrawer() {
                       : "bg-accent text-accent-foreground",
                   )}
                 >
-                  {m.from === "nova" ? <Sparkles className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
+                  {m.from === "nova" ? (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  ) : (
+                    <User className="h-3.5 w-3.5" />
+                  )}
                 </div>
                 <div
                   className={cn(
@@ -141,7 +144,12 @@ export function NovaDrawer() {
               placeholder="Escribe tu pregunta a CNM Nova..."
               className="h-10"
             />
-            <Button type="submit" size="icon" className="h-10 w-10 gradient-nova text-white" aria-label="Enviar">
+            <Button
+              type="submit"
+              size="icon"
+              className="h-10 w-10 gradient-nova text-white"
+              aria-label="Enviar"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </form>

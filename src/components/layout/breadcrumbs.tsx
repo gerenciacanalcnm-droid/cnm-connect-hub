@@ -4,19 +4,15 @@ import { primaryNavigation } from "@/config/navigation";
 
 const labelMap: Record<string, string> = (() => {
   const m: Record<string, string> = { dashboard: "Dashboard" };
-  for (const s of primaryNavigation) for (const it of s.items) {
-    m[it.to.replace(/^\//, "")] = it.title;
-  }
+  for (const s of primaryNavigation)
+    for (const it of s.items) {
+      m[it.to.replace(/^\//, "")] = it.title;
+    }
   return m;
 })();
 
 function humanize(seg: string) {
-  return (
-    labelMap[seg] ??
-    seg
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase())
-  );
+  return labelMap[seg] ?? seg.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function Breadcrumbs() {
@@ -44,14 +40,9 @@ export function Breadcrumbs() {
           <span key={to} className="inline-flex min-w-0 items-center gap-1.5">
             <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-60" />
             {isLast ? (
-              <span className="truncate font-medium text-foreground">
-                {humanize(seg)}
-              </span>
+              <span className="truncate font-medium text-foreground">{humanize(seg)}</span>
             ) : (
-              <Link
-                to={to}
-                className="truncate hover:text-foreground"
-              >
+              <Link to={to} className="truncate hover:text-foreground">
                 {humanize(seg)}
               </Link>
             )}

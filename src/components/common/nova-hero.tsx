@@ -1,12 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  Sparkles,
-  ArrowRight,
-  CheckCircle2,
-  Clock,
-  TrendingUp,
-  Wallet,
-} from "lucide-react";
+import { Sparkles, ArrowRight, CheckCircle2, Clock, TrendingUp, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -29,21 +22,13 @@ export type NovaHeroProps = {
   className?: string;
 };
 
-export function NovaHero({
-  greeting,
-  userName,
-  onOpenNova,
-  className,
-}: NovaHeroProps) {
+export function NovaHero({ greeting, userName, onOpenNova, className }: NovaHeroProps) {
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
-      className={cn(
-        "surface-elevated relative overflow-hidden p-6 sm:p-8",
-        className,
-      )}
+      className={cn("surface-elevated relative overflow-hidden p-6 sm:p-8", className)}
     >
       {/* Ambient background */}
       <div className="pointer-events-none absolute inset-0 opacity-70">
@@ -70,10 +55,8 @@ export function NovaHero({
           </h2>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
             He analizado tu cuenta esta mañana. Tengo{" "}
-            <span className="font-medium text-foreground">
-              4 recomendaciones
-            </span>{" "}
-            para mejorar tu operación hoy.
+            <span className="font-medium text-foreground">4 recomendaciones</span> para mejorar tu
+            operación hoy.
           </p>
         </div>
 
@@ -102,9 +85,7 @@ export function NovaHero({
             <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-nova/10 text-nova ring-1 ring-inset ring-nova/20 transition-colors group-hover:bg-nova/15">
               <rec.icon className="h-4 w-4" />
             </div>
-            <p className="min-w-0 pt-0.5 text-sm leading-snug text-foreground">
-              {rec.text}
-            </p>
+            <p className="min-w-0 pt-0.5 text-sm leading-snug text-foreground">{rec.text}</p>
           </motion.div>
         ))}
       </div>

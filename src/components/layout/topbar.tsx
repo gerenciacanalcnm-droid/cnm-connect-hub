@@ -1,12 +1,17 @@
-import { Bell, HelpCircle, LifeBuoy, Keyboard, BookOpen, Search, Sparkles, Shield } from "lucide-react";
+import {
+  Bell,
+  HelpCircle,
+  LifeBuoy,
+  Keyboard,
+  BookOpen,
+  Search,
+  Sparkles,
+  Shield,
+} from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,7 +64,6 @@ export function Topbar() {
       <CompanySwitcher />
       <Separator orientation="vertical" className="hidden h-5 md:block" />
 
-
       {/* Global search */}
       <button
         type="button"
@@ -105,7 +109,12 @@ export function Topbar() {
         {/* Help */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="hidden h-9 w-9 md:inline-flex" aria-label="Ayuda">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden h-9 w-9 md:inline-flex"
+              aria-label="Ayuda"
+            >
               <HelpCircle className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -143,7 +152,6 @@ export function Topbar() {
         </Button>
 
         <Separator orientation="vertical" className="mx-1 h-5" />
-
 
         {/* User menu */}
         <DropdownMenu>

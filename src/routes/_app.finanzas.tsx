@@ -30,10 +30,18 @@ function FinanzasPage() {
           <TabsTrigger value="facturas">Facturas</TabsTrigger>
           <TabsTrigger value="metodos">Métodos de pago</TabsTrigger>
         </TabsList>
-        <TabsContent value="recargas"><RechargePanel /></TabsContent>
-        <TabsContent value="historial"><RechargeHistory /></TabsContent>
-        <TabsContent value="facturas"><InvoicesTable /></TabsContent>
-        <TabsContent value="metodos"><PaymentMethods /></TabsContent>
+        <TabsContent value="recargas">
+          <RechargePanel />
+        </TabsContent>
+        <TabsContent value="historial">
+          <RechargeHistory />
+        </TabsContent>
+        <TabsContent value="facturas">
+          <InvoicesTable />
+        </TabsContent>
+        <TabsContent value="metodos">
+          <PaymentMethods />
+        </TabsContent>
       </Tabs>
     </div>
   );

@@ -12,10 +12,12 @@ import { Loader } from "@/components/common/loader";
 
 export function NovaChat() {
   const { data: suggestions } = useQuery({
-    queryKey: queryKeys.nova, queryFn: () => novaService.suggestions(),
+    queryKey: queryKeys.nova,
+    queryFn: () => novaService.suggestions(),
   });
   const { data: initial } = useQuery({
-    queryKey: queryKeys.novaHistory, queryFn: () => novaService.history(),
+    queryKey: queryKeys.novaHistory,
+    queryFn: () => novaService.history(),
   });
 
   const [messages, setMessages] = useState<NovaMessage[]>([]);
@@ -23,7 +25,9 @@ export function NovaChat() {
   const [pending, setPending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { if (initial && messages.length === 0) setMessages(initial); }, [initial, messages.length]);
+  useEffect(() => {
+    if (initial && messages.length === 0) setMessages(initial);
+  }, [initial, messages.length]);
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, pending]);
@@ -32,7 +36,8 @@ export function NovaChat() {
     const value = text.trim();
     if (!value || pending) return;
     setMessages((m) => [...m, { from: "user", text: value }]);
-    setInput(""); setPending(true);
+    setInput("");
+    setPending(true);
     const reply = await novaService.chat(value);
     setMessages((m) => [...m, reply]);
     setPending(false);
@@ -50,7 +55,10 @@ export function NovaChat() {
             <div className="text-xs text-muted-foreground">Tu copiloto de mensajería con IA</div>
           </div>
         </div>
-        <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600">
+        <Badge
+          variant="outline"
+          className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+        >
           <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" /> Online
         </Badge>
       </div>
@@ -58,19 +66,21 @@ export function NovaChat() {
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-6 py-6">
         {messages.map((m, i) => (
           <div key={i} className={cn("flex", m.from === "user" ? "justify-end" : "justify-start")}>
-            <div className={cn(
-              "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm",
-              m.from === "user"
-                ? "gradient-brand text-primary-foreground"
-                : "bg-muted"
-            )}>
+            <div
+              className={cn(
+                "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm",
+                m.from === "user" ? "gradient-brand text-primary-foreground" : "bg-muted",
+              )}
+            >
               {m.text}
             </div>
           </div>
         ))}
         {pending && (
           <div className="flex justify-start">
-            <div className="rounded-2xl bg-muted px-4 py-3"><Loader /></div>
+            <div className="rounded-2xl bg-muted px-4 py-3">
+              <Loader />
+            </div>
           </div>
         )}
       </div>
@@ -79,8 +89,11 @@ export function NovaChat() {
         <div className="border-t px-6 py-3">
           <div className="flex flex-wrap gap-2">
             {suggestions.slice(0, 4).map((s) => (
-              <button key={s} onClick={() => send(s)}
-                className="rounded-full border bg-card px-3 py-1 text-xs transition hover:border-nova/40 hover:bg-nova/5">
+              <button
+                key={s}
+                onClick={() => send(s)}
+                className="rounded-full border bg-card px-3 py-1 text-xs transition hover:border-nova/40 hover:bg-nova/5"
+              >
                 {s}
               </button>
             ))}
@@ -90,11 +103,23 @@ export function NovaChat() {
 
       <CardContent className="border-t p-4">
         <form
-          onSubmit={(e) => { e.preventDefault(); send(input); }}
-          className="flex items-center gap-2">
-          <Input value={input} onChange={(e) => setInput(e.target.value)}
-            placeholder="Pregunta lo que quieras a CNM Nova..." className="flex-1" />
-          <Button type="submit" disabled={!input.trim() || pending} className="gap-1.5 gradient-nova text-white hover:opacity-90">
+          onSubmit={(e) => {
+            e.preventDefault();
+            send(input);
+          }}
+          className="flex items-center gap-2"
+        >
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Pregunta lo que quieras a CNM Nova..."
+            className="flex-1"
+          />
+          <Button
+            type="submit"
+            disabled={!input.trim() || pending}
+            className="gap-1.5 gradient-nova text-white hover:opacity-90"
+          >
             <Send className="h-4 w-4" /> Enviar
           </Button>
         </form>

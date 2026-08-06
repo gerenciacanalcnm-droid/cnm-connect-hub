@@ -28,9 +28,7 @@ export function HowItWorksSection() {
               <div className="flex h-9 w-9 items-center justify-center rounded-full gradient-brand text-sm font-bold text-primary-foreground shadow-md">
                 {s.step}
               </div>
-              <h3 className="mt-4 text-base font-semibold text-foreground">
-                {s.title}
-              </h3>
+              <h3 className="mt-4 text-base font-semibold text-foreground">{s.title}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                 {s.description}
               </p>

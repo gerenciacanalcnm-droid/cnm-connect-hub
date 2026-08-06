@@ -6,7 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { useRechargePackages, useBalance } from "@/hooks/use-recharges";
 import { formatCurrency, formatNumber } from "@/lib/format";
@@ -39,15 +44,21 @@ export function RechargePanel() {
         </Card>
         <Card>
           <CardContent className="p-5">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">Consumo mes</div>
-            <div className="mt-3 text-3xl font-semibold">{formatCurrency(12_480, "MXN", "es-MX")}</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">
+              Consumo mes
+            </div>
+            <div className="mt-3 text-3xl font-semibold">
+              {formatCurrency(12_480, "MXN", "es-MX")}
+            </div>
             <div className="mt-1 text-sm text-muted-foreground">62 400 SMS enviados</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-5">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Proyección</div>
-            <div className="mt-3 text-3xl font-semibold">{formatCurrency(18_200, "MXN", "es-MX")}</div>
+            <div className="mt-3 text-3xl font-semibold">
+              {formatCurrency(18_200, "MXN", "es-MX")}
+            </div>
             <div className="mt-1 text-sm text-muted-foreground">estimado fin de mes</div>
           </CardContent>
         </Card>
@@ -57,17 +68,26 @@ export function RechargePanel() {
         <h2 className="mb-3 text-lg font-semibold">Paquetes de recarga</h2>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {packs.map((p) => (
-            <Card key={p.id} className={`relative flex flex-col transition hover:shadow-md ${p.popular ? "border-nova ring-2 ring-nova/30" : ""}`}>
+            <Card
+              key={p.id}
+              className={`relative flex flex-col transition hover:shadow-md ${p.popular ? "border-nova ring-2 ring-nova/30" : ""}`}
+            >
               {p.popular && (
                 <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-nova text-white">
                   <Sparkles className="mr-1 h-3 w-3" /> Más popular
                 </Badge>
               )}
-              <CardHeader><CardTitle className="text-base">{p.name}</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle className="text-base">{p.name}</CardTitle>
+              </CardHeader>
               <CardContent className="flex flex-1 flex-col space-y-3">
                 <div>
-                  <div className="text-3xl font-semibold">{formatCurrency(p.price, p.currency, "es-MX")}</div>
-                  <div className="text-sm text-muted-foreground">{formatNumber(p.smsCredits)} SMS</div>
+                  <div className="text-3xl font-semibold">
+                    {formatCurrency(p.price, p.currency, "es-MX")}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {formatNumber(p.smsCredits)} SMS
+                  </div>
                 </div>
                 {p.bonus ? (
                   <div className="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
@@ -91,7 +111,8 @@ export function RechargePanel() {
           <DialogHeader>
             <DialogTitle>Confirmar recarga · {selected?.name}</DialogTitle>
             <DialogDescription>
-              {selected && `${formatNumber(selected.smsCredits + (selected.bonus ?? 0))} SMS por ${formatCurrency(selected.price, selected.currency, "es-MX")}`}
+              {selected &&
+                `${formatNumber(selected.smsCredits + (selected.bonus ?? 0))} SMS por ${formatCurrency(selected.price, selected.currency, "es-MX")}`}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -102,7 +123,10 @@ export function RechargePanel() {
                 { v: "transfer", i: Landmark, l: "Transferencia bancaria (SPEI)" },
                 { v: "paypal", i: Wallet, l: "PayPal" },
               ].map((m) => (
-                <label key={m.v} className="flex items-center gap-3 rounded-lg border border-border p-3 hover:bg-muted/40">
+                <label
+                  key={m.v}
+                  className="flex items-center gap-3 rounded-lg border border-border p-3 hover:bg-muted/40"
+                >
                   <RadioGroupItem value={m.v} id={m.v} />
                   <m.i className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium">{m.l}</span>
@@ -111,11 +135,17 @@ export function RechargePanel() {
             </RadioGroup>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSelected(null)}>Cancelar</Button>
-            <Button onClick={() => {
-              toast.success(`Recarga procesada · ${selected?.name}`);
-              setSelected(null);
-            }}>Pagar ahora</Button>
+            <Button variant="outline" onClick={() => setSelected(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success(`Recarga procesada · ${selected?.name}`);
+                setSelected(null);
+              }}
+            >
+              Pagar ahora
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -137,7 +137,11 @@ export type LandingFooter = {
     title: string;
     links: Array<{ label: string; href: string }>;
   }>;
-  social: Array<{ label: string; href: string; kind: "twitter" | "linkedin" | "instagram" | "youtube" | "whatsapp" }>;
+  social: Array<{
+    label: string;
+    href: string;
+    kind: "twitter" | "linkedin" | "instagram" | "youtube" | "whatsapp";
+  }>;
   legalNote: string;
 };
 
@@ -226,37 +230,213 @@ export const fallbackLandingContent: LandingContent = {
     ],
   },
   features: [
-    { id: "sms", title: "SMS Masivos", description: "Envíos a millones de destinatarios con entrega verificada y cobertura nacional.", icon: "sms", tone: "primary" },
-    { id: "whatsapp", title: "WhatsApp Business", description: "Multi-número por departamento, plantillas aprobadas, campañas y conversaciones.", icon: "whatsapp", tone: "success" },
-    { id: "email", title: "Email Marketing", description: "Campañas, listas, plantillas y automatizaciones de correo transaccional.", icon: "email", tone: "info" },
-    { id: "hub", title: "Communication Hub", description: "Un único centro omnicanal para operar SMS, WhatsApp y Email.", icon: "hub", tone: "nova" },
-    { id: "flash", title: "Flash SMS", description: "Mensajes que aparecen directamente en pantalla, ideales para OTP y alertas.", icon: "flash", tone: "warning" },
-    { id: "crm", title: "CRM integrado", description: "Contactos con canal preferido y timeline unificado de SMS, WhatsApp, Email e IA.", icon: "crm", tone: "info" },
-    { id: "analytics", title: "Analytics avanzado", description: "Reportes por canal en tiempo real: entrega, lectura, conversión y costo.", icon: "analytics", tone: "success" },
-    { id: "automation", title: "Automatizaciones", description: "Flujos con disparadores, condiciones y esperas.", icon: "automation", tone: "primary" },
-    { id: "api", title: "API REST", description: "Integra SMS, WhatsApp y Email en tu stack en menos de 5 minutos.", icon: "api", tone: "info" },
-    { id: "nova", title: "CNM Nova · IA", description: "Copiloto IA que crea, optimiza y ejecuta campañas por ti.", icon: "nova", tone: "nova" },
-    { id: "help", title: "Centro de Ayuda", description: "Documentación, tutoriales y soporte 24/7.", icon: "help", tone: "info" },
-    { id: "pwa", title: "PWA", description: "Instalable en cualquier dispositivo, funciona offline.", icon: "pwa", tone: "primary" },
-    { id: "responsive", title: "100% Responsive", description: "Diseñado para desktop, tablet y móvil por igual.", icon: "responsive", tone: "success" },
-    { id: "affiliates", title: "Programa de Afiliados", description: "Gana comisiones recurrentes recomendando SMS CNM.", icon: "affiliates", tone: "warning" },
-    { id: "distributors", title: "Red de Distribuidores", description: "Revende con tu propia marca y márgenes personalizados.", icon: "distributors", tone: "nova" },
+    {
+      id: "sms",
+      title: "SMS Masivos",
+      description:
+        "Envíos a millones de destinatarios con entrega verificada y cobertura nacional.",
+      icon: "sms",
+      tone: "primary",
+    },
+    {
+      id: "whatsapp",
+      title: "WhatsApp Business",
+      description:
+        "Multi-número por departamento, plantillas aprobadas, campañas y conversaciones.",
+      icon: "whatsapp",
+      tone: "success",
+    },
+    {
+      id: "email",
+      title: "Email Marketing",
+      description: "Campañas, listas, plantillas y automatizaciones de correo transaccional.",
+      icon: "email",
+      tone: "info",
+    },
+    {
+      id: "hub",
+      title: "Communication Hub",
+      description: "Un único centro omnicanal para operar SMS, WhatsApp y Email.",
+      icon: "hub",
+      tone: "nova",
+    },
+    {
+      id: "flash",
+      title: "Flash SMS",
+      description: "Mensajes que aparecen directamente en pantalla, ideales para OTP y alertas.",
+      icon: "flash",
+      tone: "warning",
+    },
+    {
+      id: "crm",
+      title: "CRM integrado",
+      description:
+        "Contactos con canal preferido y timeline unificado de SMS, WhatsApp, Email e IA.",
+      icon: "crm",
+      tone: "info",
+    },
+    {
+      id: "analytics",
+      title: "Analytics avanzado",
+      description: "Reportes por canal en tiempo real: entrega, lectura, conversión y costo.",
+      icon: "analytics",
+      tone: "success",
+    },
+    {
+      id: "automation",
+      title: "Automatizaciones",
+      description: "Flujos con disparadores, condiciones y esperas.",
+      icon: "automation",
+      tone: "primary",
+    },
+    {
+      id: "api",
+      title: "API REST",
+      description: "Integra SMS, WhatsApp y Email en tu stack en menos de 5 minutos.",
+      icon: "api",
+      tone: "info",
+    },
+    {
+      id: "nova",
+      title: "CNM Nova · IA",
+      description: "Copiloto IA que crea, optimiza y ejecuta campañas por ti.",
+      icon: "nova",
+      tone: "nova",
+    },
+    {
+      id: "help",
+      title: "Centro de Ayuda",
+      description: "Documentación, tutoriales y soporte 24/7.",
+      icon: "help",
+      tone: "info",
+    },
+    {
+      id: "pwa",
+      title: "PWA",
+      description: "Instalable en cualquier dispositivo, funciona offline.",
+      icon: "pwa",
+      tone: "primary",
+    },
+    {
+      id: "responsive",
+      title: "100% Responsive",
+      description: "Diseñado para desktop, tablet y móvil por igual.",
+      icon: "responsive",
+      tone: "success",
+    },
+    {
+      id: "affiliates",
+      title: "Programa de Afiliados",
+      description: "Gana comisiones recurrentes recomendando SMS CNM.",
+      icon: "affiliates",
+      tone: "warning",
+    },
+    {
+      id: "distributors",
+      title: "Red de Distribuidores",
+      description: "Revende con tu propia marca y márgenes personalizados.",
+      icon: "distributors",
+      tone: "nova",
+    },
   ],
   steps: [
-    { step: 1, title: "Crear cuenta", description: "Regístrate en menos de 30 segundos, sin tarjeta." },
-    { step: 2, title: "Recargar saldo", description: "Elige tu plan o recarga desde $150.000 COP." },
-    { step: 3, title: "Importar contactos", description: "Sube tu base o conecta tu CRM en un clic." },
-    { step: 4, title: "Elegir canal y enviar", description: "SMS, WhatsApp o Email: crea, prueba y programa con CNM Nova." },
-    { step: 5, title: "Analizar resultados", description: "Mide entrega, respuestas y conversión en tiempo real." },
+    {
+      step: 1,
+      title: "Crear cuenta",
+      description: "Regístrate en menos de 30 segundos, sin tarjeta.",
+    },
+    {
+      step: 2,
+      title: "Recargar saldo",
+      description: "Elige tu plan o recarga desde $150.000 COP.",
+    },
+    {
+      step: 3,
+      title: "Importar contactos",
+      description: "Sube tu base o conecta tu CRM en un clic.",
+    },
+    {
+      step: 4,
+      title: "Elegir canal y enviar",
+      description: "SMS, WhatsApp o Email: crea, prueba y programa con CNM Nova.",
+    },
+    {
+      step: 5,
+      title: "Analizar resultados",
+      description: "Mide entrega, respuestas y conversión en tiempo real.",
+    },
   ],
   plans: [
-    { id: "p10", volume: 10000, volumeLabel: "Hasta 10.000 SMS", pricePerSms: 20, currency: "COP", badge: null, features: ["Panel completo", "CRM básico", "Soporte por correo"], cta: { label: "Comprar", href: "/dashboard" } },
-    { id: "p50", volume: 50000, volumeLabel: "Hasta 50.000 SMS", pricePerSms: 18, currency: "COP", badge: null, features: ["Todo lo anterior", "Automatizaciones", "Reportes avanzados"], cta: { label: "Comprar", href: "/dashboard" } },
-    { id: "p100", volume: 100000, volumeLabel: "Hasta 100.000 SMS", pricePerSms: 16, currency: "COP", badge: "top-seller", features: ["Todo lo anterior", "CNM Nova IA", "Soporte prioritario"], cta: { label: "Comprar", href: "/dashboard" } },
-    { id: "p200", volume: 200000, volumeLabel: "Hasta 200.000 SMS", pricePerSms: 14, currency: "COP", badge: null, features: ["Todo lo anterior", "API dedicada", "Webhooks ilimitados"], cta: { label: "Comprar", href: "/dashboard" } },
-    { id: "p300", volume: 300000, volumeLabel: "Hasta 300.000 SMS", pricePerSms: 12, currency: "COP", badge: "best-saving", features: ["Todo lo anterior", "Manager de cuenta", "SLA 99,9%"], cta: { label: "Comprar", href: "/dashboard" } },
-    { id: "p500", volume: 500000, volumeLabel: "Hasta 500.000 SMS", pricePerSms: 10, currency: "COP", badge: null, features: ["Todo lo anterior", "Onboarding personalizado", "Multi-usuario"], cta: { label: "Comprar", href: "/dashboard" } },
-    { id: "p1m", volume: 1000000, volumeLabel: "Hasta 1.000.000 SMS", pricePerSms: 9, currency: "COP", badge: "best-price", features: ["Todo lo anterior", "Infraestructura dedicada", "Consultoría estratégica"], cta: { label: "Comprar", href: "/dashboard" } },
+    {
+      id: "p10",
+      volume: 10000,
+      volumeLabel: "Hasta 10.000 SMS",
+      pricePerSms: 20,
+      currency: "COP",
+      badge: null,
+      features: ["Panel completo", "CRM básico", "Soporte por correo"],
+      cta: { label: "Comprar", href: "/dashboard" },
+    },
+    {
+      id: "p50",
+      volume: 50000,
+      volumeLabel: "Hasta 50.000 SMS",
+      pricePerSms: 18,
+      currency: "COP",
+      badge: null,
+      features: ["Todo lo anterior", "Automatizaciones", "Reportes avanzados"],
+      cta: { label: "Comprar", href: "/dashboard" },
+    },
+    {
+      id: "p100",
+      volume: 100000,
+      volumeLabel: "Hasta 100.000 SMS",
+      pricePerSms: 16,
+      currency: "COP",
+      badge: "top-seller",
+      features: ["Todo lo anterior", "CNM Nova IA", "Soporte prioritario"],
+      cta: { label: "Comprar", href: "/dashboard" },
+    },
+    {
+      id: "p200",
+      volume: 200000,
+      volumeLabel: "Hasta 200.000 SMS",
+      pricePerSms: 14,
+      currency: "COP",
+      badge: null,
+      features: ["Todo lo anterior", "API dedicada", "Webhooks ilimitados"],
+      cta: { label: "Comprar", href: "/dashboard" },
+    },
+    {
+      id: "p300",
+      volume: 300000,
+      volumeLabel: "Hasta 300.000 SMS",
+      pricePerSms: 12,
+      currency: "COP",
+      badge: "best-saving",
+      features: ["Todo lo anterior", "Manager de cuenta", "SLA 99,9%"],
+      cta: { label: "Comprar", href: "/dashboard" },
+    },
+    {
+      id: "p500",
+      volume: 500000,
+      volumeLabel: "Hasta 500.000 SMS",
+      pricePerSms: 10,
+      currency: "COP",
+      badge: null,
+      features: ["Todo lo anterior", "Onboarding personalizado", "Multi-usuario"],
+      cta: { label: "Comprar", href: "/dashboard" },
+    },
+    {
+      id: "p1m",
+      volume: 1000000,
+      volumeLabel: "Hasta 1.000.000 SMS",
+      pricePerSms: 9,
+      currency: "COP",
+      badge: "best-price",
+      features: ["Todo lo anterior", "Infraestructura dedicada", "Consultoría estratégica"],
+      cta: { label: "Comprar", href: "/dashboard" },
+    },
   ],
   calculator: {
     currency: "COP",
@@ -276,16 +456,42 @@ export const fallbackLandingContent: LandingContent = {
     { id: "clients", label: "Clientes activos", value: 3200, suffix: "+", format: "integer" },
     { id: "sent", label: "SMS enviados", value: 480, suffix: "M+", format: "integer" },
     { id: "uptime", label: "Disponibilidad", value: 99.99, suffix: "%", format: "decimal" },
-    { id: "latency", label: "Tiempo de respuesta API", value: 120, suffix: " ms", format: "integer" },
+    {
+      id: "latency",
+      label: "Tiempo de respuesta API",
+      value: 120,
+      suffix: " ms",
+      format: "integer",
+    },
     { id: "api", label: "Requests API / día", value: 12, suffix: "M", format: "integer" },
   ],
   screenshots: [
-    { id: "dashboard", title: "Dashboard", description: "Centro de Comando en tiempo real.", surface: "dashboard" },
+    {
+      id: "dashboard",
+      title: "Dashboard",
+      description: "Centro de Comando en tiempo real.",
+      surface: "dashboard",
+    },
     { id: "crm", title: "CRM", description: "Contactos y segmentos avanzados.", surface: "crm" },
-    { id: "analytics", title: "Analytics", description: "Métricas de entrega y conversión.", surface: "analytics" },
+    {
+      id: "analytics",
+      title: "Analytics",
+      description: "Métricas de entrega y conversión.",
+      surface: "analytics",
+    },
     { id: "nova", title: "CNM Nova", description: "Tu copiloto IA en acción.", surface: "nova" },
-    { id: "campaigns", title: "Campañas", description: "Constructor visual de campañas.", surface: "campaigns" },
-    { id: "automations", title: "Automatizaciones", description: "Flujos y disparadores.", surface: "automations" },
+    {
+      id: "campaigns",
+      title: "Campañas",
+      description: "Constructor visual de campañas.",
+      surface: "campaigns",
+    },
+    {
+      id: "automations",
+      title: "Automatizaciones",
+      description: "Flujos y disparadores.",
+      surface: "automations",
+    },
     { id: "api", title: "API", description: "Claves, logs y sandbox.", surface: "api" },
   ],
   api: {
@@ -308,14 +514,43 @@ export const fallbackLandingContent: LandingContent = {
     cta: { label: "Ver documentación", href: "#documentacion" },
   },
   faq: [
-    { question: "¿Cuánto tiempo tarda la activación?", answer: "Menos de 5 minutos. Creas tu cuenta, recargas saldo y ya puedes enviar." },
-    { question: "¿Puedo usar WhatsApp Business en la plataforma?", answer: "Sí. La plataforma soporta múltiples números de WhatsApp Business por empresa y departamento (Ventas, Soporte, Cobranza, Marketing). La conexión oficial con Meta se activa mediante Embedded Signup, sin copiar credenciales manualmente." },
-    { question: "¿Incluye Email Marketing?", answer: "Sí. El Communication Hub incluye campañas, listas, plantillas y automatizaciones de email junto a SMS y WhatsApp." },
-    { question: "¿Puedo integrar SMS CNM con mi CRM?", answer: "Sí. Ofrecemos API REST, Webhooks y conectores nativos para los CRMs más populares." },
-    { question: "¿Qué es CNM Nova?", answer: "Es tu copiloto de IA. Analiza tu negocio, redacta SMS, segmenta clientes y programa campañas por ti." },
-    { question: "¿Cómo funcionan los precios?", answer: "Pagas por volumen. Mientras más SMS compres, menor es el precio por unidad. Sin mensualidades ni permanencia." },
-    { question: "¿Tienen SLA empresarial?", answer: "Sí. Los planes desde 300.000 SMS incluyen SLA 99,9% y manager de cuenta dedicado." },
-    { question: "¿Ofrecen programa de afiliados o distribuidores?", answer: "Sí. Contamos con programa de afiliados con comisiones recurrentes y red de distribuidores con marca blanca." },
+    {
+      question: "¿Cuánto tiempo tarda la activación?",
+      answer: "Menos de 5 minutos. Creas tu cuenta, recargas saldo y ya puedes enviar.",
+    },
+    {
+      question: "¿Puedo usar WhatsApp Business en la plataforma?",
+      answer:
+        "Sí. La plataforma soporta múltiples números de WhatsApp Business por empresa y departamento (Ventas, Soporte, Cobranza, Marketing). La conexión oficial con Meta se activa mediante Embedded Signup, sin copiar credenciales manualmente.",
+    },
+    {
+      question: "¿Incluye Email Marketing?",
+      answer:
+        "Sí. El Communication Hub incluye campañas, listas, plantillas y automatizaciones de email junto a SMS y WhatsApp.",
+    },
+    {
+      question: "¿Puedo integrar SMS CNM con mi CRM?",
+      answer: "Sí. Ofrecemos API REST, Webhooks y conectores nativos para los CRMs más populares.",
+    },
+    {
+      question: "¿Qué es CNM Nova?",
+      answer:
+        "Es tu copiloto de IA. Analiza tu negocio, redacta SMS, segmenta clientes y programa campañas por ti.",
+    },
+    {
+      question: "¿Cómo funcionan los precios?",
+      answer:
+        "Pagas por volumen. Mientras más SMS compres, menor es el precio por unidad. Sin mensualidades ni permanencia.",
+    },
+    {
+      question: "¿Tienen SLA empresarial?",
+      answer: "Sí. Los planes desde 300.000 SMS incluyen SLA 99,9% y manager de cuenta dedicado.",
+    },
+    {
+      question: "¿Ofrecen programa de afiliados o distribuidores?",
+      answer:
+        "Sí. Contamos con programa de afiliados con comisiones recurrentes y red de distribuidores con marca blanca.",
+    },
   ],
   ctaFinal: {
     title: "Empieza hoy mismo.",
@@ -324,7 +559,8 @@ export const fallbackLandingContent: LandingContent = {
     secondaryCta: { label: "Hablar con ventas", href: "#contacto" },
   },
   footer: {
-    tagline: "Enterprise Omnichannel Communication Platform: SMS, WhatsApp Business y Email con IA.",
+    tagline:
+      "Enterprise Omnichannel Communication Platform: SMS, WhatsApp Business y Email con IA.",
     columns: [
       {
         title: "Producto",

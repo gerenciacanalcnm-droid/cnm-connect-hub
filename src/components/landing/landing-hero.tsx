@@ -7,10 +7,7 @@ export function LandingHero() {
   const { hero } = useLandingContent();
 
   return (
-    <section
-      id="inicio"
-      className="relative isolate overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-24"
-    >
+    <section id="inicio" className="relative isolate overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-24">
       {/* Ambient background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
@@ -37,8 +34,7 @@ export function LandingHero() {
             transition={{ duration: 0.6, delay: 0.05 }}
             className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl"
           >
-            {hero.title}{" "}
-            <span className="text-gradient-nova">{hero.highlight}</span>
+            {hero.title} <span className="text-gradient-nova">{hero.highlight}</span>
           </motion.h1>
 
           <motion.p

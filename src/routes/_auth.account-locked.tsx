@@ -36,7 +36,8 @@ function LockedPage() {
           <ShieldAlert className="h-5 w-5" />
         </div>
         <div className="rounded-lg border border-border bg-surface p-4 text-sm text-muted-foreground">
-          Puedes desbloquear tu cuenta restableciendo tu contraseña o esperando 15 minutos e intentando de nuevo.
+          Puedes desbloquear tu cuenta restableciendo tu contraseña o esperando 15 minutos e
+          intentando de nuevo.
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button asChild className="flex-1">

@@ -1,7 +1,4 @@
-import {
-  adminSettingsService,
-  type AdminSettings,
-} from "@/services/admin-settings.service";
+import { adminSettingsService, type AdminSettings } from "@/services/admin-settings.service";
 
 export interface AdminSettingsRepository {
   get(): Promise<AdminSettings>;

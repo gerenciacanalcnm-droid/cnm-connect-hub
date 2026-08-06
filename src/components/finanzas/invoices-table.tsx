@@ -17,32 +17,53 @@ export function InvoicesTable() {
   const columns = useMemo<ColumnDef<Invoice>[]>(
     () => [
       {
-        accessorKey: "number", header: "Factura",
+        accessorKey: "number",
+        header: "Factura",
         cell: ({ row }) => (
           <span className="inline-flex items-center gap-2 font-mono text-sm">
-            <FileText className="h-3.5 w-3.5 text-muted-foreground" />{row.original.number}
+            <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+            {row.original.number}
           </span>
         ),
       },
       { accessorKey: "concept", header: "Concepto" },
       {
-        accessorKey: "issuedAt", header: "Emitida",
+        accessorKey: "issuedAt",
+        header: "Emitida",
         cell: ({ row }) => new Date(row.original.issuedAt).toLocaleDateString("es-MX"),
       },
       {
-        accessorKey: "dueAt", header: "Vence",
+        accessorKey: "dueAt",
+        header: "Vence",
         cell: ({ row }) => new Date(row.original.dueAt).toLocaleDateString("es-MX"),
       },
       {
-        accessorKey: "amount", header: "Importe",
-        cell: ({ row }) => <span className="font-semibold">{formatCurrency(row.original.amount, row.original.currency, "es-MX")}</span>,
-      },
-      { accessorKey: "status", header: "Estado", cell: ({ row }) => <StatusBadge status={row.original.status} /> },
-      {
-        id: "actions", header: "",
+        accessorKey: "amount",
+        header: "Importe",
         cell: ({ row }) => (
-          <Button size="sm" variant="ghost" className="gap-1.5"
-            onClick={(e) => { e.stopPropagation(); toast.success(`Descargando ${row.original.number}.pdf`); }}>
+          <span className="font-semibold">
+            {formatCurrency(row.original.amount, row.original.currency, "es-MX")}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Estado",
+        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) => (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5"
+            onClick={(e) => {
+              e.stopPropagation();
+              toast.success(`Descargando ${row.original.number}.pdf`);
+            }}
+          >
             <Download className="h-3.5 w-3.5" /> PDF
           </Button>
         ),

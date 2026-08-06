@@ -33,11 +33,6 @@ export function CommandPalette() {
   const { data: invoicesData } = useInvoices();
   const { data: smsData } = useSms();
 
-  const contacts = contactsData?.items ?? [];
-  const campaigns = campaignsData?.items ?? [];
-  const invoices = invoicesData ?? [];
-  const sms = smsData?.items ?? [];
-
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -54,13 +49,13 @@ export function CommandPalette() {
     setTimeout(fn, 50);
   }
 
-  const filteredContacts = useMemo(
-    () => contacts.slice(0, 5),
-    [contacts],
+  const filteredContacts = useMemo(() => (contactsData?.items ?? []).slice(0, 5), [contactsData]);
+  const filteredCampaigns = useMemo(
+    () => (campaignsData?.items ?? []).slice(0, 5),
+    [campaignsData],
   );
-  const filteredCampaigns = useMemo(() => campaigns.slice(0, 5), [campaigns]);
-  const filteredInvoices = useMemo(() => invoices.slice(0, 5), [invoices]);
-  const filteredSms = useMemo(() => sms.slice(0, 5), [sms]);
+  const filteredInvoices = useMemo(() => (invoicesData ?? []).slice(0, 5), [invoicesData]);
+  const filteredSms = useMemo(() => (smsData?.items ?? []).slice(0, 5), [smsData]);
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
@@ -91,17 +86,19 @@ export function CommandPalette() {
         <CommandSeparator />
 
         <CommandGroup heading="Navegación">
-          {primaryNavigation.flatMap((s) => s.items).map((item) => (
-            <CommandItem
-              key={item.to}
-              value={`nav ${item.title} ${item.to}`}
-              onSelect={() => run(() => navigate({ to: item.to }))}
-            >
-              <item.icon className="mr-2 h-4 w-4" />
-              {item.title}
-              <span className="ml-auto text-xs text-muted-foreground">{item.to}</span>
-            </CommandItem>
-          ))}
+          {primaryNavigation
+            .flatMap((s) => s.items)
+            .map((item) => (
+              <CommandItem
+                key={item.to}
+                value={`nav ${item.title} ${item.to}`}
+                onSelect={() => run(() => navigate({ to: item.to }))}
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.title}
+                <span className="ml-auto text-xs text-muted-foreground">{item.to}</span>
+              </CommandItem>
+            ))}
         </CommandGroup>
 
         {filteredContacts.length > 0 && (

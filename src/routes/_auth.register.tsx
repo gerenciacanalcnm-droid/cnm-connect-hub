@@ -67,7 +67,13 @@ function RegisterPage() {
   const navigate = useNavigate();
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", company: "", email: "", password: "", terms: false as unknown as true },
+    defaultValues: {
+      name: "",
+      company: "",
+      email: "",
+      password: "",
+      terms: false as unknown as true,
+    },
   });
   const password = form.watch("password");
 
@@ -153,12 +159,18 @@ function RegisterPage() {
           <Checkbox
             className="mt-0.5"
             checked={!!form.watch("terms")}
-            onCheckedChange={(v) => form.setValue("terms", (!!v) as true, { shouldValidate: true })}
+            onCheckedChange={(v) => form.setValue("terms", !!v as true, { shouldValidate: true })}
           />
           <span>
             Acepto los{" "}
-            <a href="#" className="text-primary hover:underline">Términos de servicio</a> y la{" "}
-            <a href="#" className="text-primary hover:underline">Política de privacidad</a>.
+            <a href="#" className="text-primary hover:underline">
+              Términos de servicio
+            </a>{" "}
+            y la{" "}
+            <a href="#" className="text-primary hover:underline">
+              Política de privacidad
+            </a>
+            .
           </span>
         </label>
         {form.formState.errors.terms && (

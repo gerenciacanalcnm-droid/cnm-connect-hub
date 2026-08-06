@@ -2,9 +2,10 @@
  * Configuración del API Client. Reemplazable por variables de entorno o
  * por el Panel del Super Administrador en producción.
  */
-const env = (typeof import.meta !== "undefined"
-  ? (import.meta as unknown as { env: Record<string, string | undefined> }).env
-  : {}) ?? {};
+const env =
+  (typeof import.meta !== "undefined"
+    ? (import.meta as unknown as { env: Record<string, string | undefined> }).env
+    : {}) ?? {};
 
 export const apiConfig = {
   baseURL: env.VITE_API_URL ?? "/api",

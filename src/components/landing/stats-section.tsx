@@ -6,9 +6,7 @@ import type { LandingStat } from "@/config/landing-content";
 function formatValue(value: number, stat: LandingStat) {
   if (stat.format === "decimal") return value.toFixed(2);
   if (stat.format === "percent") return `${value.toFixed(1)}%`;
-  return new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(
-    Math.round(value),
-  );
+  return new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(Math.round(value));
 }
 
 function Counter({ stat }: { stat: LandingStat }) {

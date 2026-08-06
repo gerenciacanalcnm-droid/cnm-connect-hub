@@ -22,22 +22,37 @@ export function PaymentMethods() {
         {METHODS.map((m) => {
           const Icon = m.type === "card" ? CreditCard : m.type === "transfer" ? Landmark : Wallet;
           return (
-            <Card key={m.id} className={m.primary ? "border-primary/50 ring-2 ring-primary/20" : ""}>
+            <Card
+              key={m.id}
+              className={m.primary ? "border-primary/50 ring-2 ring-primary/20" : ""}
+            >
               <CardContent className="space-y-3 p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-primary/10 p-2 text-primary"><Icon className="h-5 w-5" /></div>
+                    <div className="rounded-lg bg-primary/10 p-2 text-primary">
+                      <Icon className="h-5 w-5" />
+                    </div>
                     <div>
                       <div className="font-medium">{m.brand}</div>
                       <div className="font-mono text-xs text-muted-foreground">•••• {m.last4}</div>
                     </div>
                   </div>
-                  {m.primary && <Badge className="gap-1"><Star className="h-3 w-3" /> Principal</Badge>}
+                  {m.primary && (
+                    <Badge className="gap-1">
+                      <Star className="h-3 w-3" /> Principal
+                    </Badge>
+                  )}
                 </div>
                 {m.exp && <div className="text-xs text-muted-foreground">Vence {m.exp}</div>}
                 <div className="flex gap-2 border-t border-border pt-3">
-                  {!m.primary && <Button size="sm" variant="outline">Marcar principal</Button>}
-                  <Button size="sm" variant="ghost" className="text-destructive">Eliminar</Button>
+                  {!m.primary && (
+                    <Button size="sm" variant="outline">
+                      Marcar principal
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" className="text-destructive">
+                    Eliminar
+                  </Button>
                 </div>
               </CardContent>
             </Card>

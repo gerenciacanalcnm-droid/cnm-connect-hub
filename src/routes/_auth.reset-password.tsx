@@ -13,7 +13,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 const schema = z
   .object({ password: z.string().min(8, "Mínimo 8 caracteres"), confirm: z.string() })
-  .refine((d) => d.password === d.confirm, { message: "Las contraseñas no coinciden", path: ["confirm"] });
+  .refine((d) => d.password === d.confirm, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirm"],
+  });
 type FormValues = z.infer<typeof schema>;
 
 export const Route = createFileRoute("/_auth/reset-password")({
