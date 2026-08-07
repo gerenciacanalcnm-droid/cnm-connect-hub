@@ -255,6 +255,155 @@ export type Database = {
           },
         ]
       }
+      commercial_features: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      commercial_history: {
+        Row: {
+          amount: number | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          entity_id: string | null
+          entity_type: string | null
+          event_type: string
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          amount?: number | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+        }
+        Update: {
+          amount?: number | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_promotions: {
+        Row: {
+          auto_apply: boolean
+          channel: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string
+          ends_at: string | null
+          id: string
+          kind: string
+          max_redemptions: number
+          name: string
+          redemptions: number
+          starts_at: string | null
+          status: string
+          updated_at: string
+          value: number
+          value_type: string
+        }
+        Insert: {
+          auto_apply?: boolean
+          channel?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          max_redemptions?: number
+          name: string
+          redemptions?: number
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+          value?: number
+          value_type?: string
+        }
+        Update: {
+          auto_apply?: boolean
+          channel?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          max_redemptions?: number
+          name?: string
+          redemptions?: number
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+          value?: number
+          value_type?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           balance: number
@@ -1078,6 +1227,60 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_gateways: {
+        Row: {
+          code: string
+          config: Json
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_enabled: boolean
+          last_test_at: string | null
+          last_test_message: string | null
+          last_test_ok: boolean | null
+          mode: string
+          name: string
+          sort_order: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          config?: Json
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_enabled?: boolean
+          last_test_at?: string | null
+          last_test_message?: string | null
+          last_test_ok?: boolean | null
+          mode?: string
+          name: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          config?: Json
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_enabled?: boolean
+          last_test_at?: string | null
+          last_test_message?: string | null
+          last_test_ok?: boolean | null
+          mode?: string
+          name?: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       permissions: {
         Row: {
           code: string
@@ -1096,6 +1299,146 @@ export type Database = {
           description?: string | null
           id?: string
           module?: string
+        }
+        Relationships: []
+      }
+      plan_features: {
+        Row: {
+          created_at: string
+          feature_key: string
+          id: string
+          included: boolean
+          note: string | null
+          plan_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          feature_key: string
+          id?: string
+          included?: boolean
+          note?: string | null
+          plan_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          feature_key?: string
+          id?: string
+          included?: boolean
+          note?: string | null
+          plan_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_features_feature_key_fkey"
+            columns: ["feature_key"]
+            isOneToOne: false
+            referencedRelation: "commercial_features"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "plan_features_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_limits: {
+        Row: {
+          created_at: string
+          id: string
+          is_unlimited: boolean
+          limit_key: string
+          limit_value: number
+          plan_id: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_unlimited?: boolean
+          limit_key: string
+          limit_value?: number
+          plan_id: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_unlimited?: boolean
+          limit_key?: string
+          limit_value?: number
+          plan_id?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_limits_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          badge: string | null
+          code: string
+          color: string
+          created_at: string
+          currency: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          is_visible: boolean
+          name: string
+          price_monthly: number
+          price_yearly: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          code: string
+          color?: string
+          created_at?: string
+          currency?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          is_visible?: boolean
+          name: string
+          price_monthly?: number
+          price_yearly?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          code?: string
+          color?: string
+          created_at?: string
+          currency?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          is_visible?: boolean
+          name?: string
+          price_monthly?: number
+          price_yearly?: number
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1138,44 +1481,107 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_tiers: {
+        Row: {
+          channel: string
+          created_at: string
+          currency: string
+          from_qty: number
+          id: string
+          is_active: boolean
+          sort_order: number
+          to_qty: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          currency?: string
+          from_qty?: number
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          to_qty?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          currency?: string
+          from_qty?: number
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          to_qty?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       recharges: {
         Row: {
           amount: number
+          channel: string
           company_id: string
           completed_at: string | null
           created_at: string
           created_by: string | null
           currency: string
+          gateway_code: string | null
           id: string
           metadata: Json
+          mode: string
           payment_method: string | null
           payment_reference: string | null
+          receipt_path: string | null
+          review_note: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: Database["public"]["Enums"]["recharge_status"]
         }
         Insert: {
           amount: number
+          channel?: string
           company_id: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
+          gateway_code?: string | null
           id?: string
           metadata?: Json
+          mode?: string
           payment_method?: string | null
           payment_reference?: string | null
+          receipt_path?: string | null
+          review_note?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["recharge_status"]
         }
         Update: {
           amount?: number
+          channel?: string
           company_id?: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
+          gateway_code?: string | null
           id?: string
           metadata?: Json
+          mode?: string
           payment_method?: string | null
           payment_reference?: string | null
+          receipt_path?: string | null
+          review_note?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["recharge_status"]
         }
         Relationships: [
@@ -1528,6 +1934,110 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json
+          reference: string | null
+          type: string
+          units: number
+          wallet_id: string
+        }
+        Insert: {
+          amount?: number
+          balance_after?: number | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          reference?: string | null
+          type: string
+          units?: number
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          reference?: string | null
+          type?: string
+          units?: number
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallets: {
+        Row: {
+          balance: number
+          channel: string
+          company_id: string
+          consumed: number
+          created_at: string
+          credits: number
+          currency: string
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          channel: string
+          company_id: string
+          consumed?: number
+          created_at?: string
+          credits?: number
+          currency?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          channel?: string
+          company_id?: string
+          consumed?: number
+          created_at?: string
+          credits?: number
+          currency?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       webhooks: {
         Row: {
