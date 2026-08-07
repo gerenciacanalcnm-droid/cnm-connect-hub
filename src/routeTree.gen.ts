@@ -31,6 +31,7 @@ import { Route as AppComunicacionRouteImport } from './routes/_app.comunicacion'
 import { Route as AppAutomatizacionesRouteImport } from './routes/_app.automatizaciones'
 import { Route as AppApiRouteImport } from './routes/_app.api'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
+import { Route as ApiPublicSmsIpTestRouteImport } from './routes/api/public/sms-ip-test'
 import { Route as AdminAdminUsuariosRouteImport } from './routes/_admin.admin.usuarios'
 import { Route as AdminAdminTarifasRouteImport } from './routes/_admin.admin.tarifas'
 import { Route as AdminAdminSistemaRouteImport } from './routes/_admin.admin.sistema'
@@ -162,6 +163,11 @@ const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
   getParentRoute: () => AppRoute,
+} as any)
+const ApiPublicSmsIpTestRoute = ApiPublicSmsIpTestRouteImport.update({
+  id: '/api/public/sms-ip-test',
+  path: '/api/public/sms-ip-test',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAdminUsuariosRoute = AdminAdminUsuariosRouteImport.update({
   id: '/admin/usuarios',
@@ -330,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/admin/sistema': typeof AdminAdminSistemaRoute
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
+  '/api/public/sms-ip-test': typeof ApiPublicSmsIpTestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -375,6 +382,7 @@ export interface FileRoutesByTo {
   '/admin/sistema': typeof AdminAdminSistemaRoute
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
+  '/api/public/sms-ip-test': typeof ApiPublicSmsIpTestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -424,6 +432,7 @@ export interface FileRoutesById {
   '/_admin/admin/sistema': typeof AdminAdminSistemaRoute
   '/_admin/admin/tarifas': typeof AdminAdminTarifasRoute
   '/_admin/admin/usuarios': typeof AdminAdminUsuariosRoute
+  '/api/public/sms-ip-test': typeof ApiPublicSmsIpTestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -471,6 +480,7 @@ export interface FileRouteTypes {
     | '/admin/sistema'
     | '/admin/tarifas'
     | '/admin/usuarios'
+    | '/api/public/sms-ip-test'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -516,6 +526,7 @@ export interface FileRouteTypes {
     | '/admin/sistema'
     | '/admin/tarifas'
     | '/admin/usuarios'
+    | '/api/public/sms-ip-test'
   id:
     | '__root__'
     | '/'
@@ -564,6 +575,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/sistema'
     | '/_admin/admin/tarifas'
     | '/_admin/admin/usuarios'
+    | '/api/public/sms-ip-test'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -571,6 +583,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  ApiPublicSmsIpTestRoute: typeof ApiPublicSmsIpTestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -728,6 +741,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/analytics'
       preLoaderRoute: typeof AppAnalyticsRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/api/public/sms-ip-test': {
+      id: '/api/public/sms-ip-test'
+      path: '/api/public/sms-ip-test'
+      fullPath: '/api/public/sms-ip-test'
+      preLoaderRoute: typeof ApiPublicSmsIpTestRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_admin/admin/usuarios': {
       id: '/_admin/admin/usuarios'
@@ -1013,6 +1033,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  ApiPublicSmsIpTestRoute: ApiPublicSmsIpTestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
