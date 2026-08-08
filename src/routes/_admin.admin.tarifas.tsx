@@ -66,7 +66,11 @@ function TarifasPage() {
 
   const columns = useMemo<ColumnDef<RateTier, unknown>[]>(
     () => [
-      { accessorKey: "fromQty", header: "Desde", cell: (c) => formatNumber(c.row.original.fromQty) },
+      {
+        accessorKey: "fromQty",
+        header: "Desde",
+        cell: (c) => formatNumber(c.row.original.fromQty),
+      },
       { accessorKey: "toQty", header: "Hasta", cell: (c) => formatNumber(c.row.original.toQty) },
       {
         accessorKey: "unitPrice",

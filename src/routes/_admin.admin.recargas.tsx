@@ -68,7 +68,11 @@ function RecargasPage() {
         cell: (c) => <Badge variant="outline">{c.row.original.channel}</Badge>,
       },
       { accessorKey: "mode", header: "Modo" },
-      { accessorKey: "gatewayCode", header: "Pasarela", cell: (c) => c.row.original.gatewayCode ?? "—" },
+      {
+        accessorKey: "gatewayCode",
+        header: "Pasarela",
+        cell: (c) => c.row.original.gatewayCode ?? "—",
+      },
       {
         accessorKey: "reviewStatus",
         header: "Estado",

@@ -117,10 +117,13 @@ function PromoPage() {
       {
         accessorKey: "redemptions",
         header: "Canjes",
-        cell: (c) =>
-          `${c.row.original.redemptions}/${c.row.original.maxRedemptions || "∞"}`,
+        cell: (c) => `${c.row.original.redemptions}/${c.row.original.maxRedemptions || "∞"}`,
       },
-      { accessorKey: "startsAt", header: "Inicio", cell: (c) => day(c.row.original.startsAt) || "—" },
+      {
+        accessorKey: "startsAt",
+        header: "Inicio",
+        cell: (c) => day(c.row.original.startsAt) || "—",
+      },
       { accessorKey: "endsAt", header: "Fin", cell: (c) => day(c.row.original.endsAt) || "—" },
       {
         accessorKey: "autoApply",

@@ -177,8 +177,8 @@ function PlanesPage() {
                   <span className="text-xs text-muted-foreground">/ mes</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {p.features.filter((f) => f.included).length} funcionalidades ·{" "}
-                  {p.limits.length} límites
+                  {p.features.filter((f) => f.included).length} funcionalidades · {p.limits.length}{" "}
+                  límites
                 </p>
                 <div className="flex items-center justify-between rounded-md border border-border p-2 text-xs">
                   <span className="flex items-center gap-1.5">
@@ -191,9 +191,7 @@ function PlanesPage() {
                   </span>
                   <Switch
                     checked={p.isVisible}
-                    onCheckedChange={(v) =>
-                      upsert.mutate({ ...toDraft(p), is_visible: v })
-                    }
+                    onCheckedChange={(v) => upsert.mutate({ ...toDraft(p), is_visible: v })}
                   />
                 </div>
                 <div className="flex gap-2">
@@ -320,7 +318,9 @@ function PlanesPage() {
                   <Input
                     type="number"
                     value={draft.sort_order}
-                    onChange={(e) => setDraft((d) => ({ ...d, sort_order: Number(e.target.value) }))}
+                    onChange={(e) =>
+                      setDraft((d) => ({ ...d, sort_order: Number(e.target.value) }))
+                    }
                   />
                 </div>
               </div>

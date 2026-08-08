@@ -94,7 +94,10 @@ export function usePlanMutations() {
     mutationFn: (input: Record<string, unknown>) => w.upsertPlan(input),
     onSuccess: invalidate,
   });
-  const remove = useMutation({ mutationFn: (id: string) => w.deletePlan(id), onSuccess: invalidate });
+  const remove = useMutation({
+    mutationFn: (id: string) => w.deletePlan(id),
+    onSuccess: invalidate,
+  });
   const duplicate = useMutation({
     mutationFn: (id: string) => w.duplicatePlan(id),
     onSuccess: invalidate,
@@ -149,7 +152,10 @@ export function useGatewayMutations() {
     mutationFn: (input: Record<string, unknown>) => w.updateGateway(input),
     onSuccess: invalidate,
   });
-  const test = useMutation({ mutationFn: (id: string) => w.testGateway(id), onSuccess: invalidate });
+  const test = useMutation({
+    mutationFn: (id: string) => w.testGateway(id),
+    onSuccess: invalidate,
+  });
   return { update, test };
 }
 
