@@ -209,3 +209,69 @@ export const commercialService: CommercialService = {
     }));
   },
 };
+
+/* ═══════════════ Escrituras del Motor Comercial ═══════════════ */
+
+export interface CommercialWriteService {
+  upsertPlan(input: Record<string, unknown>): Promise<{ id: string }>;
+  deletePlan(id: string): Promise<void>;
+  duplicatePlan(id: string): Promise<void>;
+  setPlanFeature(planId: string, featureKey: string, included: boolean): Promise<void>;
+  setPlanLimit(
+    planId: string,
+    limitKey: string,
+    limitValue: number,
+    unit: string,
+    isUnlimited: boolean,
+  ): Promise<void>;
+  upsertRateTier(input: Record<string, unknown>): Promise<void>;
+  deleteRateTier(id: string): Promise<void>;
+  upsertPromotion(input: Record<string, unknown>): Promise<void>;
+  deletePromotion(id: string): Promise<void>;
+  updateGateway(input: Record<string, unknown>): Promise<void>;
+  testGateway(id: string): Promise<{ ok: boolean; message: string }>;
+  adjustWallet(input: Record<string, unknown>): Promise<void>;
+  reviewRecharge(id: string, status: string, note: string): Promise<void>;
+}
+
+export const commercialWriteService: CommercialWriteService = {
+  async upsertPlan(input) {
+    return fn.upsertPlan({ data: input as never });
+  },
+  async deletePlan(id) {
+    await fn.deletePlan({ data: { id } });
+  },
+  async duplicatePlan(id) {
+    await fn.duplicatePlan({ data: { id } });
+  },
+  async setPlanFeature(plan_id, feature_key, included) {
+    await fn.setPlanFeature({ data: { plan_id, feature_key, included } });
+  },
+  async setPlanLimit(plan_id, limit_key, limit_value, unit, is_unlimited) {
+    await fn.setPlanLimit({ data: { plan_id, limit_key, limit_value, unit, is_unlimited } });
+  },
+  async upsertRateTier(input) {
+    await fn.upsertRateTier({ data: input as never });
+  },
+  async deleteRateTier(id) {
+    await fn.deleteRateTier({ data: { id } });
+  },
+  async upsertPromotion(input) {
+    await fn.upsertPromotion({ data: input as never });
+  },
+  async deletePromotion(id) {
+    await fn.deletePromotion({ data: { id } });
+  },
+  async updateGateway(input) {
+    await fn.updatePaymentGateway({ data: input as never });
+  },
+  async testGateway(id) {
+    return fn.testPaymentGateway({ data: { id } });
+  },
+  async adjustWallet(input) {
+    await fn.adjustWallet({ data: input as never });
+  },
+  async reviewRecharge(id, review_status, review_note) {
+    await fn.reviewRecharge({ data: { id, review_status: review_status as never, review_note } });
+  },
+};

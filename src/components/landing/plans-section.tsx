@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Check, Sparkles, TrendingDown, Trophy } from "lucide-react";
 import { useLandingContent } from "@/hooks/use-landing-content";
+import { useRateTiers } from "@/hooks/use-commercial";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { LandingPlan, LandingPlanBadge } from "@/config/landing-content";
@@ -87,7 +89,31 @@ function PlanCard({ plan, index }: { plan: LandingPlan; index: number }) {
 }
 
 export function PlansSection() {
-  const { plans } = useLandingContent();
+  const { plans: fallbackPlans } = useLandingContent();
+  const { data: tiers } = useRateTiers();
+
+  /** Los precios por volumen provienen del Motor Comercial (rate_tiers). */
+  const plans = useMemo<LandingPlan[]>(() => {
+    const sms = (tiers ?? []).filter((t) => t.channel === "sms" && t.isActive);
+    if (sms.length === 0) return fallbackPlans;
+    const sorted = [...sms].sort((a, b) => a.fromQty - b.fromQty);
+    const cheapest = Math.min(...sorted.map((t) => t.unitPrice));
+    return sorted.map((t, i) => ({
+      id: t.id,
+      volume: t.toQty || t.fromQty,
+      volumeLabel: `${formatNumber(t.fromQty)} – ${t.toQty ? formatNumber(t.toQty) : "∞"} SMS`,
+      pricePerSms: t.unitPrice,
+      currency: t.currency,
+      badge:
+        t.unitPrice === cheapest
+          ? "best-price"
+          : i === Math.floor(sorted.length / 2)
+            ? "top-seller"
+            : null,
+      features: fallbackPlans[Math.min(i, fallbackPlans.length - 1)]?.features ?? [],
+      cta: { label: "Empezar ahora", href: "/register" },
+    }));
+  }, [tiers, fallbackPlans]);
 
   return (
     <section id="planes" className="relative py-24 sm:py-32">
