@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Check, Sparkles, TrendingDown, Trophy } from "lucide-react";
 import { useLandingContent } from "@/hooks/use-landing-content";
+import { useRateTiers } from "@/hooks/use-commercial";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { LandingPlan, LandingPlanBadge } from "@/config/landing-content";
