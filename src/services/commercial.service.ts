@@ -212,8 +212,6 @@ export const commercialService: CommercialService = {
 
 /* ═══════════════ Escrituras del Motor Comercial ═══════════════ */
 
-export type PlanInput = Parameters<typeof fn.upsertPlan>[0] extends { data: infer D } ? D : never;
-
 export interface CommercialWriteService {
   upsertPlan(input: Record<string, unknown>): Promise<{ id: string }>;
   deletePlan(id: string): Promise<void>;

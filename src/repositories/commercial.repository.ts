@@ -11,3 +11,7 @@ export const commercialRepository: CommercialService = {
   listRecharges: () => commercialService.listRecharges(),
   listHistory: () => commercialService.listHistory(),
 };
+
+import { commercialWriteService, type CommercialWriteService } from "@/services/commercial.service";
+
+export const commercialWriteRepository: CommercialWriteService = commercialWriteService;
