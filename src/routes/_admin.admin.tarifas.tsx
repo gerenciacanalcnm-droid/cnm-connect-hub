@@ -1,24 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AdminPage } from "@/components/admin/admin-page";
 import { DataTable, type ColumnDef } from "@/components/common/data-table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { Plus, Copy, Pencil, Trash2 } from "lucide-react";
-import { useAdminTariffs } from "@/hooks/use-admin-settings";
-import type { TariffTier } from "@/services/admin-settings.service";
-import { formatCurrency } from "@/lib/format";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRateTiers, useRateTierMutations } from "@/hooks/use-commercial";
+import type { CommercialChannel, RateTier } from "@/types/commercial";
+import { formatCurrency, formatNumber } from "@/lib/format";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_admin/admin/tarifas")({
@@ -26,33 +27,81 @@ export const Route = createFileRoute("/_admin/admin/tarifas")({
   component: TarifasPage,
 });
 
-function TarifasPage() {
-  const initial = useAdminTariffs();
-  const [data, setData] = useState<TariffTier[]>(initial);
-  const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState({ from: 0, to: 0, price: 0 });
+type Draft = {
+  id?: string;
+  channel: CommercialChannel;
+  from_qty: number;
+  to_qty: number;
+  unit_price: number;
+  currency: string;
+  is_active: boolean;
+  sort_order: number;
+};
 
-  const columns = useMemo<ColumnDef<TariffTier, unknown>[]>(
+const CHANNELS: { value: CommercialChannel; label: string }[] = [
+  { value: "sms", label: "SMS" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "email", label: "Email" },
+];
+
+function TarifasPage() {
+  const { data: tiers = [], isLoading } = useRateTiers();
+  const { upsert, remove } = useRateTierMutations();
+  const [channel, setChannel] = useState<CommercialChannel>("sms");
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<Draft>({
+    channel: "sms",
+    from_qty: 0,
+    to_qty: 0,
+    unit_price: 0,
+    currency: "COP",
+    is_active: true,
+    sort_order: 0,
+  });
+
+  const rows = useMemo(
+    () => tiers.filter((t) => t.channel === channel).sort((a, b) => a.fromQty - b.fromQty),
+    [tiers, channel],
+  );
+
+  const columns = useMemo<ColumnDef<RateTier, unknown>[]>(
     () => [
-      { accessorKey: "order", header: "#" },
-      { accessorKey: "from", header: "Desde" },
-      { accessorKey: "to", header: "Hasta" },
+      { accessorKey: "fromQty", header: "Desde", cell: (c) => formatNumber(c.row.original.fromQty) },
+      { accessorKey: "toQty", header: "Hasta", cell: (c) => formatNumber(c.row.original.toQty) },
       {
-        accessorKey: "price",
-        header: "Precio unit.",
-        cell: (c) => formatCurrency(c.row.original.price),
+        accessorKey: "unitPrice",
+        header: "Precio unitario",
+        cell: (c) => (
+          <span className="font-medium">
+            {formatCurrency(c.row.original.unitPrice, c.row.original.currency)}
+          </span>
+        ),
       },
       {
-        accessorKey: "active",
+        accessorKey: "channel",
+        header: "Canal",
+        cell: (c) => <Badge variant="outline">{c.row.original.channel}</Badge>,
+      },
+      {
+        accessorKey: "isActive",
         header: "Estado",
-        cell: (c) =>
-          c.row.original.active ? (
-            <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
-              Activa
-            </Badge>
-          ) : (
-            <Badge variant="outline">Inactiva</Badge>
-          ),
+        cell: (c) => (
+          <Switch
+            checked={c.row.original.isActive}
+            onCheckedChange={(v) =>
+              upsert.mutate({
+                id: c.row.original.id,
+                channel: c.row.original.channel,
+                from_qty: c.row.original.fromQty,
+                to_qty: c.row.original.toQty,
+                unit_price: c.row.original.unitPrice,
+                currency: c.row.original.currency,
+                is_active: v,
+                sort_order: c.row.original.sortOrder,
+              })
+            }
+          />
+        ),
       },
       {
         id: "actions",
@@ -62,23 +111,31 @@ function TarifasPage() {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Editar tarifa"
               onClick={() => {
-                setData((d) => [
-                  ...d,
-                  { ...row.original, id: `t${Date.now()}`, order: d.length + 1 },
-                ]);
-                toast.success("Tarifa duplicada");
+                setDraft({
+                  id: row.original.id,
+                  channel: row.original.channel,
+                  from_qty: row.original.fromQty,
+                  to_qty: row.original.toQty,
+                  unit_price: row.original.unitPrice,
+                  currency: row.original.currency,
+                  is_active: row.original.isActive,
+                  sort_order: row.original.sortOrder,
+                });
+                setOpen(true);
               }}
             >
-              <Copy className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon">
               <Pencil className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setData((d) => d.filter((x) => x.id !== row.original.id))}
+              aria-label="Eliminar tarifa"
+              onClick={async () => {
+                await remove.mutateAsync(row.original.id);
+                toast.success("Tarifa eliminada");
+              }}
             >
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
@@ -86,81 +143,118 @@ function TarifasPage() {
         ),
       },
     ],
-    [],
+    [remove, upsert],
   );
+
+  const save = async () => {
+    try {
+      await upsert.mutateAsync({ ...draft });
+      toast.success(draft.id ? "Tarifa actualizada" : "Tarifa creada");
+      setOpen(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No se pudo guardar la tarifa");
+    }
+  };
 
   return (
     <AdminPage
       title="Tarifas por volumen"
-      description="Escalones dinámicos de precios por rango de SMS. Nunca escritos en código."
+      description="Precio unitario por canal según el volumen mensual enviado."
       actions={
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm">
-              <Plus className="mr-1.5 h-4 w-4" />
-              Nueva tarifa
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Nueva tarifa</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-3 py-2">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="grid gap-1.5">
-                  <Label>Desde</Label>
-                  <Input
-                    type="number"
-                    onChange={(e) => setDraft((d) => ({ ...d, from: +e.target.value }))}
-                  />
-                </div>
-                <div className="grid gap-1.5">
-                  <Label>Hasta</Label>
-                  <Input
-                    type="number"
-                    onChange={(e) => setDraft((d) => ({ ...d, to: +e.target.value }))}
-                  />
-                </div>
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Precio unitario</Label>
-                <Input
-                  type="number"
-                  onChange={(e) => setDraft((d) => ({ ...d, price: +e.target.value }))}
-                />
-              </div>
-              <div className="flex items-center justify-between rounded-md border border-border p-3">
-                <Label>Activa</Label>
-                <Switch defaultChecked />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={() => {
-                  setData((d) => [
-                    ...d,
-                    { id: `t${Date.now()}`, ...draft, active: true, order: d.length + 1 },
-                  ]);
-                  setOpen(false);
-                  toast.success("Tarifa creada");
-                }}
-              >
-                Crear
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button
+          size="sm"
+          onClick={() => {
+            setDraft({
+              channel,
+              from_qty: 0,
+              to_qty: 0,
+              unit_price: 0,
+              currency: "COP",
+              is_active: true,
+              sort_order: rows.length,
+            });
+            setOpen(true);
+          }}
+        >
+          <Plus className="mr-1.5 h-4 w-4" />
+          Nueva tarifa
+        </Button>
       }
     >
-      <DataTable
-        data={data}
-        columns={columns}
-        searchPlaceholder="Buscar tarifa…"
-        exportFilename="tarifas"
-      />
+      <Tabs value={channel} onValueChange={(v) => setChannel(v as CommercialChannel)}>
+        <TabsList>
+          {CHANNELS.map((c) => (
+            <TabsTrigger key={c.value} value={c.value}>
+              {c.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
+      <div className="mt-4">
+        {isLoading ? (
+          <Skeleton className="h-64 w-full rounded-xl" />
+        ) : (
+          <DataTable
+            data={rows}
+            columns={columns}
+            searchPlaceholder="Buscar tarifa…"
+            exportFilename="tarifas"
+          />
+        )}
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{draft.id ? "Editar tarifa" : "Nueva tarifa"}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-1.5">
+                <Label>Desde</Label>
+                <Input
+                  type="number"
+                  value={draft.from_qty}
+                  onChange={(e) => setDraft((d) => ({ ...d, from_qty: Number(e.target.value) }))}
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label>Hasta</Label>
+                <Input
+                  type="number"
+                  value={draft.to_qty}
+                  onChange={(e) => setDraft((d) => ({ ...d, to_qty: Number(e.target.value) }))}
+                />
+              </div>
+            </div>
+            <div className="grid gap-1.5">
+              <Label>Precio unitario</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={draft.unit_price}
+                onChange={(e) => setDraft((d) => ({ ...d, unit_price: Number(e.target.value) }))}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-md border border-border p-3">
+              <Label>Activa</Label>
+              <Switch
+                checked={draft.is_active}
+                onCheckedChange={(v) => setDraft((d) => ({ ...d, is_active: v }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={save} disabled={upsert.isPending}>
+              {draft.id ? "Guardar" : "Crear"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminPage>
   );
 }
