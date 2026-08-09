@@ -1,28 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { AdminPage } from "@/components/admin/admin-page";
 import { KpiCard } from "@/components/common/kpi-card";
 import { ChartCard } from "@/components/common/chart-card";
+import { EmptyState } from "@/components/common/empty-state";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Building2,
   Users,
-  MessageSquare,
   DollarSign,
-  TrendingUp,
-  AlertTriangle,
-  Activity,
   Wallet,
-  Send,
-  MessageCircle,
-  Zap,
   Package,
   RefreshCw,
-  ServerCog,
+  Coins,
+  TrendingDown,
+  Tag,
+  Activity,
+  Inbox,
 } from "lucide-react";
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
   CartesianGrid,
   XAxis,
   YAxis,
@@ -31,178 +29,209 @@ import {
   Bar,
   Legend,
 } from "recharts";
-import { StatusBadge } from "@/components/common/status-badge";
+import {
+  useCommercialHistory,
+  useCommercialPlans,
+  useCommercialPromotions,
+  useRechargeRequests,
+  useWallets,
+  useWalletTransactions,
+} from "@/hooks/use-commercial";
+import { useUsers } from "@/hooks/use-users";
+import { formatCurrency, formatNumber } from "@/lib/format";
 
 export const Route = createFileRoute("/_admin/admin/dashboard")({
   head: () => ({
     meta: [
       { title: "Super Dashboard — SMS CNM Admin" },
       { name: "description", content: "Centro de control ejecutivo de SMS CNM." },
+      { property: "og:title", content: "Super Dashboard — SMS CNM Admin" },
+      { property: "og:description", content: "Centro de control ejecutivo de SMS CNM." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: SuperDashboard,
 });
 
-const revenue = Array.from({ length: 12 }, (_, i) => ({
-  month: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"][i],
-  ingresos: 8_000_000 + Math.round(Math.random() * 4_000_000),
-  recargas: 6_000_000 + Math.round(Math.random() * 3_500_000),
-}));
-
-const traffic = Array.from({ length: 30 }, (_, i) => ({
-  d: `${i + 1}`,
-  sms: 40_000 + Math.round(Math.random() * 30_000),
-  wa: 5_000 + Math.round(Math.random() * 8_000),
-}));
-
-const up = { value: "+12%", direction: "up" as const };
-const down = { value: "-8%", direction: "down" as const };
+const MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 function SuperDashboard() {
+  const wallets = useWallets();
+  const txs = useWalletTransactions();
+  const recharges = useRechargeRequests();
+  const plans = useCommercialPlans();
+  const promotions = useCommercialPromotions();
+  const history = useCommercialHistory();
+  const users = useUsers();
+
+  const refetchAll = () => {
+    void wallets.refetch();
+    void txs.refetch();
+    void recharges.refetch();
+    void history.refetch();
+  };
+
+  const walletRows = wallets.data ?? [];
+  const rechargeRows = recharges.data ?? [];
+  const txRows = txs.data ?? [];
+  const historyRows = history.data ?? [];
+
+  const companies = useMemo(
+    () => new Set(walletRows.map((w) => w.companyId)).size,
+    [walletRows],
+  );
+  const totals = useMemo(
+    () => ({
+      balance: walletRows.reduce((a, w) => a + w.balance, 0),
+      consumed: walletRows.reduce((a, w) => a + w.consumed, 0),
+      credits: walletRows.reduce((a, w) => a + w.credits, 0),
+    }),
+    [walletRows],
+  );
+
+  const approved = rechargeRows.filter((r) => r.reviewStatus === "aprobada");
+  const pending = rechargeRows.filter((r) => r.reviewStatus === "pendiente");
+  const revenue = approved.reduce((a, r) => a + r.amount, 0);
+
+  const monthly = useMemo(() => {
+    const base = MONTHS.map((month) => ({ month, ingresos: 0, recargas: 0 }));
+    for (const r of approved) {
+      const d = new Date(r.createdAt);
+      if (Number.isNaN(d.getTime())) continue;
+      const slot = base[d.getMonth()];
+      if (slot) {
+        slot.ingresos += r.amount;
+        slot.recargas += 1;
+      }
+    }
+    return base;
+  }, [approved]);
+
+  const hasRevenue = monthly.some((m) => m.ingresos > 0);
+  const activePlans = (plans.data ?? []).filter((p) => p.isActive);
+  const activePromos = (promotions.data ?? []).filter((p) => p.status === "active");
+
   return (
     <AdminPage
       title="Dashboard Ejecutivo"
-      description="Métricas operativas y comerciales en tiempo real."
+      description="Métricas comerciales reales del Motor Comercial."
       actions={
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <RefreshCw className="mr-1.5 h-4 w-4" />
-            Actualizar
-          </Button>
-          <Button size="sm">Exportar</Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={refetchAll}>
+          <RefreshCw className="mr-1.5 h-4 w-4" />
+          Actualizar
+        </Button>
       }
     >
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KpiCard label="Empresas" value="248" icon={Building2} delta={up} />
-        <KpiCard label="Usuarios activos" value="1.842" icon={Users} delta={up} />
-        <KpiCard label="Clientes" value="3.517" icon={Users} delta={up} />
+        <KpiCard label="Empresas con wallet" value={formatNumber(companies)} icon={Building2} />
+        <KpiCard label="Usuarios" value={formatNumber(users.data?.length ?? 0)} icon={Users} />
         <KpiCard
-          label="Ingresos (mes)"
-          value="$128.4M"
+          label="Ingresos aprobados"
+          value={formatCurrency(revenue)}
           icon={DollarSign}
-          delta={up}
           tone="success"
         />
-        <KpiCard label="Saldo vendido" value="$412M" icon={Wallet} delta={up} />
-        <KpiCard label="Saldo disponible" value="$78.2M" icon={Wallet} />
-        <KpiCard label="SMS enviados hoy" value="184K" icon={Send} delta={up} />
+        <KpiCard label="Saldo disponible" value={formatCurrency(totals.balance)} icon={Wallet} />
         <KpiCard
-          label="WhatsApp enviados"
-          value="21K"
-          icon={MessageCircle}
-          delta={up}
-          tone="nova"
+          label="Consumo total"
+          value={formatCurrency(totals.consumed)}
+          icon={TrendingDown}
         />
-        <KpiCard label="Campañas activas" value="132" icon={MessageSquare} />
-        <KpiCard label="Recargas (mes)" value="612" icon={Package} delta={up} />
-        <KpiCard label="Clientes nuevos" value="94" icon={TrendingUp} delta={up} tone="success" />
-        <KpiCard label="Uso API" value="1.2M req" icon={Activity} />
+        <KpiCard label="Créditos" value={formatNumber(totals.credits)} icon={Coins} />
+        <KpiCard label="Recargas aprobadas" value={formatNumber(approved.length)} icon={Package} />
         <KpiCard
-          label="Errores 24h"
-          value="42"
-          icon={AlertTriangle}
-          tone="destructive"
-          delta={down}
+          label="Recargas pendientes"
+          value={formatNumber(pending.length)}
+          icon={Inbox}
+          tone={pending.length ? "warning" : "primary"}
         />
-        <KpiCard label="Alertas" value="7" icon={Zap} tone="destructive" />
-        <KpiCard label="Facturación" value="$142.8M" icon={DollarSign} tone="success" />
-        <KpiCard label="Sistema" value="Operativo" icon={ServerCog} tone="success" />
+        <KpiCard label="Planes activos" value={formatNumber(activePlans.length)} icon={Package} />
+        <KpiCard label="Promociones activas" value={formatNumber(activePromos.length)} icon={Tag} />
+        <KpiCard label="Movimientos wallet" value={formatNumber(txRows.length)} icon={Activity} />
+        <KpiCard
+          label="Eventos comerciales"
+          value={formatNumber(historyRows.length)}
+          icon={Activity}
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <ChartCard title="Ingresos vs Recargas" description="Últimos 12 meses">
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={revenue}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis dataKey="month" className="text-xs" />
-              <YAxis className="text-xs" />
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(var(--popover))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: 8,
-                }}
-              />
-              <Legend />
-              <Bar dataKey="ingresos" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="recargas" fill="hsl(var(--nova))" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        <ChartCard title="Ingresos por mes" description="Recargas aprobadas del año en curso">
+          {hasRevenue ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={monthly}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="month" className="text-xs" />
+                <YAxis className="text-xs" />
+                <Tooltip
+                  contentStyle={{
+                    background: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: 8,
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="ingresos" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyState
+              icon={DollarSign}
+              title="Sin ingresos registrados"
+              description="Cuando se aprueben recargas verás aquí la evolución mensual."
+            />
+          )}
         </ChartCard>
 
-        <ChartCard title="Tráfico de mensajería" description="SMS + WhatsApp últimos 30 días">
-          <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={traffic}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis dataKey="d" className="text-xs" />
-              <YAxis className="text-xs" />
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(var(--popover))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: 8,
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey="sms"
-                stroke="hsl(var(--primary))"
-                fill="hsl(var(--primary) / 0.2)"
-              />
-              <Area
-                type="monotone"
-                dataKey="wa"
-                stroke="hsl(var(--nova))"
-                fill="hsl(var(--nova) / 0.2)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+        <ChartCard title="Recargas pendientes" description="Requieren revisión del administrador">
+          {pending.length ? (
+            <ul className="space-y-3 text-sm">
+              {pending.slice(0, 8).map((r) => (
+                <li key={r.id} className="flex items-center justify-between gap-3">
+                  <span className="truncate">{r.companyName}</span>
+                  <span className="flex items-center gap-2">
+                    <Badge variant="outline">{r.channel.toUpperCase()}</Badge>
+                    <span className="font-medium">{formatCurrency(r.amount, r.currency)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              icon={Inbox}
+              title="Todo al día"
+              description="No hay recargas pendientes de aprobación."
+            />
+          )}
         </ChartCard>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <ChartCard title="Estado del sistema" description="Componentes críticos">
-          <div className="space-y-3">
-            {[
-              { name: "API Gateway", s: "active" },
-              { name: "SMS Gateway (Infobip)", s: "active" },
-              { name: "Base de datos", s: "active" },
-              { name: "CNM Nova", s: "active" },
-              { name: "Webhooks", s: "active" },
-            ].map((x) => (
-              <div key={x.name} className="flex items-center justify-between">
-                <span className="text-sm">{x.name}</span>
-                <StatusBadge status={x.s} />
-              </div>
+      <ChartCard title="Actividad comercial" description="Últimos eventos registrados">
+        {historyRows.length ? (
+          <ul className="space-y-3 text-sm">
+            {historyRows.slice(0, 10).map((h) => (
+              <li key={h.id} className="flex items-center justify-between gap-3">
+                <span className="truncate">
+                  <Badge variant="outline" className="mr-2">
+                    {h.eventType}
+                  </Badge>
+                  {h.description ?? h.companyName ?? "—"}
+                </span>
+                <span className="shrink-0 text-muted-foreground">
+                  {new Date(h.createdAt).toLocaleDateString("es-CO")}
+                </span>
+              </li>
             ))}
-          </div>
-        </ChartCard>
-        <ChartCard title="Alertas recientes" description="Últimas 24 horas">
-          <ul className="space-y-3 text-sm">
-            <li className="flex gap-2">
-              <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" /> Rate limit del 92% para
-              tenant "Retail Prime".
-            </li>
-            <li className="flex gap-2">
-              <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" /> 3 recargas pendientes de
-              aprobación &gt;24h.
-            </li>
-            <li className="flex gap-2">
-              <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" /> Proveedor SMS reportó
-              latencia elevada 03:12.
-            </li>
           </ul>
-        </ChartCard>
-        <ChartCard title="Actividad" description="Últimos eventos">
-          <ul className="space-y-3 text-sm">
-            <li>+94 nuevos usuarios esta semana</li>
-            <li>+18 empresas activadas</li>
-            <li>512 campañas ejecutadas hoy</li>
-            <li>7 tickets críticos abiertos</li>
-          </ul>
-        </ChartCard>
-      </div>
+        ) : (
+          <EmptyState
+            icon={Activity}
+            title="Sin actividad"
+            description="Los eventos del Motor Comercial aparecerán aquí."
+          />
+        )}
+      </ChartCard>
     </AdminPage>
   );
 }

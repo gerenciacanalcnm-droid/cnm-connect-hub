@@ -57,6 +57,8 @@ export const adminNavigation: AdminNavSection[] = [
       { title: "Planes", to: "/admin/planes", icon: Package },
       { title: "Promociones", to: "/admin/promociones", icon: Tag },
       { title: "Recargas", to: "/admin/recargas", icon: Wallet },
+      { title: "Wallet y Saldos", to: "/admin/wallet", icon: Wallet },
+      { title: "Historial Comercial", to: "/admin/historial-comercial", icon: FileText },
     ],
   },
   {
