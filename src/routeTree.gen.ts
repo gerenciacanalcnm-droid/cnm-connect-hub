@@ -31,6 +31,7 @@ import { Route as AppComunicacionRouteImport } from './routes/_app.comunicacion'
 import { Route as AppAutomatizacionesRouteImport } from './routes/_app.automatizaciones'
 import { Route as AppApiRouteImport } from './routes/_app.api'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
+import { Route as AdminAdminWalletRouteImport } from './routes/_admin.admin.wallet'
 import { Route as AdminAdminUsuariosRouteImport } from './routes/_admin.admin.usuarios'
 import { Route as AdminAdminTarifasRouteImport } from './routes/_admin.admin.tarifas'
 import { Route as AdminAdminSistemaRouteImport } from './routes/_admin.admin.sistema'
@@ -45,6 +46,7 @@ import { Route as AdminAdminNotificacionesRouteImport } from './routes/_admin.ad
 import { Route as AdminAdminLogsRouteImport } from './routes/_admin.admin.logs'
 import { Route as AdminAdminLandingCmsRouteImport } from './routes/_admin.admin.landing-cms'
 import { Route as AdminAdminIntegracionesRouteImport } from './routes/_admin.admin.integraciones'
+import { Route as AdminAdminHistorialComercialRouteImport } from './routes/_admin.admin.historial-comercial'
 import { Route as AdminAdminFeatureFlagsRouteImport } from './routes/_admin.admin.feature-flags'
 import { Route as AdminAdminEmpresasRouteImport } from './routes/_admin.admin.empresas'
 import { Route as AdminAdminDashboardRouteImport } from './routes/_admin.admin.dashboard'
@@ -163,6 +165,11 @@ const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminAdminWalletRoute = AdminAdminWalletRouteImport.update({
+  id: '/admin/wallet',
+  path: '/admin/wallet',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAdminUsuariosRoute = AdminAdminUsuariosRouteImport.update({
   id: '/admin/usuarios',
   path: '/admin/usuarios',
@@ -234,6 +241,12 @@ const AdminAdminIntegracionesRoute = AdminAdminIntegracionesRouteImport.update({
   path: '/admin/integraciones',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAdminHistorialComercialRoute =
+  AdminAdminHistorialComercialRouteImport.update({
+    id: '/admin/historial-comercial',
+    path: '/admin/historial-comercial',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminAdminFeatureFlagsRoute = AdminAdminFeatureFlagsRouteImport.update({
   id: '/admin/feature-flags',
   path: '/admin/feature-flags',
@@ -316,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminAdminDashboardRoute
   '/admin/empresas': typeof AdminAdminEmpresasRoute
   '/admin/feature-flags': typeof AdminAdminFeatureFlagsRoute
+  '/admin/historial-comercial': typeof AdminAdminHistorialComercialRoute
   '/admin/integraciones': typeof AdminAdminIntegracionesRoute
   '/admin/landing-cms': typeof AdminAdminLandingCmsRoute
   '/admin/logs': typeof AdminAdminLogsRoute
@@ -330,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/admin/sistema': typeof AdminAdminSistemaRoute
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
+  '/admin/wallet': typeof AdminAdminWalletRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -361,6 +376,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminAdminDashboardRoute
   '/admin/empresas': typeof AdminAdminEmpresasRoute
   '/admin/feature-flags': typeof AdminAdminFeatureFlagsRoute
+  '/admin/historial-comercial': typeof AdminAdminHistorialComercialRoute
   '/admin/integraciones': typeof AdminAdminIntegracionesRoute
   '/admin/landing-cms': typeof AdminAdminLandingCmsRoute
   '/admin/logs': typeof AdminAdminLogsRoute
@@ -375,6 +391,7 @@ export interface FileRoutesByTo {
   '/admin/sistema': typeof AdminAdminSistemaRoute
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
+  '/admin/wallet': typeof AdminAdminWalletRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -410,6 +427,7 @@ export interface FileRoutesById {
   '/_admin/admin/dashboard': typeof AdminAdminDashboardRoute
   '/_admin/admin/empresas': typeof AdminAdminEmpresasRoute
   '/_admin/admin/feature-flags': typeof AdminAdminFeatureFlagsRoute
+  '/_admin/admin/historial-comercial': typeof AdminAdminHistorialComercialRoute
   '/_admin/admin/integraciones': typeof AdminAdminIntegracionesRoute
   '/_admin/admin/landing-cms': typeof AdminAdminLandingCmsRoute
   '/_admin/admin/logs': typeof AdminAdminLogsRoute
@@ -424,6 +442,7 @@ export interface FileRoutesById {
   '/_admin/admin/sistema': typeof AdminAdminSistemaRoute
   '/_admin/admin/tarifas': typeof AdminAdminTarifasRoute
   '/_admin/admin/usuarios': typeof AdminAdminUsuariosRoute
+  '/_admin/admin/wallet': typeof AdminAdminWalletRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -457,6 +476,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/empresas'
     | '/admin/feature-flags'
+    | '/admin/historial-comercial'
     | '/admin/integraciones'
     | '/admin/landing-cms'
     | '/admin/logs'
@@ -471,6 +491,7 @@ export interface FileRouteTypes {
     | '/admin/sistema'
     | '/admin/tarifas'
     | '/admin/usuarios'
+    | '/admin/wallet'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -502,6 +523,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/empresas'
     | '/admin/feature-flags'
+    | '/admin/historial-comercial'
     | '/admin/integraciones'
     | '/admin/landing-cms'
     | '/admin/logs'
@@ -516,6 +538,7 @@ export interface FileRouteTypes {
     | '/admin/sistema'
     | '/admin/tarifas'
     | '/admin/usuarios'
+    | '/admin/wallet'
   id:
     | '__root__'
     | '/'
@@ -550,6 +573,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/dashboard'
     | '/_admin/admin/empresas'
     | '/_admin/admin/feature-flags'
+    | '/_admin/admin/historial-comercial'
     | '/_admin/admin/integraciones'
     | '/_admin/admin/landing-cms'
     | '/_admin/admin/logs'
@@ -564,6 +588,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/sistema'
     | '/_admin/admin/tarifas'
     | '/_admin/admin/usuarios'
+    | '/_admin/admin/wallet'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -729,6 +754,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAnalyticsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_admin/admin/wallet': {
+      id: '/_admin/admin/wallet'
+      path: '/admin/wallet'
+      fullPath: '/admin/wallet'
+      preLoaderRoute: typeof AdminAdminWalletRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/admin/usuarios': {
       id: '/_admin/admin/usuarios'
       path: '/admin/usuarios'
@@ -827,6 +859,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminIntegracionesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/admin/historial-comercial': {
+      id: '/_admin/admin/historial-comercial'
+      path: '/admin/historial-comercial'
+      fullPath: '/admin/historial-comercial'
+      preLoaderRoute: typeof AdminAdminHistorialComercialRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/admin/feature-flags': {
       id: '/_admin/admin/feature-flags'
       path: '/admin/feature-flags'
@@ -911,6 +950,7 @@ interface AdminRouteChildren {
   AdminAdminDashboardRoute: typeof AdminAdminDashboardRoute
   AdminAdminEmpresasRoute: typeof AdminAdminEmpresasRoute
   AdminAdminFeatureFlagsRoute: typeof AdminAdminFeatureFlagsRoute
+  AdminAdminHistorialComercialRoute: typeof AdminAdminHistorialComercialRoute
   AdminAdminIntegracionesRoute: typeof AdminAdminIntegracionesRoute
   AdminAdminLandingCmsRoute: typeof AdminAdminLandingCmsRoute
   AdminAdminLogsRoute: typeof AdminAdminLogsRoute
@@ -925,6 +965,7 @@ interface AdminRouteChildren {
   AdminAdminSistemaRoute: typeof AdminAdminSistemaRoute
   AdminAdminTarifasRoute: typeof AdminAdminTarifasRoute
   AdminAdminUsuariosRoute: typeof AdminAdminUsuariosRoute
+  AdminAdminWalletRoute: typeof AdminAdminWalletRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -938,6 +979,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAdminDashboardRoute: AdminAdminDashboardRoute,
   AdminAdminEmpresasRoute: AdminAdminEmpresasRoute,
   AdminAdminFeatureFlagsRoute: AdminAdminFeatureFlagsRoute,
+  AdminAdminHistorialComercialRoute: AdminAdminHistorialComercialRoute,
   AdminAdminIntegracionesRoute: AdminAdminIntegracionesRoute,
   AdminAdminLandingCmsRoute: AdminAdminLandingCmsRoute,
   AdminAdminLogsRoute: AdminAdminLogsRoute,
@@ -952,6 +994,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAdminSistemaRoute: AdminAdminSistemaRoute,
   AdminAdminTarifasRoute: AdminAdminTarifasRoute,
   AdminAdminUsuariosRoute: AdminAdminUsuariosRoute,
+  AdminAdminWalletRoute: AdminAdminWalletRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
