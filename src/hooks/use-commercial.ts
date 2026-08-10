@@ -52,10 +52,10 @@ export function useWallets() {
   });
 }
 
-export function useWalletTransactions() {
+export function useWalletTransactions(walletId?: string) {
   return useQuery({
-    queryKey: key("wallet-transactions"),
-    queryFn: () => commercialRepository.listWalletTransactions(),
+    queryKey: key("wallet-transactions", walletId ?? "all"),
+    queryFn: () => commercialRepository.listWalletTransactions(walletId),
     staleTime: STALE,
   });
 }
