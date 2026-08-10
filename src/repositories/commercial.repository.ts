@@ -7,7 +7,8 @@ export const commercialRepository: CommercialService = {
   listPromotions: () => commercialService.listPromotions(),
   listGateways: () => commercialService.listGateways(),
   listWallets: () => commercialService.listWallets(),
-  listWalletTransactions: () => commercialService.listWalletTransactions(),
+  listWalletTransactions: (walletId?: string) =>
+    commercialService.listWalletTransactions(walletId),
   listRecharges: () => commercialService.listRecharges(),
   listHistory: () => commercialService.listHistory(),
 };
