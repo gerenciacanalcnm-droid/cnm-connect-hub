@@ -337,68 +337,184 @@ export const testPaymentGateway = createServerFn({ method: "POST" })
 export const listWallets = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("wallets")
-      .select("*, companies(name)")
-      .order("updated_at", { ascending: false });
-    if (error) throw new Error(error.message);
-    return JSON.stringify(data ?? []);
+    const [wallets, recharges] = await Promise.all([
+      context.supabase
+        .from("wallets")
+        .select("*, companies(name, plan_code)")
+        .order("updated_at", { ascending: false }),
+      context.supabase
+        .from("recharges")
+        .select("company_id, created_at, review_status")
+        .eq("review_status", "aprobada")
+        .order("created_at", { ascending: false })
+        .limit(500),
+    ]);
+    if (wallets.error) throw new Error(wallets.error.message);
+    const last = new Map<string, string>();
+    for (const r of (recharges.data ?? []) as { company_id: string; created_at: string }[]) {
+      if (!last.has(r.company_id)) last.set(r.company_id, r.created_at);
+    }
+    const rows = (wallets.data ?? []).map((w) => {
+      const row = w as Record<string, unknown>;
+      return { ...row, last_recharge_at: last.get(String(row.company_id)) ?? null };
+    });
+    return JSON.stringify(rows);
   });
 
 export const listWalletTransactions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
+  .inputValidator((v) => z.object({ wallet_id: uuid.optional() }).parse(v ?? {}))
+  .handler(async ({ data, context }) => {
+    let q = context.supabase
       .from("wallet_transactions")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(200);
+      .limit(300);
+    if (data.wallet_id) q = q.eq("wallet_id", data.wallet_id);
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return JSON.stringify(data ?? []);
+    return JSON.stringify(rows ?? []);
   });
 
-export const adjustWallet = createServerFn({ method: "POST" })
+/** Tipos de operación soportados por la Wallet (Sprint 10 · Fase 2). */
+const operationType = z.enum([
+  "RECARGA",
+  "AJUSTE_CREDITO",
+  "AJUSTE_DEBITO",
+  "REEMBOLSO",
+  "CORRECCION",
+]);
+
+type Sb = { from: (t: string) => any };
+
+/**
+ * Acredita/debita una wallet dejando trazabilidad completa:
+ * wallet → movimiento → historial comercial → auditoría.
+ */
+async function applyWalletMovement(
+  supabase: Sb,
+  input: {
+    walletId: string;
+    amount: number;
+    units: number;
+    type: z.infer<typeof operationType>;
+    concept: string;
+    paymentMethod?: string | null;
+    reference?: string | null;
+    notes?: string | null;
+    performedBy: string;
+  },
+) {
+  const { data: w, error } = await supabase
+    .from("wallets")
+    .select("id, company_id, balance, credits, currency")
+    .eq("id", input.walletId)
+    .single();
+  if (error) throw new Error(error.message);
+  const wallet = w as {
+    company_id: string;
+    balance: number;
+    credits: number;
+    currency: string;
+  };
+  const balanceBefore = Number(wallet.balance);
+  const balanceAfter = balanceBefore + input.amount;
+  const creditsAfter = Number(wallet.credits) + input.units;
+
+  const up = await supabase
+    .from("wallets")
+    .update({
+      balance: balanceAfter,
+      credits: creditsAfter,
+      status: balanceAfter > 0 ? "active" : "inactive",
+    })
+    .eq("id", input.walletId);
+  if (up.error) throw new Error(up.error.message);
+
+  const metadata = {
+    balance_before: balanceBefore,
+    balance_after: balanceAfter,
+    concept: input.concept,
+    payment_method: input.paymentMethod ?? null,
+    notes: input.notes ?? null,
+    performed_by: input.performedBy,
+    operation_type: input.type,
+  };
+
+  const tx = await supabase
+    .from("wallet_transactions")
+    .insert({
+      wallet_id: input.walletId,
+      company_id: wallet.company_id,
+      type: input.type,
+      amount: input.amount,
+      units: input.units,
+      balance_after: balanceAfter,
+      reference: input.reference ?? null,
+      description: input.concept,
+      metadata,
+    })
+    .select("id")
+    .single();
+  if (tx.error) throw new Error(tx.error.message);
+
+  await supabase.from("commercial_history").insert({
+    company_id: wallet.company_id,
+    event_type: `wallet.${input.type.toLowerCase()}`,
+    entity_type: "wallet",
+    entity_id: input.walletId,
+    amount: input.amount,
+    currency: wallet.currency,
+    description: input.concept,
+    metadata,
+    created_by: input.performedBy,
+  });
+
+  await supabase.from("audit_logs").insert({
+    company_id: wallet.company_id,
+    user_id: input.performedBy,
+    module: "wallet",
+    action: input.type,
+    entity_type: "wallet",
+    entity_id: input.walletId,
+    before: { balance: balanceBefore },
+    after: { balance: balanceAfter, credits: creditsAfter },
+  });
+
+  return { balanceBefore, balanceAfter, companyId: wallet.company_id };
+}
+
+export const walletOperation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) =>
     z
       .object({
         wallet_id: uuid,
+        type: operationType,
         amount: z.number(),
         units: z.number().int().default(0),
-        type: z.enum(["credit", "debit", "adjustment", "bonus"]).default("adjustment"),
-        description: z.string().default(""),
+        concept: z.string().trim().min(1).max(200),
+        payment_method: z.string().max(60).nullable().default(null),
+        reference: z.string().max(120).nullable().default(null),
+        notes: z.string().max(500).nullable().default(null),
       })
       .parse(v),
   )
   .handler(async ({ data, context }) => {
-    const { data: w, error } = await context.supabase
-      .from("wallets")
-      .select("id, company_id, balance, credits")
-      .eq("id", data.wallet_id)
-      .single();
-    if (error) throw new Error(error.message);
-    const wallet = w as { company_id: string; balance: number; credits: number };
-    const nextBalance = Number(wallet.balance) + data.amount;
-    const nextCredits = Number(wallet.credits) + data.units;
-    const { error: e2 } = await context.supabase
-      .from("wallets")
-      .update({
-        balance: nextBalance,
-        credits: nextCredits,
-        status: nextBalance > 0 ? "active" : "inactive",
-      } as never)
-      .eq("id", data.wallet_id);
-    if (e2) throw new Error(e2.message);
-    await context.supabase.from("wallet_transactions").insert({
-      wallet_id: data.wallet_id,
-      company_id: wallet.company_id,
-      type: data.type,
-      amount: data.amount,
+    const signed =
+      data.type === "AJUSTE_DEBITO" ? -Math.abs(data.amount) : data.amount;
+    const res = await applyWalletMovement(context.supabase as unknown as Sb, {
+      walletId: data.wallet_id,
+      amount: signed,
       units: data.units,
-      balance_after: nextBalance,
-      description: data.description,
-    } as never);
-    return { ok: true, balance: nextBalance };
+      type: data.type,
+      concept: data.concept,
+      paymentMethod: data.payment_method,
+      reference: data.reference,
+      notes: data.notes,
+      performedBy: context.userId,
+    });
+    return { ok: true, balance: res.balanceAfter };
   });
 
 // ═══════════════════ RECARGAS ═══════════════════
@@ -414,6 +530,50 @@ export const listRechargeRequests = createServerFn({ method: "GET" })
     return JSON.stringify(data ?? []);
   });
 
+/**
+ * Solicitud de recarga desde el panel de la empresa.
+ * Sin pasarela integrada aún: toda recarga entra como PENDIENTE y la aprueba
+ * el Super Admin. Cuando exista confirmación real de la pasarela, bastará con
+ * llamar a `reviewRecharge` con estado "aprobada" desde el webhook.
+ */
+export const createRechargeRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z
+      .object({
+        company_id: uuid,
+        amount: z.number().positive().max(1_000_000_000),
+        channel: channel.default("sms"),
+        gateway_code: z.string().max(60).nullable().default(null),
+        payment_method: z.string().max(60).default("transferencia"),
+        reference: z.string().max(120).nullable().default(null),
+        notes: z.string().max(500).nullable().default(null),
+      })
+      .parse(v),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase
+      .from("recharges")
+      .insert({
+        company_id: data.company_id,
+        amount: data.amount,
+        currency: "COP",
+        status: "pending",
+        mode: data.gateway_code ? "automatic" : "manual",
+        channel: data.channel,
+        gateway_code: data.gateway_code,
+        payment_method: data.payment_method,
+        payment_reference: data.reference,
+        review_status: "pendiente",
+        created_by: context.userId,
+        metadata: { notes: data.notes ?? null },
+      } as never)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: (row as { id: string }).id, reviewStatus: "pendiente" as const };
+  });
+
 export const reviewRecharge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) =>
@@ -426,6 +586,21 @@ export const reviewRecharge = createServerFn({ method: "POST" })
       .parse(v),
   )
   .handler(async ({ data, context }) => {
+    const { data: rec, error: e0 } = await context.supabase
+      .from("recharges")
+      .select("id, company_id, amount, channel, review_status, payment_method, payment_reference")
+      .eq("id", data.id)
+      .single();
+    if (e0) throw new Error(e0.message);
+    const recharge = rec as {
+      company_id: string;
+      amount: number;
+      channel: string;
+      review_status: string;
+      payment_method: string | null;
+      payment_reference: string | null;
+    };
+
     const { error } = await context.supabase
       .from("recharges")
       .update({
@@ -434,11 +609,51 @@ export const reviewRecharge = createServerFn({ method: "POST" })
         reviewed_by: context.userId,
         reviewed_at: new Date().toISOString(),
         status: data.review_status === "aprobada" ? "completed" : "pending",
+        completed_at: data.review_status === "aprobada" ? new Date().toISOString() : null,
       } as never)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+
+    // Acreditar la wallet solo en la transición a "aprobada".
+    if (data.review_status === "aprobada" && recharge.review_status !== "aprobada") {
+      const { data: w } = await context.supabase
+        .from("wallets")
+        .select("id")
+        .eq("company_id", recharge.company_id)
+        .eq("channel", recharge.channel)
+        .maybeSingle();
+      let walletId = (w as { id: string } | null)?.id;
+      if (!walletId) {
+        const created = await context.supabase
+          .from("wallets")
+          .insert({
+            company_id: recharge.company_id,
+            channel: recharge.channel,
+            balance: 0,
+            credits: 0,
+            currency: "COP",
+            status: "active",
+          } as never)
+          .select("id")
+          .single();
+        if (created.error) throw new Error(created.error.message);
+        walletId = (created.data as { id: string }).id;
+      }
+      await applyWalletMovement(context.supabase as unknown as Sb, {
+        walletId,
+        amount: Number(recharge.amount),
+        units: 0,
+        type: "RECARGA",
+        concept: "Recarga aprobada",
+        paymentMethod: recharge.payment_method,
+        reference: recharge.payment_reference,
+        notes: data.review_note || null,
+        performedBy: context.userId,
+      });
+    }
     return { ok: true };
   });
+
 
 // ═══════════════════ HISTORIAL COMERCIAL ═══════════════════
 export const listCommercialHistory = createServerFn({ method: "GET" })
