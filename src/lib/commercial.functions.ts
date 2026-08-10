@@ -385,6 +385,7 @@ const operationType = z.enum([
   "CORRECCION",
 ]);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = { from: (t: string) => any };
 
 /**
