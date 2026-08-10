@@ -23,13 +23,17 @@ function FinanzasPage() {
         title="Finanzas"
         description="Recargas de créditos, facturación electrónica y métodos de pago."
       />
-      <Tabs defaultValue="recargas" className="w-full">
+      <Tabs defaultValue="wallet" className="w-full">
         <TabsList className="mb-6">
+          <TabsTrigger value="wallet">Wallet</TabsTrigger>
           <TabsTrigger value="recargas">Recargas</TabsTrigger>
           <TabsTrigger value="historial">Historial</TabsTrigger>
           <TabsTrigger value="facturas">Facturas</TabsTrigger>
           <TabsTrigger value="metodos">Métodos de pago</TabsTrigger>
         </TabsList>
+        <TabsContent value="wallet">
+          <WalletPanel />
+        </TabsContent>
         <TabsContent value="recargas">
           <RechargePanel />
         </TabsContent>
