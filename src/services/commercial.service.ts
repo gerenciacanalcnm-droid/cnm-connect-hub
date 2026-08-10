@@ -241,7 +241,10 @@ export interface CommercialWriteService {
   deletePromotion(id: string): Promise<void>;
   updateGateway(input: Record<string, unknown>): Promise<void>;
   testGateway(id: string): Promise<{ ok: boolean; message: string }>;
-  adjustWallet(input: Record<string, unknown>): Promise<void>;
+  walletOperation(input: Record<string, unknown>): Promise<void>;
+  createRecharge(
+    input: Record<string, unknown>,
+  ): Promise<{ id: string; reviewStatus: "pendiente" }>;
   reviewRecharge(id: string, status: string, note: string): Promise<void>;
 }
 
