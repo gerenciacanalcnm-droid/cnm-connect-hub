@@ -36,7 +36,7 @@ export interface CommercialService {
   listPromotions(): Promise<CommercialPromotion[]>;
   listGateways(): Promise<PaymentGateway[]>;
   listWallets(): Promise<Wallet[]>;
-  listWalletTransactions(): Promise<WalletTransaction[]>;
+  listWalletTransactions(walletId?: string): Promise<WalletTransaction[]>;
   listRecharges(): Promise<RechargeRequest[]>;
   listHistory(): Promise<CommercialHistoryEntry[]>;
 }
