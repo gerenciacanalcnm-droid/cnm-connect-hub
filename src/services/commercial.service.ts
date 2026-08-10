@@ -279,8 +279,11 @@ export const commercialWriteService: CommercialWriteService = {
   async testGateway(id) {
     return fn.testPaymentGateway({ data: { id } });
   },
-  async adjustWallet(input) {
-    await fn.adjustWallet({ data: input as never });
+  async walletOperation(input) {
+    await fn.walletOperation({ data: input as never });
+  },
+  async createRecharge(input) {
+    return fn.createRechargeRequest({ data: input as never });
   },
   async reviewRecharge(id, review_status, review_note) {
     await fn.reviewRecharge({ data: { id, review_status: review_status as never, review_note } });
