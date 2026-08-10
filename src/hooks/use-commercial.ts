@@ -52,10 +52,10 @@ export function useWallets() {
   });
 }
 
-export function useWalletTransactions() {
+export function useWalletTransactions(walletId?: string) {
   return useQuery({
-    queryKey: key("wallet-transactions"),
-    queryFn: () => commercialRepository.listWalletTransactions(),
+    queryKey: key("wallet-transactions", walletId ?? "all"),
+    queryFn: () => commercialRepository.listWalletTransactions(walletId),
     staleTime: STALE,
   });
 }
@@ -170,10 +170,18 @@ export function useRechargeMutations() {
 }
 
 export function useWalletMutations() {
-  const invalidate = useInvalidate(["wallets", "wallet-transactions"]);
-  const adjust = useMutation({
-    mutationFn: (input: Record<string, unknown>) => w.adjustWallet(input),
+  const invalidate = useInvalidate(["wallets", "wallet-transactions", "history", "recharges"]);
+  const operate = useMutation({
+    mutationFn: (input: Record<string, unknown>) => w.walletOperation(input),
     onSuccess: invalidate,
   });
-  return { adjust };
+  return { operate };
+}
+
+export function useCreateRecharge() {
+  const invalidate = useInvalidate(["recharges", "wallets"]);
+  return useMutation({
+    mutationFn: (input: Record<string, unknown>) => w.createRecharge(input),
+    onSuccess: invalidate,
+  });
 }

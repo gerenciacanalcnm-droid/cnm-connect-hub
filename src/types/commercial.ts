@@ -102,24 +102,39 @@ export type Wallet = {
   id: string;
   companyId: string;
   companyName: string;
+  planCode: string | null;
   channel: CommercialChannel;
   balance: number;
   consumed: number;
   credits: number;
   currency: string;
   status: "active" | "inactive" | "suspended";
+  lastRechargeAt: string | null;
   updatedAt: string;
 };
+
+export type WalletOperationType =
+  | "RECARGA"
+  | "AJUSTE_CREDITO"
+  | "AJUSTE_DEBITO"
+  | "REEMBOLSO"
+  | "CORRECCION";
 
 export type WalletTransaction = {
   id: string;
   walletId: string;
+  companyId: string;
   type: string;
   amount: number;
   units: number;
+  balanceBefore: number | null;
   balanceAfter: number | null;
   reference: string | null;
   description: string | null;
+  concept: string | null;
+  paymentMethod: string | null;
+  notes: string | null;
+  performedBy: string | null;
   createdAt: string;
 };
 
