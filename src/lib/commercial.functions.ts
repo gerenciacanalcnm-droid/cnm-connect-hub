@@ -115,7 +115,10 @@ export const duplicatePlan = createServerFn({ method: "POST" })
     const newId = (created as { id: string }).id;
 
     const [feats, lims] = await Promise.all([
-      context.supabase.from("plan_features").select("feature_key, included, note").eq("plan_id", data.id),
+      context.supabase
+        .from("plan_features")
+        .select("feature_key, included, note")
+        .eq("plan_id", data.id),
       context.supabase
         .from("plan_limits")
         .select("limit_key, limit_value, unit, is_unlimited")
@@ -502,8 +505,7 @@ export const walletOperation = createServerFn({ method: "POST" })
       .parse(v),
   )
   .handler(async ({ data, context }) => {
-    const signed =
-      data.type === "AJUSTE_DEBITO" ? -Math.abs(data.amount) : data.amount;
+    const signed = data.type === "AJUSTE_DEBITO" ? -Math.abs(data.amount) : data.amount;
     const res = await applyWalletMovement(context.supabase as unknown as Sb, {
       walletId: data.wallet_id,
       amount: signed,
@@ -654,7 +656,6 @@ export const reviewRecharge = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
-
 
 // ═══════════════════ HISTORIAL COMERCIAL ═══════════════════
 export const listCommercialHistory = createServerFn({ method: "GET" })

@@ -220,11 +220,7 @@ export function WalletPanel() {
             </div>
             <div className="space-y-1.5">
               <Label>Observaciones</Label>
-              <Textarea
-                value={notes}
-                maxLength={500}
-                onChange={(e) => setNotes(e.target.value)}
-              />
+              <Textarea value={notes} maxLength={500} onChange={(e) => setNotes(e.target.value)} />
             </div>
           </div>
           <DialogFooter>

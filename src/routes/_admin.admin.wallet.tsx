@@ -163,9 +163,7 @@ function WalletPage() {
       {
         accessorKey: "planCode",
         header: "Plan",
-        cell: (c) => (
-          <Badge variant="outline">{c.row.original.planCode ?? "sin plan"}</Badge>
-        ),
+        cell: (c) => <Badge variant="outline">{c.row.original.planCode ?? "sin plan"}</Badge>,
       },
       {
         accessorKey: "balance",
@@ -243,9 +241,7 @@ function WalletPage() {
         accessorKey: "balanceBefore",
         header: "Saldo anterior",
         cell: (c) =>
-          c.row.original.balanceBefore == null
-            ? "—"
-            : formatCurrency(c.row.original.balanceBefore),
+          c.row.original.balanceBefore == null ? "—" : formatCurrency(c.row.original.balanceBefore),
       },
       {
         accessorKey: "balanceAfter",
@@ -389,9 +385,7 @@ function WalletPage() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div
-                              className={t.amount < 0 ? "text-destructive" : "text-success"}
-                            >
+                            <div className={t.amount < 0 ? "text-destructive" : "text-success"}>
                               {formatCurrency(t.amount)}
                             </div>
                             <div className="text-xs text-muted-foreground">
@@ -465,20 +459,13 @@ function WalletPage() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Créditos (opcional)</Label>
-                  <Input
-                    type="number"
-                    value={units}
-                    onChange={(e) => setUnits(e.target.value)}
-                  />
+                  <Input type="number" value={units} onChange={(e) => setUnits(e.target.value)} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>Tipo de operación</Label>
-                  <Select
-                    value={type}
-                    onValueChange={(v) => setType(v as WalletOperationType)}
-                  >
+                  <Select value={type} onValueChange={(v) => setType(v as WalletOperationType)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
