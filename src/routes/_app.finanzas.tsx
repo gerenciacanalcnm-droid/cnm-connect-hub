@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RechargePanel } from "@/components/finanzas/recharge-panel";
+import { WalletPanel } from "@/components/finanzas/wallet-panel";
 import { RechargeHistory } from "@/components/finanzas/recharge-history";
 import { InvoicesTable } from "@/components/finanzas/invoices-table";
 import { PaymentMethods } from "@/components/finanzas/payment-methods";
