@@ -150,29 +150,40 @@ export const commercialService: CommercialService = {
       id: s(r.id),
       companyId: s(r.company_id),
       companyName: s((r.companies as Row | null)?.name, "—"),
+      planCode: sn((r.companies as Row | null)?.plan_code),
       channel: s(r.channel, "sms") as Wallet["channel"],
       balance: n(r.balance),
       consumed: n(r.consumed),
       credits: n(r.credits),
       currency: s(r.currency, "COP"),
       status: s(r.status, "inactive") as Wallet["status"],
+      lastRechargeAt: sn(r.last_recharge_at),
       updatedAt: s(r.updated_at),
     }));
   },
 
-  async listWalletTransactions() {
-    const rows = parse<Row>(await fn.listWalletTransactions());
-    return rows.map((r) => ({
-      id: s(r.id),
-      walletId: s(r.wallet_id),
-      type: s(r.type),
-      amount: n(r.amount),
-      units: n(r.units),
-      balanceAfter: r.balance_after == null ? null : n(r.balance_after),
-      reference: sn(r.reference),
-      description: sn(r.description),
-      createdAt: s(r.created_at),
-    }));
+  async listWalletTransactions(walletId?: string) {
+    const rows = parse<Row>(await fn.listWalletTransactions({ data: { wallet_id: walletId } }));
+    return rows.map((r) => {
+      const meta = (r.metadata ?? {}) as Row;
+      return {
+        id: s(r.id),
+        walletId: s(r.wallet_id),
+        companyId: s(r.company_id),
+        type: s(r.type),
+        amount: n(r.amount),
+        units: n(r.units),
+        balanceBefore: meta.balance_before == null ? null : n(meta.balance_before),
+        balanceAfter: r.balance_after == null ? null : n(r.balance_after),
+        reference: sn(r.reference),
+        description: sn(r.description),
+        concept: sn(meta.concept) ?? sn(r.description),
+        paymentMethod: sn(meta.payment_method),
+        notes: sn(meta.notes),
+        performedBy: sn(meta.performed_by),
+        createdAt: s(r.created_at),
+      };
+    });
   },
 
   async listRecharges() {
