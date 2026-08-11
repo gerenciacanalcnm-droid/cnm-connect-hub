@@ -85,16 +85,17 @@ export function WhatsAppTemplates() {
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 uppercase">General</label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" className="text-sm" />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" className="text-sm text-slate-900 bg-white border-slate-200" />
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="text-sm text-slate-900 bg-white border-slate-200"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="MARKETING">Marketing</SelectItem>
-                <SelectItem value="UTILITY">Utilidad</SelectItem>
+                <SelectItem value="UTILITY">Utility</SelectItem>
+                <SelectItem value="AUTHENTICATION">Authentication</SelectItem>
               </SelectContent>
             </Select>
             <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="text-sm text-slate-900 bg-white border-slate-200"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="es">Español</SelectItem>
                 <SelectItem value="en">Inglés</SelectItem>
