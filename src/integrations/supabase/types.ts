@@ -2690,7 +2690,7 @@ export type Database = {
             foreignKeyName: "whatsapp_messages_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
-            referencedRelation: "templates"
+            referencedRelation: "whatsapp_templates"
             referencedColumns: ["id"]
           },
         ]
