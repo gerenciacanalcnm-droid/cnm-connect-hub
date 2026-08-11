@@ -432,7 +432,7 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
 
     await context.supabase
       .from("whatsapp_messages")
-      .update({ status: "sent" } as never)
+      .update({ status: "sent" as never } as never)
       .eq("id", msg.id);
 
     return { ok: true, messageId: msg.id };
