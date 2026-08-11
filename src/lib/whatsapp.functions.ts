@@ -269,7 +269,7 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
         const metaErrorMessage = metaResult.error?.message;
         
         if (metaErrorCode === 132012) {
-          throw new Error(`META_TEMPLATE_PARAMETER_ERROR: Los parámetros enviados no coinciden con la estructura de la plantilla aprobada en Meta. Code: 132012, Msg: ${metaErrorMessage}`);
+          throw new Error(`META_TEMPLATE_PARAMETER_ERROR: Los parámetros enviados no coinciden con la estructura de la plantilla aprobada en Meta. Code: 132012, Msg: ${metaErrorMessage}. Payload sent: ${JSON.stringify(metaPayload.template?.components || [])}`);
         }
 
         if (metaResponse.status === 401 || metaResponse.status === 403) {

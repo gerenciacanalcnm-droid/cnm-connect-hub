@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { MessageCircle, Send, AlertCircle, Wallet, Users, Search, Filter, Trash2, FileUp, FileText, Info, Calendar, Clock, Globe } from "lucide-react";
+import { MessageCircle, Send, AlertCircle, Wallet, Users, Search, Filter, Trash2, FileUp, FileText, Info, Calendar, Clock, Globe, ShieldCheck, ShieldAlert } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -624,72 +624,87 @@ export function SendWhatsAppIndividual() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>Estado:</span>
+                <span>Estado Meta:</span>
                 <span className={String(selectedTemplate?.status) === 'APPROVED' ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
                   {String(selectedTemplate?.status || "N/A")}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Variables:</span>
-                {selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0 ? (
-                  <span className={Object.keys(templateVariables).length > 0 && !Object.keys(templateVariables).some(k => !templateVariables[k]?.trim()) ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
-                    {Object.keys(templateVariables).length > 0 && !Object.keys(templateVariables).some(k => !templateVariables[k]?.trim()) ? "OK" : "FALTANTES"}
-                  </span>
-                ) : (
-                  <span className="text-emerald-600 font-bold">OK</span>
-                )}
-              </div>
-              <div className="flex justify-between">
-                <span>Destinatarios:</span>
-                <span>{stats.valid}</span>
-              </div>
+
+              {messageType === 'template' && selectedTemplate && (
+                <>
+                  <Separator className="my-1 opacity-50" />
+                  <div className="flex justify-between font-bold text-[9px] text-slate-500 uppercase">
+                    <span>Estructura Meta</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Body Vars:</span>
+                    <span>{(selectedTemplate.body?.match(/{{(\d+)}}/g) || []).length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Nova envía:</span>
+                    <span>{Object.keys(templateVariables).length}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1 pt-1 border-t border-dashed">
+                    <span>ESTRUCTURA:</span>
+                    <span className="flex items-center gap-1">
+                      {Object.keys(templateVariables).length === (selectedTemplate.body?.match(/{{(\d+)}}/g) || []).length ? (
+                        <><ShieldCheck className="h-3 w-3 text-emerald-600" /> <span className="text-emerald-600 font-bold">MATCH</span></>
+                      ) : (
+                        <><ShieldAlert className="h-3 w-3 text-destructive" /> <span className="text-destructive font-bold">MISMATCH</span></>
+                      )}
+                    </span>
+                  </div>
+                </>
+              )}
+
+              <Separator className="my-1 opacity-50" />
               <div className="flex justify-between">
                 <span>Costo:</span>
                 <span>{formatCurrency(totalCost)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Saldo:</span>
-                <span>{formatCurrency(balance)}</span>
-              </div>
-              <div className="flex justify-between border-t pt-1 mt-1">
-                <span>Saldo suficiente:</span>
                 <span className={!isInsufficient ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
-                  {!isInsufficient ? "SÍ" : "NO"}
+                  {formatCurrency(balance)}
                 </span>
               </div>
               
-              {sendIndividualMutation.error && (
-                <div className="mt-2 pt-2 border-t border-red-100 text-red-700 space-y-1">
+              {(sendIndividualMutation.error || sendTemplateMutation.error) && (
+                <div className="mt-2 pt-2 border-t border-red-100 text-red-700 space-y-1 overflow-hidden">
                   <div className="flex justify-between">
-                    <span>STATUS:</span>
-                    <span className="font-bold">ERROR</span>
+                    <span>ERROR:</span>
+                    <span className="font-bold">META_API_FAILURE</span>
                   </div>
-                  <div className="break-words">
-                    {String(sendIndividualMutation.error)}
+                  <div className="break-all text-[9px] opacity-80 leading-tight">
+                    {String(sendIndividualMutation.error || sendTemplateMutation.error)}
                   </div>
                 </div>
               )}
             </div>
 
-
             <Button
-              onClick={handleSend}
+              className="w-full mt-4 font-bold uppercase tracking-tight h-11"
               disabled={
-                isInsufficient || 
+                !connectedAccount || 
                 stats.valid === 0 || 
-                (messageType === 'text' ? !msg.trim() : !selectedTemplateId) || 
-                !connectedAccount ||
-                (messageType === 'template' && selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0 && Object.keys(templateVariables).some(k => !templateVariables[k]?.trim()))
+                isInsufficient || 
+                (messageType === "text" && !msg.trim()) || 
+                (messageType === "template" && !selectedTemplateId) ||
+                (messageType === "template" && selectedTemplate && Object.keys(templateVariables).length !== (selectedTemplate.body?.match(/{{(\d+)}}/g) || []).length) ||
+                sendIndividualMutation.isPending || 
+                sendTemplateMutation.isPending
               }
-              className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4"
+              onClick={handleSend}
             >
               <Send className="h-4 w-4 mr-2" />
-              {isInsufficient ? `Saldo insuficiente. Necesitas ${formatCurrency(totalCost)} para realizar este envío.` : 
-               mode === 'individual' ? 'Enviar Ahora' : 
-               mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'}
+              {sendIndividualMutation.isPending || sendTemplateMutation.isPending ? (
+                "Procesando..."
+              ) : (
+                mode === 'individual' ? 'Enviar Ahora' : mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'
+              )}
             </Button>
             
-            <div className="flex items-center gap-2 p-3 rounded border bg-amber-50/50 border-amber-100 text-[11px] text-amber-800 italic">
+            <div className="flex items-center gap-2 p-3 rounded border bg-amber-50/50 border-amber-100 text-[11px] text-amber-800 italic mt-4">
                <Info className="h-3 w-3 shrink-0" />
                <p>Los envíos de plantillas están sujetos a las políticas comerciales de Meta.</p>
             </div>
