@@ -13,21 +13,21 @@ export const getMyCompanyWallet = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ channel: z.string().default("whatsapp") }).parse(v ?? {}))
   .handler(async ({ data, context }) => {
-    // 1. Obtener el company_id del usuario (del perfil)
-    const { data: profile, error: pErr } = await context.supabase
-      .from("profiles")
+    // 1. Obtener el company_id del usuario (de company_members)
+    const { data: membership, error: mErr } = await context.supabase
+      .from("company_members")
       .select("company_id")
-      .eq("id", context.userId)
-      .single();
+      .eq("user_id", context.userId)
+      .eq("is_active", true)
+      .maybeSingle();
 
-    if (pErr || !profile?.company_id) {
-      throw new Error("No se pudo identificar la empresa del usuario.");
+    if (mErr || !membership?.company_id) {
+      throw new Error("No se pudo identificar la empresa del usuario o no tiene una empresa activa asignada.");
     }
 
-    const companyId = profile.company_id;
+    const companyId = membership.company_id;
 
     // 2. Consultar el wallet específico para ese canal
-    // El Wallet central pertenece al company_id
     const { data: wallet, error: wErr } = await context.supabase
       .from("wallets")
       .select("*")

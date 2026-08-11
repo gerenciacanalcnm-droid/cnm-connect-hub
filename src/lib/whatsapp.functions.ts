@@ -117,14 +117,15 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
-    // 0. Obtener company_id del perfil del usuario
-    const { data: profile } = await context.supabase
-      .from("profiles")
+    // 0. Obtener company_id del usuario (de company_members)
+    const { data: membership } = await context.supabase
+      .from("company_members")
       .select("company_id")
-      .eq("id", context.userId)
-      .single();
+      .eq("user_id", context.userId)
+      .eq("is_active", true)
+      .maybeSingle();
     
-    const companyId = profile?.company_id || CNM_COMPANY_ID;
+    const companyId = membership?.company_id || CNM_COMPANY_ID;
 
     // 1. Obtener credenciales de la cuenta (usamos context.supabase con RLS)
     const { data: account, error: accErr } = await context.supabase
