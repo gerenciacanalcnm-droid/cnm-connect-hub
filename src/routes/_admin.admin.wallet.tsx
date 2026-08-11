@@ -325,8 +325,8 @@ function WalletPage() {
           </DialogHeader>
 
           {managed && (
-            <>
-              {!formMode && (
+            <div className="space-y-4">
+              <div className={formMode ? "hidden" : "block"}>
                 <div className="space-y-4">
                   <div className="grid gap-3 sm:grid-cols-3">
                 <Card>
@@ -493,7 +493,8 @@ function WalletPage() {
                 </TabsContent>
               </Tabs>
                 </div>
-              )}
+              </div>
+
 
 
 
