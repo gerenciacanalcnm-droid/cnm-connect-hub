@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { trackServiceUsage } from "./commercial.functions";
 import { z } from "zod";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const CNM_COMPANY_ID = "00000000-0000-4000-8000-000000000001";
 
@@ -522,4 +523,77 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
         .eq("id", msg.id);
       throw err;
     }
+  });
+
+/**
+ * Programación de envíos de WhatsApp.
+ */
+export const createWhatsAppSchedule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({
+      accountId: z.string().uuid(),
+      recipients: z.array(z.string().min(10)),
+      body: z.string().optional(),
+      templateId: z.string().uuid().optional(),
+      variables: z.record(z.string()).optional(),
+      scheduledAt: z.string(),
+      timezone: z.string().default('America/Bogota'),
+      estimatedCost: z.number().nonnegative(),
+    }).parse(v)
+  )
+  .handler(async ({ data, context }) => {
+    const { accountId, recipients, body, templateId, variables, scheduledAt, timezone, estimatedCost } = data;
+    
+    let finalScheduledAt = scheduledAt;
+    if (!scheduledAt.includes('Z') && !scheduledAt.includes('+') && !scheduledAt.includes('-')) {
+      const offset = timezone === 'America/Bogota' ? '-05:00' : '-05:00'; 
+      finalScheduledAt = `${scheduledAt}${offset}`;
+    }
+
+    const { data: row, error } = await context.supabase
+      .from("wa_schedules")
+      .insert({
+        company_id: CNM_COMPANY_ID,
+        user_id: context.userId,
+        account_id: accountId,
+        recipients,
+        message_body: body,
+        template_id: templateId,
+        variables,
+        scheduled_at: finalScheduledAt,
+        timezone,
+        estimated_cost: estimatedCost,
+        reference: crypto.randomUUID(),
+        status: 'PROGRAMADO'
+      } as any)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const listWhatsAppSchedules = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("wa_schedules")
+      .select("*, whatsapp_templates(name), whatsapp_accounts(alias)")
+      .order("scheduled_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return JSON.stringify(data ?? []);
+  });
+
+export const cancelWhatsAppSchedule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("wa_schedules")
+      .update({ status: 'CANCELADO' } as any)
+      .eq("id", data.id)
+      .eq("status", "PROGRAMADO");
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });

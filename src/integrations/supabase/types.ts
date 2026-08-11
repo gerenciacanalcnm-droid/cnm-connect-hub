@@ -2012,6 +2012,88 @@ export type Database = {
         }
         Relationships: []
       }
+      wa_schedules: {
+        Row: {
+          account_id: string
+          actual_cost: number | null
+          company_id: string
+          created_at: string | null
+          error_log: string | null
+          estimated_cost: number | null
+          id: string
+          message_body: string | null
+          recipients: string[]
+          reference: string
+          scheduled_at: string
+          status: string | null
+          template_id: string | null
+          timezone: string | null
+          updated_at: string | null
+          user_id: string | null
+          variables: Json | null
+        }
+        Insert: {
+          account_id: string
+          actual_cost?: number | null
+          company_id: string
+          created_at?: string | null
+          error_log?: string | null
+          estimated_cost?: number | null
+          id?: string
+          message_body?: string | null
+          recipients: string[]
+          reference: string
+          scheduled_at: string
+          status?: string | null
+          template_id?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          account_id?: string
+          actual_cost?: number | null
+          company_id?: string
+          created_at?: string | null
+          error_log?: string | null
+          estimated_cost?: number | null
+          id?: string
+          message_body?: string | null
+          recipients?: string[]
+          reference?: string
+          scheduled_at?: string
+          status?: string | null
+          template_id?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          variables?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_schedules_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_schedules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_schedules_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallet_transactions: {
         Row: {
           amount: number

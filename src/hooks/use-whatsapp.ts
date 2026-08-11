@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { whatsappRepository } from "@/repositories/whatsapp.repository";
 import { queryKeys } from "./queries/keys";
+import { createWhatsAppSchedule, listWhatsAppSchedules, cancelWhatsAppSchedule } from "@/lib/whatsapp.functions";
 
 export function useWhatsAppAccounts() {
   return useQuery({
@@ -106,5 +107,31 @@ export function useSendWhatsAppTemplate() {
   return useMutation({
     mutationFn: (data: { recipient: string; templateId: string; variables?: Record<string, string>; accountId: string; batchId?: string }) => 
       whatsappRepository.sendTemplate({ data }),
+  });
+}
+
+export function useWhatsAppSchedules() {
+  return useQuery({
+    queryKey: queryKeys.whatsapp.campaigns, // Reutilizamos temporalmente o extendemos keys
+    queryFn: async () => {
+      const res = await listWhatsAppSchedules();
+      return JSON.parse(res as string);
+    },
+  });
+}
+
+export function useCreateWhatsAppSchedule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => createWhatsAppSchedule({ data }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.whatsapp.campaigns }),
+  });
+}
+
+export function useCancelWhatsAppSchedule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => cancelWhatsAppSchedule({ data: { id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.whatsapp.campaigns }),
   });
 }

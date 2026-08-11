@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MessageSquare, MessageCircle, Mail, Inbox, Settings2, Send, FileText } from "lucide-react";
+import { MessageSquare, MessageCircle, Mail, Inbox, Settings2, Send, FileText, Calendar } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SendSms } from "@/components/comunicacion/send-sms";
 import { SmsHistory } from "@/components/comunicacion/sms-history";
 import { SendWhatsAppIndividual } from "@/components/comunicacion/send-whatsapp-individual";
 import { WhatsAppTemplates } from "@/components/comunicacion/whatsapp-templates";
+import { WhatsAppSchedules } from "@/components/comunicacion/whatsapp-schedules";
 import { EmailMarketing } from "@/components/comunicacion/email-marketing";
 import { CommunicationSettings } from "@/components/comunicacion/communication-settings";
 
@@ -47,6 +48,9 @@ function ComunicacionPage() {
           <TabsTrigger value="plantillas" className="gap-1.5 flex-1 min-w-[110px]">
             <FileText className="h-3.5 w-3.5" /> Plantillas WA
           </TabsTrigger>
+          <TabsTrigger value="programacion-wa" className="gap-1.5 flex-1 min-w-[110px]">
+            <Calendar className="h-3.5 w-3.5" /> Programar WA
+          </TabsTrigger>
           <TabsTrigger value="email" className="gap-1.5 flex-1 min-w-[90px]">
             <Mail className="h-3.5 w-3.5" /> Email
           </TabsTrigger>
@@ -63,6 +67,9 @@ function ComunicacionPage() {
         </TabsContent>
         <TabsContent value="whatsapp">
           <SendWhatsAppIndividual />
+        </TabsContent>
+        <TabsContent value="programacion-wa">
+          <WhatsAppSchedules />
         </TabsContent>
         <TabsContent value="plantillas">
           <WhatsAppTemplates />

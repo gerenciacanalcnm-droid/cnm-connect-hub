@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { MessageCircle, Send, AlertCircle, Wallet, Users, Search, Filter, Trash2, FileUp, FileText, Info } from "lucide-react";
+import { MessageCircle, Send, AlertCircle, Wallet, Users, Search, Filter, Trash2, FileUp, FileText, Info, Calendar, Clock, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,11 +32,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { useWallets, useRateTiers } from "@/hooks/use-commercial";
 import { formatCurrency } from "@/lib/format";
-import { useWhatsAppAccounts, useSendWhatsAppIndividual, useSendWhatsAppBulk, useWhatsAppTemplates, useSendWhatsAppTemplate } from "@/hooks/use-whatsapp";
+import { useWhatsAppAccounts, useSendWhatsAppIndividual, useSendWhatsAppBulk, useWhatsAppTemplates, useSendWhatsAppTemplate, useCreateWhatsAppSchedule } from "@/hooks/use-whatsapp";
 import { useContacts } from "@/hooks/use-contacts";
 import { useContactGroups } from "@/hooks/use-platform";
 
-type SendMode = "individual" | "bulk";
+type SendMode = "individual" | "bulk" | "schedule";
 type MessageType = "text" | "template";
 
 export function SendWhatsAppIndividual() {
@@ -48,6 +48,10 @@ export function SendWhatsAppIndividual() {
   const [toManual, setToManual] = useState("");
   const [msg, setMsg] = useState("");
   
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [timezone, setTimezone] = useState("America/Bogota");
+
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
 
@@ -61,6 +65,7 @@ export function SendWhatsAppIndividual() {
   const sendIndividualMutation = useSendWhatsAppIndividual();
   const sendBulkMutation = useSendWhatsAppBulk();
   const sendTemplateMutation = useSendWhatsAppTemplate();
+  const createScheduleMutation = useCreateWhatsAppSchedule();
 
   const contacts = contactsData?.items ?? [];
   const groups = groupsData ?? [];
@@ -113,7 +118,7 @@ export function SendWhatsAppIndividual() {
     }
     const raw = toManual.split(/[\s,;]+/).filter(Boolean);
     const valid = allRecipients.length;
-    const invalid = raw.length - validManualPhones.length;
+    const invalid = Math.max(0, raw.length - validManualPhones.length);
     return { total: raw.length + selectedContacts.size, valid, invalid };
   }, [mode, toManual, allRecipients, validManualPhones, selectedContacts]);
 
@@ -134,6 +139,35 @@ export function SendWhatsAppIndividual() {
 
     if (messageType === "text" && !msg.trim()) return toast.error("El mensaje no puede estar vacío.");
     if (messageType === "template" && !selectedTemplateId) return toast.error("Selecciona una plantilla.");
+
+    if (mode === "schedule") {
+      if (!scheduledDate || !scheduledTime) return toast.error("Selecciona fecha y hora para la programación.");
+      const scheduledAt = `${scheduledDate}T${scheduledTime}:00`;
+
+      try {
+        await createScheduleMutation.mutateAsync({
+          accountId: connectedAccount.id,
+          recipients: allRecipients,
+          body: messageType === 'text' ? msg.trim() : undefined,
+          templateId: messageType === 'template' ? selectedTemplateId : undefined,
+          variables: messageType === 'template' ? templateVariables : undefined,
+          scheduledAt,
+          timezone,
+          estimatedCost: totalCost
+        });
+        toast.success("Envío de WhatsApp programado correctamente");
+        
+        setToManual("");
+        setSelectedContacts(new Set());
+        setMsg("");
+        setSelectedTemplateId("");
+        setScheduledDate("");
+        setScheduledTime("");
+      } catch (err: any) {
+        toast.error(err.message || "Error al programar WhatsApp");
+      }
+      return;
+    }
 
     try {
       if (messageType === "template") {
@@ -200,12 +234,15 @@ export function SendWhatsAppIndividual() {
         <Card>
           <CardContent className="pt-6">
             <Tabs value={mode} onValueChange={(v) => setMode(v as SendMode)}>
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="individual" className="gap-2 text-xs sm:text-sm">
                   <Send className="h-4 w-4" /> Individual
                 </TabsTrigger>
                 <TabsTrigger value="bulk" className="gap-2 text-xs sm:text-sm">
                   <Users className="h-4 w-4" /> Masivo
+                </TabsTrigger>
+                <TabsTrigger value="schedule" className="gap-2 text-xs sm:text-sm">
+                  <Calendar className="h-4 w-4" /> Programar
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -220,6 +257,49 @@ export function SendWhatsAppIndividual() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {mode === "schedule" && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-emerald-50/30 rounded-lg border border-emerald-100">
+                <div className="space-y-2">
+                  <Label className="text-xs flex items-center gap-1.5">
+                    <Calendar className="h-3 w-3 text-emerald-600" /> Fecha de Envío
+                  </Label>
+                  <Input 
+                    type="date" 
+                    value={scheduledDate}
+                    onChange={(e) => setScheduledDate(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs flex items-center gap-1.5">
+                    <Clock className="h-3 w-3 text-emerald-600" /> Hora (24h)
+                  </Label>
+                  <Input 
+                    type="time" 
+                    value={scheduledTime}
+                    onChange={(e) => setScheduledTime(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs flex items-center gap-1.5">
+                    <Globe className="h-3 w-3 text-emerald-600" /> Zona Horaria
+                  </Label>
+                  <Select value={timezone} onValueChange={setTimezone}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="America/Bogota">Bogotá (GMT-5)</SelectItem>
+                      <SelectItem value="America/Mexico_City">Ciudad de México (GMT-6)</SelectItem>
+                      <SelectItem value="America/New_York">New York (GMT-5)</SelectItem>
+                      <SelectItem value="UTC">UTC</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
             {!connectedAccount && (
               <Alert variant="destructive" className="bg-destructive/10 border-none">
                 <AlertCircle className="h-4 w-4" />
@@ -413,7 +493,7 @@ export function SendWhatsAppIndividual() {
               className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
             >
               <Send className="h-4 w-4 mr-2" />
-              {mode === 'individual' ? 'Enviar Ahora' : 'Procesar Masivo'}
+              {mode === 'individual' ? 'Enviar Ahora' : mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'}
             </Button>
             
             <div className="flex items-center gap-2 p-3 rounded border bg-amber-50/50 border-amber-100 text-[11px] text-amber-800 italic">
