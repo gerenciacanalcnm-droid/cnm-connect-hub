@@ -205,7 +205,7 @@ export function SendWhatsAppIndividual() {
           templateId: messageType === 'template' ? selectedTemplateId : undefined,
           variables: messageType === 'template' ? templateVariables : undefined,
           accountId: connectedAccount.id,
-          batchId
+          batchId: batchId
         });
 
         toast.success(`Envío masivo completado. Total: ${res.total}, Enviados: ${res.sent}, Fallidos: ${res.failed}`);
