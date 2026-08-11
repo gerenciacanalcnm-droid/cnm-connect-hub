@@ -111,7 +111,8 @@ function NovaMapsPage() {
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8 hover:text-destructive"
-                    onClick={() => { if(confirm('¿Eliminar mapa?')) deleteMutation.mutate({ id: map.id }) }}
+                    onClick={() => { if(confirm('¿Eliminar mapa?')) deleteMutation.mutate({ data: { id: map.id } } as any) }}
+
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
