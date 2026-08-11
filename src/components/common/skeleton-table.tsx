@@ -12,9 +12,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 interface SkeletonTableProps {
   columnCount?: number;
   rowCount?: number;
+  rows?: number; // Added to maintain backward compatibility and fix build errors
 }
 
-export function SkeletonTable({ columnCount = 5, rowCount = 5 }: SkeletonTableProps) {
+export function SkeletonTable({ columnCount = 5, rowCount = 5, rows }: SkeletonTableProps) {
+  const actualRowCount = rows ?? rowCount;
+
   return (
     <div className="rounded-md border bg-card">
       <Table>
@@ -28,7 +31,8 @@ export function SkeletonTable({ columnCount = 5, rowCount = 5 }: SkeletonTablePr
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: rowCount }).map((_, i) => (
+          {Array.from({ length: actualRowCount }).map((_, i) => (
+
             <TableRow key={i}>
               {Array.from({ length: columnCount }).map((_, j) => (
                 <TableCell key={j}>
