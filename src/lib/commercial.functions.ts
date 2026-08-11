@@ -496,7 +496,7 @@ async function applyWalletMovement(
 
   // Validación de saldo (No permitir saldo negativo si es un débito)
   if (balanceAfter < 0 && input.amount < 0) {
-    throw new Error("Saldo insuficiente para realizar esta operación.");
+    throw new Error("Wallet completada");
   }
 
   const creditsAfter = Number(wallet.credits) + input.units;
