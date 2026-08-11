@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { MessageCircle, Send, AlertCircle, Wallet, Users, Search, Filter, Trash2, FileUp, FileText, Info } from "lucide-react";
+import { MessageCircle, Send, AlertCircle, Wallet, Users, Search, Filter, Trash2, FileUp, FileText, Info, Calendar, Clock, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
