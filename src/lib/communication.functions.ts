@@ -429,7 +429,10 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
     } catch (err: any) {
       await context.supabase
         .from("whatsapp_messages")
-        .update({ status: "failed" } as never)
+        .update({ 
+          status: "failed",
+          metadata: { failure_type: "INSUFFICIENT_BALANCE", error: err.message }
+        } as never)
         .eq("id", msg.id);
       throw err;
     }
