@@ -43,3 +43,15 @@ export function useNovaKnowledge() {
 
   return { ...query, save: mutation.mutate, isSaving: mutation.isPending };
 }
+
+// Mock hook for backward compatibility with NovaDrawer
+export function useNova() {
+  return {
+    data: [
+      "¿Cómo va mi saldo?",
+      "Crear una campaña SMS",
+      "Analizar últimos mensajes"
+    ]
+  };
+}
+
