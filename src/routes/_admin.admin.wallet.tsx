@@ -438,7 +438,7 @@ function WalletPage() {
                             <Badge variant="outline">{r.reviewStatus}</Badge>
                             {r.reviewStatus === "pendiente" && (
                               <div className="flex gap-1">
-                                <Button size="xs" variant="ghost" className="h-7 text-success" onClick={async () => {
+                                <Button size="sm" variant="ghost" className="h-7 text-success px-2" onClick={async () => {
                                   if(confirm("¿Aprobar esta recarga?")) {
                                     const { reviewRecharge } = await import("@/lib/commercial.functions");
                                     try {
@@ -449,7 +449,7 @@ function WalletPage() {
                                     }
                                   }
                                 }}>Aprobar</Button>
-                                <Button size="xs" variant="ghost" className="h-7 text-destructive" onClick={async () => {
+                                <Button size="sm" variant="ghost" className="h-7 text-destructive px-2" onClick={async () => {
                                   const note = prompt("Motivo del rechazo:");
                                   if(note) {
                                     const { reviewRecharge } = await import("@/lib/commercial.functions");
