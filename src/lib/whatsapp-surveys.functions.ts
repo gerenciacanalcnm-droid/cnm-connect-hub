@@ -35,33 +35,69 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
       .single();
 
     if (survErr || !survey) throw new Error("Encuesta no encontrada.");
-    const options = (survey as any).options || [];
-    if (options.length < 2) throw new Error("La encuesta debe tener al menos 2 opciones.");
+    const s = survey as any;
+    const options = s.options || [];
+    if (options.length < 1) throw new Error("La encuesta debe tener al menos 1 opción.");
 
-    // 3. Preparar mensaje interactivo Meta
+    // 3. Preparar mensaje interactivo Meta basado en el tipo
+    let interactive: any = {
+      body: { text: s.question },
+      footer: s.metadata?.footer ? { text: s.metadata.footer } : undefined
+    };
+
+    if (s.type === 'INTERACTIVE_LIST') {
+      interactive.type = "list";
+      interactive.header = { type: "text", text: s.title || "Encuesta" };
+      interactive.action = {
+        button: s.metadata?.button_text || "Ver opciones",
+        sections: [
+          {
+            title: s.metadata?.section_title || "Opciones",
+            rows: options.map((opt: any) => ({
+              id: opt.option_key,
+              title: opt.label.substring(0, 24),
+              description: opt.metadata?.description?.substring(0, 72)
+            }))
+          }
+        ]
+      };
+    } else if (s.type === 'INTERACTIVE_BUTTONS') {
+      interactive.type = "button";
+      
+      // Header multimedia para botones
+      if (s.metadata?.header_type && s.metadata?.header_type !== 'NONE') {
+        const hType = s.metadata.header_type.toLowerCase();
+        interactive.header = {
+          type: hType,
+          [hType]: hType === 'text' ? { text: s.metadata.header_text } : { link: s.metadata.header_url }
+        };
+      }
+
+      interactive.action = {
+        buttons: options.slice(0, 3).map((opt: any) => ({
+          type: "reply",
+          reply: {
+            id: opt.option_key,
+            title: opt.label.substring(0, 24)
+          }
+        }))
+      };
+    } else {
+      // Legacy fallback
+      interactive.type = "list";
+      interactive.header = { type: "text", text: s.title };
+      interactive.action = {
+        button: "Ver opciones",
+        sections: [{ title: "Opciones", rows: options.map((opt: any) => ({ id: opt.option_key, title: opt.label })) }]
+      };
+    }
+
     const interactivePayload = {
       messaging_product: "whatsapp",
       recipient_type: "individual",
       to: data.recipient,
       type: "interactive",
-      interactive: {
-        type: "list",
-        header: { type: "text", text: (survey as any).title || "Encuesta" },
-        body: { text: (survey as any).question },
-        footer: { text: "Selecciona una opción" },
-        action: {
-          button: "Ver opciones",
-          sections: [
-            {
-              title: "Opciones disponibles",
-              rows: options.map((opt: any) => ({
-                id: opt.option_key,
-                title: opt.label.substring(0, 24),
-              }))
-            }
-          ]
-        }
-      }
+      interactive
     };
 
     // 4. Registrar mensaje en estado 'sending'
