@@ -122,5 +122,97 @@ Responde de forma natural y concisa.
       prompt_tokens: usage?.prompt_tokens,
       completion_tokens: usage?.completion_tokens,
     }
-  };
+
+/**
+ * Motor de Ejecución de Mapas de Conversación
+ */
+export async function executeConversationMap(
+  companyId: string,
+  contactId: string,
+  conversationId: string,
+  userMessage: string,
+  map: any
+) {
+  const sb = supabaseAdmin;
+  const nodes = map.nodes || [];
+  
+  // 1. Identificar punto de entrada (simplificado: primer nodo MENSAJE o PREGUNTA)
+  // En una versión avanzada usaríamos conversation_state para rastrear el nodo actual
+  const startNode = nodes[0];
+  if (!startNode) return { response: null };
+
+  let currentNode = startNode;
+  let responseText = "";
+
+  // 2. Procesar Nodos (Lógica de paso a paso)
+  // Para fase 4: Evaluamos el mensaje contra condiciones del mapa si es un nodo de decisión
+  
+  if (currentNode.type === "MENSAJE") {
+    responseText = currentNode.data?.text;
+    // Buscar si hay una condición siguiente
+    const nextNode = nodes.find((n: any) => n.id === "node_2"); // Ejemplo de flujo
+    if (nextNode && nextNode.type === "CONDICION") {
+      currentNode = nextNode;
+    }
+  }
+
+  if (currentNode.type === "CONDICION") {
+    const branches = currentNode.data?.branches || [];
+    const normalizedMsg = userMessage.toLowerCase();
+    
+    let targetNodeId = currentNode.data?.default_next;
+    
+    for (const branch of branches) {
+      if (normalizedMsg.includes(branch.value)) {
+        targetNodeId = branch.next_node;
+        break;
+      }
+    }
+
+    const nextNode = nodes.find((n: any) => n.id === targetNodeId);
+    if (nextNode) currentNode = nextNode;
+  }
+
+  // 3. Ejecutar Acción
+  if (currentNode.type === "TRANSFERIR_A_ASESOR") {
+    await transferToAgent(companyId, conversationId, currentNode.data?.agent_id);
+    return { response: "Transferido a un asesor. Un momento por favor." };
+  }
+
+  if (currentNode.type === "ACCION") {
+    const action = currentNode.data?.action;
+    if (action === "RESPONDER_CON_IA") {
+      const novaResp = await generateNovaResponse(companyId, contactId, conversationId, userMessage);
+      return { response: novaResp.response };
+    }
+  }
+
+  if (currentNode.type === "MENSAJE") {
+    responseText = currentNode.data?.text;
+  }
+
+  return { response: responseText || null };
 }
+
+async function transferToAgent(companyId: string, conversationId: string, agentId: string | null) {
+  const sb = supabaseAdmin;
+  
+  // 1. Asignar asesor y cambiar estado
+  await sb.from("whatsapp_conversations")
+    .update({ 
+      assigned_to: agentId, 
+      status: "pending", // Cambia a pendiente de atención
+      updated_at: new Date().toISOString() 
+    })
+    .eq("id", conversationId)
+    .eq("company_id", companyId);
+
+  // 2. Registrar auditoría
+  await sb.from("automation_logs").insert({
+    company_id: companyId,
+    trigger_type: "nova_transfer",
+    result: "SUCCESS",
+    execution_data: { conversation_id: conversationId, agent_id: agentId }
+  } as any);
+}
+

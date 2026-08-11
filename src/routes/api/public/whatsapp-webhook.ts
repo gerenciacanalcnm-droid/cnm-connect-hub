@@ -169,7 +169,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                 wamid
               );
 
-              // --- CICLO NOVA AI ---
+              // --- CICLO NOVA AI & CONVERSATION MAPS ---
               const { data: settingsData } = await supabaseAdmin
                 .from('nova_settings' as any)
                 .select('status')
@@ -182,19 +182,45 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
 
               if (isNovaActive && !isAssigned && !isClosed) {
                 try {
-                  const novaResp = await generateNovaResponse(
-                    account.company_id,
-                    contact.id,
-                    conversationId,
-                    text
-                  );
+                  // 1. Buscar Mapa Activo
+                  const { data: activeMap } = await supabaseAdmin
+                    .from('conversation_maps')
+                    .select('*')
+                    .eq('company_id', account.company_id)
+                    .eq('status', 'ACTIVO')
+                    .limit(1)
+                    .maybeSingle();
 
-                  if (novaResp.response) {
+                  let responseText = null;
+
+                  if (activeMap) {
+                    // Ejecutar motor de mapa (simplificado para fase 4)
+                    const { executeConversationMap } = await import('@/lib/nova-engine.server');
+                    const mapResult = await executeConversationMap(
+                      account.company_id,
+                      contact.id,
+                      conversationId,
+                      text,
+                      activeMap as any
+                    );
+                    responseText = mapResult.response;
+                  } else {
+                    // Si no hay mapa, comportamiento estándar de Nova
+                    const novaResp = await generateNovaResponse(
+                      account.company_id,
+                      contact.id,
+                      conversationId,
+                      text
+                    );
+                    responseText = novaResp.response;
+                  }
+
+                  if (responseText) {
                     await internalSendNovaResponse(
                       account.company_id,
                       account.id,
                       from,
-                      novaResp.response,
+                      responseText,
                       conversationId,
                       contact.id
                     );
@@ -203,6 +229,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   console.error('[Nova Engine Error]:', novaErr);
                 }
               }
+
             }
           }
 
