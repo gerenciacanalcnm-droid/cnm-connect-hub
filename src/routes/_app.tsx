@@ -22,9 +22,12 @@ function AppLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login", replace: true });
+    // Temporarily disabled for diagnostic test
+    // if (!loading && !user) navigate({ to: "/login", replace: true });
   }, [loading, user, navigate]);
 
+  // Temporarily bypass loading screen for diagnostic
+  /*
   if (loading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -32,6 +35,7 @@ function AppLayout() {
       </div>
     );
   }
+  */
 
   return (
     <CompanyProvider>
