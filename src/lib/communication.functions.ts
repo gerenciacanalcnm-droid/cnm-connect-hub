@@ -366,7 +366,7 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
     // 4. Actualizar estado final
     await context.supabase
       .from("sms_messages")
-      .update({ status: "sent", sent_at: new Date().toISOString() } as never)
+      .update({ status: "sent" as never, sent_at: new Date().toISOString() } as never)
       .eq("id", sms.id);
 
     return { ok: true, messageId: sms.id };
