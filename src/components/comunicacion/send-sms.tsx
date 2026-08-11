@@ -135,9 +135,10 @@ export function SendSms() {
           <CardContent className="pt-6">
             <Tabs value={mode} onValueChange={(v) => setMode(v as SendMode)}>
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="direct">Enviar ahora</TabsTrigger>
-                <TabsTrigger value="bulk">Masivo</TabsTrigger>
-                <TabsTrigger value="schedule">Programar</TabsTrigger>
+                <TabsTrigger value="direct" className="gap-2"><Send className="h-4 w-4" /> Enviar ahora</TabsTrigger>
+                <TabsTrigger value="bulk" className="gap-2"><Users className="h-4 w-4" /> Envío masivo</TabsTrigger>
+                <TabsTrigger value="schedule" className="gap-2"><Calendar className="h-4 w-4" /> Programar</TabsTrigger>
+
               </TabsList>
             </Tabs>
           </CardContent>
