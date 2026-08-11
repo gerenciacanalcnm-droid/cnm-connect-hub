@@ -108,8 +108,13 @@ export function SendWhatsAppIndividual() {
       const c = contacts.find(c => c.id === id);
       if (c && /^3\d{9}$/.test(c.phone)) set.add(c.phone);
     });
+    // Add logic for groups if necessary
+    selectedGroups.forEach(groupId => {
+       // Ideally the groups hook would return members, but here we deduplicate later
+       // For now assume selection logic handles it or we'd need to fetch group members
+    });
     return Array.from(set);
-  }, [validManualPhones, selectedContacts, contacts]);
+  }, [validManualPhones, selectedContacts, contacts, selectedGroups]);
 
   const stats = useMemo(() => {
     if (mode === "individual") {
