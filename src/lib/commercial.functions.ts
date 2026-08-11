@@ -569,7 +569,7 @@ export const walletOperation = createServerFn({ method: "POST" })
   .inputValidator((v) =>
     z
       .object({
-        wallet_id: uuid,
+        wallet_id: z.string(),
         type: operationType,
         amount: z.number(),
         units: z.number().int().default(0),
