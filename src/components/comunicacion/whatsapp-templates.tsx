@@ -290,12 +290,16 @@ export function WhatsAppTemplates() {
 
         {selectedComponent === 'FOOTER' && (
           <div className="space-y-4">
-            <Input 
-              value={footer} 
-              onChange={(e) => setFooter(e.target.value)} 
-              placeholder="Ej: CNM Digital Media" 
-              maxLength={60}
-            />
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pie de página</label>
+              <Input 
+                value={footer} 
+                onChange={(e) => setFooter(e.target.value)} 
+                placeholder="Ej: CNM Digital Media" 
+                maxLength={60}
+                className="text-slate-900 bg-white"
+              />
+            </div>
           </div>
         )}
 
