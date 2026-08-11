@@ -85,7 +85,7 @@ export function WhatsAppTemplates() {
           <Button variant="ghost" size="icon" onClick={() => setIsEditorOpen(false)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="font-semibold">Nuevo</span>
+          <span className="font-semibold text-slate-900">Nueva Plantilla</span>
         </div>
         
         <div className="space-y-4">
