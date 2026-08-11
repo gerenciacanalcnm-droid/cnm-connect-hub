@@ -426,55 +426,58 @@ export function WhatsAppTemplates() {
                             </Button>
                           </div>
                           <div className="space-y-3">
-                            {form.watch("buttons")?.map((button, index) => (
-                              <div key={index} className="p-3 bg-slate-50 rounded-lg border space-y-3 relative group">
-                                <Button 
-                                  type="button"
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  onClick={() => {
-                                    const current = form.getValues("buttons") || [];
-                                    form.setValue("buttons", current.filter((_, i) => i !== index));
-                                  }}
-                                >
-                                  <Trash2 className="h-3 w-3 text-destructive" />
-                                </Button>
-                                <FormField control={form.control} name={`buttons.${index}.type`} render={({ field }) => (
-                                  <FormItem>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                      <FormControl>
-                                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="QUICK_REPLY">Respuesta rápida</SelectItem>
-                                        <SelectItem value="URL">Enlace (URL)</SelectItem>
-                                        <SelectItem value="PHONE">Teléfono</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </FormItem>
-                                )} />
-                                <FormField control={form.control} name={`buttons.${index}.text`} render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl><Input {...field} placeholder="Texto del botón" className="h-8 text-xs" /></FormControl>
-                                  </FormItem>
-                                )} />
-                                {button.type === "URL" && (
-                                  <FormField control={form.control} name={`buttons.${index}.url`} render={({ field }) => (
+                            {form.watch("buttons")?.map((button, index) => {
+                              if (!button) return null;
+                              return (
+                                <div key={index} className="p-3 bg-slate-50 rounded-lg border space-y-3 relative group">
+                                  <Button 
+                                    type="button"
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => {
+                                      const current = form.getValues("buttons") || [];
+                                      form.setValue("buttons", current.filter((_, i) => i !== index));
+                                    }}
+                                  >
+                                    <Trash2 className="h-3 w-3 text-destructive" />
+                                  </Button>
+                                  <FormField control={form.control} name={`buttons.${index}.type`} render={({ field }) => (
                                     <FormItem>
-                                      <FormControl><Input {...field} placeholder="https://..." className="h-8 text-xs" /></FormControl>
+                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="QUICK_REPLY">Respuesta rápida</SelectItem>
+                                          <SelectItem value="URL">Enlace (URL)</SelectItem>
+                                          <SelectItem value="PHONE">Teléfono</SelectItem>
+                                        </SelectContent>
+                                      </Select>
                                     </FormItem>
                                   )} />
-                                )}
-                                {button.type === "PHONE" && (
-                                  <FormField control={form.control} name={`buttons.${index}.phoneNumber`} render={({ field }) => (
+                                  <FormField control={form.control} name={`buttons.${index}.text`} render={({ field }) => (
                                     <FormItem>
-                                      <FormControl><Input {...field} placeholder="+54 11..." className="h-8 text-xs" /></FormControl>
+                                      <FormControl><Input {...field} placeholder="Texto del botón" className="h-8 text-xs" /></FormControl>
                                     </FormItem>
                                   )} />
-                                )}
-                              </div>
-                            ))}
+                                  {button.type === "URL" && (
+                                    <FormField control={form.control} name={`buttons.${index}.url`} render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl><Input {...field} placeholder="https://..." className="h-8 text-xs" /></FormControl>
+                                      </FormItem>
+                                    )} />
+                                  )}
+                                  {button.type === "PHONE" && (
+                                    <FormField control={form.control} name={`buttons.${index}.phoneNumber`} render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl><Input {...field} placeholder="+54 11..." className="h-8 text-xs" /></FormControl>
+                                      </FormItem>
+                                    )} />
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
