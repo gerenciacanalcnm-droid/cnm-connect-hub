@@ -189,7 +189,7 @@ export function WhatsAppTemplates() {
       {/* DERECHA: Configuración */}
       <div className="w-80 bg-white border-l p-6 overflow-y-auto flex flex-col">
         <h2 className="font-bold mb-6 flex items-center gap-2">
-          completado
+          100% listo
         </h2>
 
         {!selectedComponent && (
