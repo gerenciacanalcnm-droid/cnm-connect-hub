@@ -3,6 +3,17 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { processAutomationTrigger } from "./automation-engine.server";
 
+export interface NovaResponse {
+  response: string;
+  model: string;
+  usage?: {
+    total_tokens?: number;
+    prompt_tokens?: number;
+    completion_tokens?: number;
+  };
+}
+
+
 const CNM_COMPANY_ID = "00000000-0000-4000-8000-000000000001";
 
 async function admin() {
@@ -491,6 +502,15 @@ export const getNovaClientContext = createServerFn({ method: "GET" })
       conversations: convs ?? [],
     };
   });
+
+export const testNovaResponse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ contact_id: z.string().uuid(), conversation_id: z.string().uuid(), message: z.string() }).parse(v))
+  .handler(async ({ data }) => {
+    const { generateNovaResponse } = await import("./nova-engine.server");
+    return await generateNovaResponse(CNM_COMPANY_ID, data.contact_id, data.conversation_id, data.message) as NovaResponse;
+  });
+
 
 export const testNovaResponse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
