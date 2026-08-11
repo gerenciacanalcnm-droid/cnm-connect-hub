@@ -284,17 +284,16 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
     const batchId = data.batchId || crypto.randomUUID();
 
     // 2. Cobro atómico consolidado e Idempotencia
-    try {
-      // 2.1 Obtener company_id real del servidor
-      const { data: membership } = await context.supabase
-        .from("company_members")
-        .select("company_id")
-        .eq("user_id", context.userId)
-        .eq("is_active", true)
-        .maybeSingle();
-      
-      const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
+    const { data: membership } = await context.supabase
+      .from("company_members")
+      .select("company_id")
+      .eq("user_id", context.userId)
+      .eq("is_active", true)
+      .maybeSingle();
+    
+    const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
 
+    try {
       await trackServiceUsage({
         data: {
           company_id: realCompanyId,
@@ -305,7 +304,7 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
         },
       });
     } catch (err: any) {
-      throw err; // Saldo insuficiente u otro error comercial (Idempotencia manejada en applyWalletMovement)
+      throw err; // Saldo insuficiente u otro error comercial
     }
 
     // 3. Procesamiento por lotes (Chunks de 20 para evitar timeouts)
@@ -369,7 +368,7 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
 
           // Registrar en la DB
           await context.supabase.from("whatsapp_messages").insert({
-            company_id: CNM_COMPANY_ID,
+            company_id: realCompanyId,
             account_id: accountId,
             to_phone: to,
             body: templateId ? templateData.body : body,
@@ -548,16 +547,16 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
     }
 
     let usageAmount = 0;
-    if (!data.batchId) {
-      // 0. Obtener company_id real
-      const { data: membership } = await context.supabase
-        .from("company_members")
-        .select("company_id")
-        .eq("user_id", context.userId)
-        .eq("is_active", true)
-        .maybeSingle();
-      const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
+    // 0. Obtener company_id real
+    const { data: membership } = await context.supabase
+      .from("company_members")
+      .select("company_id")
+      .eq("user_id", context.userId)
+      .eq("is_active", true)
+      .maybeSingle();
+    const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
 
+    if (!data.batchId) {
       try {
         const usage = await trackServiceUsage({
           data: {
@@ -577,7 +576,7 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
     const { data: msg, error: msgErr } = await context.supabase
       .from("whatsapp_messages")
       .insert({
-        company_id: CNM_COMPANY_ID,
+        company_id: realCompanyId,
         account_id: data.accountId,
         to_phone: data.recipient,
         template_id: data.templateId as any,

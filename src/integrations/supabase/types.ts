@@ -2596,6 +2596,7 @@ export type Database = {
           external_id: string | null
           id: string
           media_url: string | null
+          metadata: Json | null
           provider_id: string | null
           read_at: string | null
           sent_at: string | null
@@ -2618,6 +2619,7 @@ export type Database = {
           external_id?: string | null
           id?: string
           media_url?: string | null
+          metadata?: Json | null
           provider_id?: string | null
           read_at?: string | null
           sent_at?: string | null
@@ -2640,6 +2642,7 @@ export type Database = {
           external_id?: string | null
           id?: string
           media_url?: string | null
+          metadata?: Json | null
           provider_id?: string | null
           read_at?: string | null
           sent_at?: string | null
