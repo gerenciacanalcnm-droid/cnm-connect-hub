@@ -325,7 +325,7 @@ function WalletPage() {
           </DialogHeader>
 
           {managed && (
-            <div className="space-y-4">
+            <>
               {!formMode && (
                 <div className="space-y-4">
                   <div className="grid gap-3 sm:grid-cols-3">
@@ -627,8 +627,11 @@ function WalletPage() {
               </p>
             </div>
           )}
+        </>
+      )}
 
-          <DialogFooter>
+      <DialogFooter>
+
             {formMode ? (
               <>
                 <Button variant="outline" onClick={resetForm}>
