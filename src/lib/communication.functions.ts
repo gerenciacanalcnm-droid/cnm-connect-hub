@@ -214,7 +214,7 @@ export const listConversations = createServerFn({ method: "GET" })
       .order("last_message_at", { ascending: false, nullsFirst: false })
       .limit(200);
     if (data.channel && data.channel !== "email") q = q.eq("channel", data.channel);
-    if (data.status) q = q.eq("status", data.status);
+    if (data.status) q = q.eq("status", data.status as string);
     if (data.search) {
       const s = `%${data.search}%`;
       q = q.or(`contact_name.ilike.${s},contact_phone.ilike.${s}`);
@@ -271,13 +271,13 @@ export const updateConversation = createServerFn({ method: "POST" })
         if (data.assignedTo !== undefined && data.assignedTo !== current.assigned_to) {
           action = "conversation_transfer";
           detail = `Transferencia de asesor: anterior ${current.assigned_to ?? 'ninguno'} -> nuevo ${data.assignedTo ?? 'sin asignar'}.`;
-        } else if (data.status && data.status !== current.status) {
+        } else if (data.status && data.status !== (current.status as string)) {
           action = "conversation_status_change";
           detail = `Cambio de estado: ${current.status} -> ${data.status}.`;
         }
 
         await context.supabase.from("audit_logs").insert({
-          company_id: current.company_id,
+          company_id: current.company_id as string,
           user_id: context.userId,
           module: "communication",
           action,
@@ -289,7 +289,7 @@ export const updateConversation = createServerFn({ method: "POST" })
             previous_status: current.status,
             new_status: data.status,
             timestamp: new Date().toISOString()
-          }
+          } as never
         });
       }
     }
