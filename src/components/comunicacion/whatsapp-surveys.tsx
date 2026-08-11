@@ -154,8 +154,8 @@ export function WhatsAppSurveys() {
                   <SelectValue placeholder="Tipo de Encuesta" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="INTERACTIVE_LIST">Lista Interactiva (2-10 opciones)</SelectItem>
-                  <SelectItem value="INTERACTIVE_BUTTONS">Botones (1-3 opciones)</SelectItem>
+                  <SelectItem value="INTERACTIVE_LIST" className="cursor-pointer">Lista Interactiva (2-10 opciones)</SelectItem>
+                  <SelectItem value="INTERACTIVE_BUTTONS" className="cursor-pointer">Botones (1-3 opciones)</SelectItem>
                 </SelectContent>
               </Select>
 
