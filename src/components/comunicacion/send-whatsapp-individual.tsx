@@ -70,7 +70,7 @@ export function SendWhatsAppIndividual() {
   const connectedAccount = accounts.find(a => a.status === 'connected');
   
   const templates = useMemo(() => {
-    return allTemplates.filter(t => t.status === 'APPROVED');
+    return allTemplates.filter(t => (t.status as string) === 'APPROVED');
   }, [allTemplates]);
 
   const selectedTemplate = useMemo(() => {

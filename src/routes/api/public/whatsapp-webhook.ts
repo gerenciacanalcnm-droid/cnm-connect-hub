@@ -14,7 +14,6 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
         const challenge = url.searchParams.get('hub.challenge');
 
         if (mode === 'subscribe' && token) {
-          // Buscamos si existe alguna cuenta con este verify_token
           const { data, error } = await supabaseAdmin
             .from('whatsapp_accounts')
             .select('id')
@@ -30,20 +29,84 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
       },
 
       /**
-       * Meta Event Notifications
+       * Meta Event Notifications (Status updates)
        */
       POST: async ({ request }) => {
         try {
           const payload = await request.json();
           
-          // Guardar el evento en la tabla de webhooks para procesamiento asíncrono posterior
+          // Auditoría del webhook bruto
           await supabaseAdmin.from('whatsapp_webhooks').insert({
             event_type: payload?.entry?.[0]?.changes?.[0]?.field || 'unknown',
             payload: payload
           });
 
+          // Procesar actualizaciones de estado de mensajes
+          const entry = payload.entry?.[0];
+          const changes = entry?.changes?.[0];
+          const value = changes?.value;
+          const statuses = value?.statuses;
+
+          if (statuses && Array.isArray(statuses)) {
+            for (const statusUpdate of statuses) {
+              const remoteId = statusUpdate.id; // wamid
+              const newStatus = statusUpdate.status; // sent, delivered, read, failed
+              const timestamp = statusUpdate.timestamp;
+              
+              // 1. Identificar mensaje por external_id (wamid)
+              const { data: msg } = await supabaseAdmin
+                .from('whatsapp_messages')
+                .select('id, status, metadata')
+                .eq('external_id', remoteId)
+                .maybeSingle();
+
+              if (!msg) continue;
+
+              // 2. Mapeo de estados y validación de precedencia para evitar retrocesos
+              // read > delivered > sent > sending
+              const statusPriority: Record<string, number> = {
+                'sending': 0,
+                'sent': 1,
+                'delivered': 2,
+                'read': 3,
+                'failed': 4
+              };
+
+              const currentPriority = statusPriority[msg.status] || 0;
+              const newPriority = statusPriority[newStatus] || 0;
+
+              // Si el nuevo estado es 'failed' o tiene mayor prioridad, actualizamos
+              if (newStatus === 'failed' || newPriority > currentPriority) {
+                const updateData: any = {
+                  status: newStatus,
+                  updated_at: new Date().toISOString()
+                };
+
+                if (newStatus === 'failed') {
+                  const error = statusUpdate.errors?.[0];
+                  updateData.error_code = error?.code?.toString();
+                  updateData.metadata = {
+                    ...((msg.metadata as any) || {}),
+                    error_message: error?.message,
+                    error_details: error?.error_data?.details,
+                    failed_at: timestamp ? new Date(parseInt(timestamp) * 1000).toISOString() : new Date().toISOString()
+                  };
+                }
+
+                if (newStatus === 'delivered') updateData.delivered_at = new Date(parseInt(timestamp) * 1000).toISOString();
+                if (newStatus === 'read') updateData.read_at = new Date(parseInt(timestamp) * 1000).toISOString();
+
+                await supabaseAdmin
+                  .from('whatsapp_messages')
+                  .update(updateData)
+                  .eq('id', msg.id);
+              }
+            }
+          }
+
           return new Response('OK', { status: 200 });
         } catch (err) {
+          console.error('[WhatsApp Webhook Error]:', err);
           return new Response('Error', { status: 500 });
         }
       }

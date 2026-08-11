@@ -104,7 +104,7 @@ export function useSyncWhatsAppTemplates() {
 
 export function useSendWhatsAppTemplate() {
   return useMutation({
-    mutationFn: (data: { recipient: string; templateId: string; variables?: Record<string, string>; accountId: string }) => 
+    mutationFn: (data: { recipient: string; templateId: string; variables?: Record<string, string>; accountId: string; batchId?: string }) => 
       whatsappRepository.sendTemplate({ data }),
   });
 }
