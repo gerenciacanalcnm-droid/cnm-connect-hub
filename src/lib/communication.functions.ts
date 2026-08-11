@@ -327,13 +327,13 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
         company_id: CNM_COMPANY_ID,
         to_phone: data.to,
         body: data.body,
-        status: "sending",
+        status: "sending" as any,
         provider: data.provider,
         cost: 0.19, 
       })
-
       .select("id")
       .single();
+
 
     if (smsErr) throw new Error(smsErr.message);
 
@@ -394,13 +394,13 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
         company_id: CNM_COMPANY_ID,
         to_phone: data.to,
         body: data.body,
-        direction: "outbound",
-        status: "sending",
+        direction: "outbound" as any,
+        status: "sending" as any,
         cost: WA_COST,
       })
-
       .select("id")
       .single();
+
 
     if (msgErr) throw new Error(msgErr.message);
 
