@@ -547,16 +547,16 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
     }
 
     let usageAmount = 0;
-    if (!data.batchId) {
-      // 0. Obtener company_id real
-      const { data: membership } = await context.supabase
-        .from("company_members")
-        .select("company_id")
-        .eq("user_id", context.userId)
-        .eq("is_active", true)
-        .maybeSingle();
-      const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
+    // 0. Obtener company_id real
+    const { data: membership } = await context.supabase
+      .from("company_members")
+      .select("company_id")
+      .eq("user_id", context.userId)
+      .eq("is_active", true)
+      .maybeSingle();
+    const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
 
+    if (!data.batchId) {
       try {
         const usage = await trackServiceUsage({
           data: {
@@ -576,7 +576,7 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
     const { data: msg, error: msgErr } = await context.supabase
       .from("whatsapp_messages")
       .insert({
-        company_id: CNM_COMPANY_ID,
+        company_id: realCompanyId,
         account_id: data.accountId,
         to_phone: data.recipient,
         template_id: data.templateId as any,
