@@ -1,36 +1,30 @@
-import type { ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
-import { Inbox } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
-export function EmptyState({
-  icon: Icon = Inbox,
-  title,
-  description,
-  action,
-  className,
-}: {
-  icon?: LucideIcon;
+interface EmptyStateProps {
+  icon: LucideIcon;
   title: string;
-  description?: string;
-  action?: ReactNode;
-  className?: string;
-}) {
+  description: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface/40 px-6 py-12 text-center",
-        className,
-      )}
-    >
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-        <Icon className="h-6 w-6" />
-      </div>
-      <h3 className="text-base font-semibold text-foreground">{title}</h3>
-      {description && (
-        <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">{description}</p>
-      )}
-      {action && <div className="mt-5">{action}</div>}
-    </div>
+    <Card className="border-dashed">
+      <CardContent className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+        <Icon className="h-12 w-12 mb-4 opacity-20" />
+        <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+        <p className="max-w-xs mb-6">{description}</p>
+        {action && (
+          <Button onClick={action.onClick}>
+            {action.label}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 }
