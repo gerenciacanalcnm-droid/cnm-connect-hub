@@ -117,9 +117,11 @@ export function WhatsAppTemplates() {
       name: "",
       category: "MARKETING",
       language: "es",
-      header: "",
+      headerType: "NONE",
+      headerText: "",
       body: "",
       footer: "",
+      buttons: [],
     },
   });
 
