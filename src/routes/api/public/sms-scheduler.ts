@@ -25,7 +25,7 @@ export const Route = createFileRoute('/api/public/sms-scheduler')({
 
           // Ejecución del motor de procesamiento
           // Note: createServerFn invocation returns a promise when called server-side
-          const result = await processPendingSmsSchedules();
+          const result = await executePendingSchedules(supabaseAdmin);
           
           return new Response(JSON.stringify(result), {
             status: 200,
