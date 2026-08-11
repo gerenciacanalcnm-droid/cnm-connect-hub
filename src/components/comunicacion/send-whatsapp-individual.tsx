@@ -308,14 +308,36 @@ export function SendWhatsAppIndividual() {
               </div>
             )}
 
-            {!connectedAccount && (
-              <Alert variant="destructive" className="bg-destructive/10 border-none">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Debes conectar una cuenta en Ajustes.
-                </AlertDescription>
-              </Alert>
-            )}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cuenta de Envío</Label>
+                {accounts.length > 0 ? (
+                  <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
+                    <SelectTrigger className="w-full bg-emerald-50/50 border-emerald-100 focus:ring-emerald-500">
+                      <SelectValue placeholder="Seleccionar cuenta de envío" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {accounts.map(acc => (
+                        <SelectItem key={acc.id} value={acc.id}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{acc.alias}</span>
+                            <span className="text-xs text-slate-400">({acc.displayPhone || acc.phoneNumberId})</span>
+                            {acc.isPrimary && <Badge variant="secondary" className="h-4 text-[9px] px-1">Principal</Badge>}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Alert variant="destructive" className="bg-destructive/10 border-none py-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      No hay cuentas conectadas. Ve a Ajustes para configurar una.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
