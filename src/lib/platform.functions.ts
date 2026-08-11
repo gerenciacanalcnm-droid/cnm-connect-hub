@@ -807,8 +807,8 @@ export const listAuditLogs = createServerFn({ method: "GET" })
     if (data.action) q = q.eq("action", data.action);
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
-    const normalized = (rows ?? []).map((r) => ({ ...r, ip: r.ip == null ? null : String(r.ip) }));
-    return { rows: normalized, total: count ?? 0 };
+    const normalized = (rows ?? []).map((r) => ({ ...r, ip: r.ip == null ? null : String(r.ip) as any }));
+    return { rows: normalized as any, total: count ?? 0 };
   });
 
 // ═══════════════════ SYSTEM LOGS ═══════════════════
@@ -850,4 +850,93 @@ export const getContactImportUploadUrl = createServerFn({ method: "POST" })
       .createSignedUploadUrl(path);
     if (error) throw new Error(error.message);
     return { path, token: signed.token, signedUrl: signed.signedUrl };
+  });
+
+// ═══════════════════ AUTOMATIONS ═══════════════════
+export const listAutomations = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("automations" as any)
+      .select("*")
+      .eq("company_id", CNM_COMPANY_ID)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as any;
+  });
+
+const AutomationInputSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional().nullable(),
+  status: z.enum(["ACTIVA", "PAUSADA", "BORRADOR"]).default("BORRADOR"),
+  channel: z.string().optional().nullable(),
+  trigger_config: z.record(z.string(), z.unknown()).default({}),
+  conditions_config: z.array(z.record(z.string(), z.unknown())).default([]),
+  actions_config: z.array(z.record(z.string(), z.unknown())).default([]),
+});
+
+export const upsertAutomation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({ id: z.string().uuid().optional(), input: AutomationInputSchema }).parse(v),
+  )
+  .handler(async ({ data, context }) => {
+    const row = {
+      ...data.input,
+      company_id: CNM_COMPANY_ID,
+      trigger_config: data.input.trigger_config as any,
+      conditions_config: data.input.conditions_config as any,
+      actions_config: data.input.actions_config as any,
+      updated_at: new Date().toISOString(),
+    };
+    const q = data.id
+      ? context.supabase
+          .from("automations" as any)
+          .update(row as never)
+          .eq("id", data.id)
+          .select()
+          .single()
+      : context.supabase
+          .from("automations" as any)
+          .insert(row as never)
+          .select()
+          .single();
+    const { data: saved, error } = await q;
+    if (error) throw new Error(error.message);
+    return saved as any;
+  });
+
+export const deleteAutomation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("automations" as any).delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listAutomationLogs = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z
+      .object({
+        automation_id: z.string().uuid().optional(),
+        page: z.number().int().min(1).default(1),
+        pageSize: z.number().int().min(1).max(200).default(50),
+      })
+      .parse(v ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const from = (data.page - 1) * data.pageSize;
+    const to = from + data.pageSize - 1;
+    let q = context.supabase
+      .from("automation_logs" as any)
+      .select("*", { count: "exact" })
+      .eq("company_id", CNM_COMPANY_ID)
+      .order("executed_at", { ascending: false })
+      .range(from, to);
+    if (data.automation_id) q = q.eq("automation_id", data.automation_id);
+    const { data: rows, error, count } = await q;
+    if (error) throw new Error(error.message);
+    return { rows: (rows ?? []) as any, total: count ?? 0 } as any;
   });
