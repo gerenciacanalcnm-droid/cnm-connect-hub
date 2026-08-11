@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Send, Zap, Calendar, Users, MessageSquare, Info, AlertCircle, Clock, Search, X, Check, Trash2, FileUp, Filter } from "lucide-react";
+import { Send, Zap, Calendar, Users, MessageSquare, Info, AlertCircle, Clock, Search, X, Check, Trash2, FileUp, Filter, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,12 +35,17 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { sendSmsMessage } from "@/lib/communication.functions";
 import { sendBulkSms } from "@/lib/sms-bulk.functions";
+import { createSmsSchedule, listSmsSchedules, cancelSmsSchedule } from "@/lib/sms-schedule.functions";
 import { useContacts } from "@/hooks/use-contacts";
 import { useContactGroups, usePermissions } from "@/hooks/use-platform";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useWallets, useRateTiers } from "@/hooks/use-commercial";
 import { formatCurrency } from "@/lib/format";
 import { smsStats } from "@/lib/sms-utils";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+
 
 
 type SendMode = "direct" | "bulk" | "schedule";
