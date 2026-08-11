@@ -33,7 +33,7 @@ export const getMetaTemplatesDetail = createServerFn({ method: "POST" })
 
     try {
       // 1. Verify Phone Number Details
-      const phoneRes = await fetch(`https://graph.facebook.com/v20.0/${phoneNumberId}?fields=id,display_phone_number,whatsapp_business_account,verified_name,status,quality_rating`, {
+      const phoneRes = await fetch(`https://graph.facebook.com/v20.0/${phoneNumberId}?fields=id,display_phone_number,verified_name,quality_rating,status,code_verification_status,whatsapp_business_account`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const phoneData = await phoneRes.json();
