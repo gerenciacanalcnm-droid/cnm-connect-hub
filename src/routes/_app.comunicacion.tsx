@@ -26,7 +26,7 @@ function ComunicacionPage() {
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <PageHeader
-        title="Conversaciones"
+        title="Comunicación"
         description="Gestiona SMS, WhatsApp Business y Email desde un único centro omnicanal."
       />
 
@@ -36,9 +36,6 @@ function ComunicacionPage() {
         <TabsList className="mb-6 flex overflow-x-auto h-auto w-full gap-1 p-1 bg-muted/50">
           <TabsTrigger value="enviar" className="gap-1.5 flex-1 min-w-[100px]">
             <Send className="h-3.5 w-3.5" /> Enviar SMS
-          </TabsTrigger>
-          <TabsTrigger value="conversaciones" className="gap-1.5 flex-1 min-w-[130px]">
-            <Inbox className="h-3.5 w-3.5" /> Conversaciones
           </TabsTrigger>
           <TabsTrigger value="historial" className="gap-1.5 flex-1 min-w-[100px]">
             <Inbox className="h-3.5 w-3.5" /> Historial
@@ -56,9 +53,6 @@ function ComunicacionPage() {
         
         <TabsContent value="enviar">
           <SendSms />
-        </TabsContent>
-        <TabsContent value="conversaciones">
-          <ConversationCenter />
         </TabsContent>
         <TabsContent value="historial">
           <SmsHistory />
