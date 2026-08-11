@@ -371,23 +371,6 @@ export function WhatsAppTemplates() {
             </DialogContent>
           </Dialog>
 
-                          const saved = await saveMutation.mutateAsync({ ...values, variables }) as any;
-                          if (saved?.id) {
-                            await handleSubmitToMeta(saved.id);
-                            setIsCreateOpen(false);
-                            form.reset();
-                          }
-                        }
-                      }}
-                    >
-                      Enviar a Meta
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-
           <Button 
             onClick={handleSync} 
             disabled={syncMutation.isPending}
