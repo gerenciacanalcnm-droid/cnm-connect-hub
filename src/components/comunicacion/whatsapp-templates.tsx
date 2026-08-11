@@ -439,7 +439,7 @@ export function WhatsAppTemplates() {
                             >
                               <Eye className="h-4 w-4" /> Previsualizar
                             </DropdownMenuItem>
-                            {template.status === "DRAFT" && (
+                            {template.status === "draft" && (
                               <DropdownMenuItem 
                                 className="gap-2 text-emerald-600 focus:text-emerald-700"
                                 onClick={() => handleSubmitToMeta(template.id)}
