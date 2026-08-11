@@ -287,7 +287,7 @@ export function ConversationCenter() {
                   disabled={!replyBody.trim() || sendWhatsApp.isPending}
                 >
                   {sendWhatsApp.isPending ? (
-                    <Loader size="sm" className="h-4 w-4" />
+                    <Loader className="h-4 w-4" />
                   ) : (
                     <Send className="h-4 w-4" />
                   )}
