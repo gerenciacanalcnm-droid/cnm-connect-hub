@@ -58,8 +58,9 @@ export function SendSms() {
   const [sending, setSending] = useState(false);
   
   // Programación
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [time, setTime] = useState("09:00");
+
 
   const [toManual, setToManual] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
