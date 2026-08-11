@@ -554,19 +554,19 @@ export function SendWhatsAppIndividual() {
             )}
 
             {!connectedAccount && accounts.length > 0 && (
-              <Alert variant="warning" className="py-2 px-3 bg-amber-50 border-amber-200">
+              <Alert variant="destructive" className="py-2 px-3 bg-amber-50 border-amber-200">
                 <AlertCircle className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-xs text-amber-800">
+                <AlertDescription className="text-xs text-amber-800 font-bold">
                   Selecciona una cuenta de envío para continuar.
                 </AlertDescription>
               </Alert>
             )}
 
-            {messageType === 'template' && selectedTemplateId && selectedTemplate?.variables.length > 0 && 
+            {messageType === 'template' && selectedTemplateId && (selectedTemplate?.variables?.length ?? 0) > 0 && 
              Object.values(templateVariables).some(v => !v.trim()) && (
-              <Alert variant="warning" className="py-2 px-3 bg-blue-50 border-blue-200">
+              <Alert variant="destructive" className="py-2 px-3 bg-blue-50 border-blue-200">
                 <Info className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-xs text-blue-800">
+                <AlertDescription className="text-xs text-blue-800 font-bold">
                   Completa todas las variables de la plantilla.
                 </AlertDescription>
               </Alert>
@@ -579,7 +579,7 @@ export function SendWhatsAppIndividual() {
                 stats.valid === 0 || 
                 (messageType === 'text' ? !msg.trim() : !selectedTemplateId) || 
                 !connectedAccount ||
-                (messageType === 'template' && selectedTemplate?.variables.length > 0 && Object.values(templateVariables).some(v => !v.trim()))
+                (messageType === 'template' && (selectedTemplate?.variables?.length ?? 0) > 0 && Object.values(templateVariables).some(v => !v.trim()))
               }
               className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
             >
