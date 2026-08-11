@@ -85,15 +85,45 @@ export function WhatsAppTemplates() {
     mutationFn: syncWhatsAppTemplates,
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['whatsapp_templates'] });
-      toast.success(
-        <div className="flex flex-col gap-1">
-          <span className="font-bold text-sm">Sincronización completada</span>
-          <div className="text-xs text-slate-500">
-            <p>• {res.count} plantillas encontradas en Meta</p>
-            <p>• {res.updated} actualizadas/insertadas</p>
-            <p>• {res.errors} errores</p>
+      
+      const hasErrors = res.errors > 0;
+      const details = res.details || [];
+      
+      toast(
+        <div className="flex flex-col gap-2 min-w-[300px]">
+          <span className="font-bold text-sm flex items-center gap-2">
+            <RefreshCw className={`h-4 w-4 ${hasErrors ? 'text-amber-500' : 'text-emerald-500'}`} />
+            Sincronización completada
+          </span>
+          
+          <div className="text-xs text-slate-500 space-y-1 bg-slate-50 p-2 rounded border border-slate-100">
+            <p className="flex justify-between"><span>Total en Meta:</span> <span className="font-mono font-bold">{res.count}</span></p>
+            <p className="flex justify-between text-emerald-600"><span>Actualizadas:</span> <span className="font-mono font-bold">{res.updated}</span></p>
+            <p className="flex justify-between text-red-500"><span>Errores:</span> <span className="font-mono font-bold">{res.errors}</span></p>
           </div>
-        </div>
+
+          {hasErrors && (
+            <div className="space-y-1.5 mt-1 border-t pt-2">
+              <p className="text-[10px] font-bold text-slate-400 uppercase">Detalle de errores:</p>
+              <div className="max-h-[150px] overflow-y-auto space-y-1 pr-1">
+                {details.filter((d: any) => !d.success).map((d: any, i: number) => (
+                  <div key={i} className="text-[10px] bg-red-50 text-red-700 p-1.5 rounded border border-red-100">
+                    <div className="font-bold flex justify-between">
+                      <span>{d.name} ({d.language})</span>
+                      <span className="text-[8px] opacity-70">ID: {d.external_id}</span>
+                    </div>
+                    <p className="mt-0.5 opacity-90 leading-tight">{d.error}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {!hasErrors && res.updated > 0 && (
+            <p className="text-[10px] text-emerald-600 font-medium">Todas las plantillas se sincronizaron correctamente.</p>
+          )}
+        </div>,
+        { duration: hasErrors ? 10000 : 4000 }
       );
     },
     onError: (err: any) => toast.error(err.message)

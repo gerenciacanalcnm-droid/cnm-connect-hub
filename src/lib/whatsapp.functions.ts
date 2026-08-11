@@ -439,6 +439,7 @@ export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
     let errors = 0;
 
     // 3. Procesar y guardar en la base de datos
+    const results = [];
     for (const t of templates) {
       try {
         console.log(`[sync] Procesando plantilla Meta: ID=${t.id}, Name=${t.name}, Status=${t.status}`);
@@ -462,24 +463,27 @@ export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
           body: bodyText,
           header: headerComponent?.text || null,
           footer: footerComponent?.text || null,
-          buttons: buttonsComponent || null,
+          buttons: buttonsComponent || [],
           variables: variables as any,
           updated_at: new Date().toISOString()
         };
 
         const { error: upsertErr } = await context.supabase
           .from("whatsapp_templates")
-          .upsert(row, { onConflict: "company_id, name, language" });
+          .upsert(row, { onConflict: "account_id, external_id, language" });
 
         if (upsertErr) {
           console.error(`[sync] Error al upsertar ${t.name}:`, upsertErr.message);
           errors++;
+          results.push({ name: t.name, external_id: t.id, language: t.language, status: t.status, success: false, error: upsertErr.message });
         } else {
           updated++;
+          results.push({ name: t.name, external_id: t.id, language: t.language, status: t.status, success: true });
         }
       } catch (err: any) {
         console.error(`[sync] Error inesperado en loop para ${t.name}:`, err.message);
         errors++;
+        results.push({ name: t.name, external_id: t.id, language: t.language, status: t.status, success: false, error: err.message });
       }
     }
 
@@ -487,7 +491,8 @@ export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
       ok: true, 
       count: templates.length,
       updated,
-      errors
+      errors,
+      details: results
     };
   });
 
