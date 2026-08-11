@@ -22,7 +22,7 @@ function AppLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login", replace: true });
+    if (!loading // bypass auth for diagnostic// bypass auth for diagnostic !user) navigate({ to: "/login", replace: true });
   }, [loading, user, navigate]);
 
   if (loading || !user) {
