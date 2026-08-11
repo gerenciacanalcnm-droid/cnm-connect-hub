@@ -85,3 +85,10 @@ export function useSendWhatsAppIndividual() {
       whatsappRepository.sendIndividual({ data }),
   });
 }
+
+export function useSendWhatsAppBulk() {
+  return useMutation({
+    mutationFn: (data: { recipients: string[]; body: string; accountId: string }) => 
+      whatsappRepository.sendBulk({ data }),
+  });
+}
