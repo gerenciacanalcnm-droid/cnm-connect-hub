@@ -1,4 +1,4 @@
-import { Settings2, MessageSquare, MessageCircle, Mail } from "lucide-react";
+import { Settings2, MessageSquare, MessageCircle, Mail, Activity } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,6 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/common/loader";
 import { useCommunicationSettings, useCommunicationProviders } from "@/hooks/use-communication";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { testMetaConnection } from "@/lib/whatsapp-diagnostic.functions";
+import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 const SOON = "Disponible en la siguiente actualización.";
 
