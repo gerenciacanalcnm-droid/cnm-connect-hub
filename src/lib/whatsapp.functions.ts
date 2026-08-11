@@ -228,21 +228,26 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
 /**
  * Procesa el envío masivo de WhatsApp.
  * Realiza un cobro atómico por el total del lote antes de procesar.
+ * Soporta texto libre y plantillas.
  */
 export const sendBulkWhatsApp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) =>
     z.object({
       recipients: z.array(z.string().min(10)),
-      body: z.string().min(1),
+      body: z.string().optional(),
+      templateId: z.string().uuid().optional(),
+      variables: z.record(z.string()).optional(),
       accountId: z.string().uuid(),
+      batchId: z.string().optional(),
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
-    const { recipients, body, accountId } = data;
+    const { recipients, body, templateId, variables, accountId } = data;
     const total = recipients.length;
 
     if (total === 0) throw new Error("No hay destinatarios.");
+    if (!body && !templateId) throw new Error("Se requiere mensaje o plantilla.");
 
     // 1. Obtener credenciales
     const { data: account, error: accErr } = await context.supabase
@@ -253,21 +258,34 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
 
     if (accErr || !account) throw new Error("Cuenta de WhatsApp no válida.");
 
-    const batchId = crypto.randomUUID();
+    // Si es plantilla, verificarla
+    let templateData: any = null;
+    if (templateId) {
+      const { data: tpl, error: tplErr } = await context.supabase
+        .from("whatsapp_templates")
+        .select("*")
+        .eq("id", templateId)
+        .single();
+      if (tplErr || !tpl) throw new Error("Plantilla no encontrada.");
+      if (tpl.status !== "APPROVED") throw new Error("La plantilla no está aprobada.");
+      templateData = tpl;
+    }
 
-    // 2. Cobro atómico consolidado
+    const batchId = data.batchId || crypto.randomUUID();
+
+    // 2. Cobro atómico consolidado e Idempotencia
     try {
       await trackServiceUsage({
         data: {
           company_id: CNM_COMPANY_ID,
           channel: "whatsapp",
           units: total,
-          description: `Envío Masivo WA (${total} dest.)`,
+          description: `Envío Masivo WA (${total} dest.) - ${templateData?.name || 'Texto'}`,
           reference: batchId,
         },
       });
     } catch (err: any) {
-      throw err; // Saldo insuficiente u otro error comercial
+      throw err; // Saldo insuficiente u otro error comercial (Idempotencia manejada en applyWalletMovement)
     }
 
     // 3. Procesamiento por lotes (Chunks de 20 para evitar timeouts)
@@ -282,6 +300,38 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
         try {
           const toFormatted = to.startsWith("57") ? to : `57${to}`;
           
+          let metaPayload: any = {
+            messaging_product: "whatsapp",
+            recipient_type: "individual",
+            to: toFormatted,
+          };
+
+          if (templateId && templateData) {
+            const parameters = Object.keys(variables || {}).sort((a, b) => parseInt(a) - parseInt(b)).map(key => ({
+              type: "text",
+              text: variables![key]
+            }));
+
+            metaPayload = {
+              ...metaPayload,
+              type: "template",
+              template: {
+                name: templateData.name,
+                language: { code: templateData.language },
+                components: parameters.length > 0 ? [{
+                  type: "body",
+                  parameters: parameters
+                }] : []
+              }
+            };
+          } else {
+            metaPayload = {
+              ...metaPayload,
+              type: "text",
+              text: { body: body || "" },
+            };
+          }
+
           const metaResponse = await fetch(
             `https://graph.facebook.com/v20.0/${account.phone_number_id}/messages`,
             {
@@ -290,13 +340,7 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
                 "Authorization": `Bearer ${account.access_token}`,
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({
-                messaging_product: "whatsapp",
-                recipient_type: "individual",
-                to: toFormatted,
-                type: "text",
-                text: { body },
-              }),
+              body: JSON.stringify(metaPayload),
             }
           );
 
@@ -306,12 +350,16 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
           // Registrar en la DB
           await context.supabase.from("whatsapp_messages").insert({
             company_id: CNM_COMPANY_ID,
+            account_id: accountId,
             to_phone: to,
-            body,
+            body: templateId ? templateData.body : body,
+            template_id: templateId as any,
             direction: "outbound",
             status: isOk ? "sent" : "failed",
-            metadata: { batch_id: batchId, ...metaResult },
-            cost: 0, 
+            external_id: metaResult.messages?.[0]?.id,
+            error_code: isOk ? null : metaResult.error?.code?.toString(),
+            metadata: { batch_id: batchId, ...metaResult, variables },
+            cost: 0, // Cobrado en el batch
           } as never);
 
           if (isOk) {
@@ -328,6 +376,16 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
 
       await Promise.all(chunkPromises);
     }
+
+    // 4. Auditoría
+    await context.supabase.from("audit_logs").insert({
+      company_id: CNM_COMPANY_ID,
+      user_id: context.userId,
+      module: "communication",
+      action: "whatsapp_bulk_send",
+      detail: `Envío masivo completado: ${results.sent} enviados, ${results.failed} fallidos.`,
+      metadata: { batch_id: batchId, total, sent: results.sent, failed: results.failed }
+    } as any);
 
     return { 
       ok: true, 
