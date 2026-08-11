@@ -8,7 +8,9 @@ import { Loader } from "@/components/common/loader";
 import { useCommunicationSettings, useCommunicationProviders } from "@/hooks/use-communication";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { testMetaConnection, getMetaTemplatesDetail } from "@/lib/whatsapp-diagnostic.functions"; // I will merge them or fix import
+import { testMetaConnection } from "@/lib/whatsapp-diagnostic.functions";
+import { getMetaTemplatesDetail } from "@/lib/whatsapp-diagnostic-detail.functions";
+
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -193,8 +195,44 @@ export function CommunicationSettings() {
                   </ul>
                 </div>
               )}
+
+              {detail && (
+                <div className="mt-6 space-y-4 border-t pt-4">
+                  <h4 className="text-sm font-bold flex items-center gap-2">
+                    <Activity className="h-3 w-3" /> Reporte Técnico de Meta
+                  </h4>
+                  
+                  <div className="grid gap-2 text-[11px] font-mono bg-slate-950 text-slate-300 p-3 rounded-md overflow-x-auto">
+                    <p className="text-blue-400">// Configuración</p>
+                    <p>WABA_ID: {detail.config?.businessAccountId}</p>
+                    <p>PHONE_ID: {detail.config?.phoneNumberId}</p>
+                    
+                    <p className="text-blue-400 mt-2">// Propiedad WABA</p>
+                    <p>Phone WABA Owner: {detail.phone_details?.whatsapp_business_account?.id || 'NO ENCONTRADO'}</p>
+                    <p>Match WABA/Phone: {detail.phone_details?.whatsapp_business_account?.id === detail.config?.businessAccountId ? 'SÍ' : 'NO (ERROR DE CONFIGURACIÓN)'}</p>
+
+                    <p className="text-blue-400 mt-2">// Plantillas ({detail.templates?.length || 0})</p>
+                    {detail.cnm_prueba_match ? (
+                      <div className="bg-green-500/10 p-1 rounded border border-green-500/20 text-green-400">
+                        CNM_PRUEBA ENCONTRADA:
+                        <br/>Name: {detail.cnm_prueba_match.name}
+                        <br/>Lang: {detail.cnm_prueba_match.language}
+                        <br/>Status: {detail.cnm_prueba_match.status}
+                        <br/>Category: {detail.cnm_prueba_match.category}
+                      </div>
+                    ) : (
+                      <p className="text-red-400">cnm_prueba: NO ENCONTRADA EN ESTE WABA</p>
+                    )}
+
+                    <div className="mt-2 text-[10px] text-slate-500">
+                      Lista de nombres: {detail.templates?.map((t: any) => `${t.name} (${t.status})`).join(', ')}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
+
           {!diagnostic && !testing && (
             <p className="text-sm text-muted-foreground italic">
               Haz clic en "Ejecutar Prueba" para validar la conectividad con Meta.
