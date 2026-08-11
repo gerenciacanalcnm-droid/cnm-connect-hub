@@ -50,7 +50,7 @@ export function WhatsAppTemplates() {
   // FASE 7: Agregar botón
   const addButton = (type: 'QUICK_REPLY' | 'URL' | 'PHONE') => {
     if (buttons.length >= 10) return;
-    setButtons([...buttons, { type, text: "Nuevo botón", url: "", phoneNumber: "" }]);
+    setButtons([...buttons, { type, text: "Enviar a Meta", url: "", phoneNumber: "" }]);
   };
 
   if (!isEditorOpen) {
