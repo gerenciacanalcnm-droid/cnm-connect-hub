@@ -225,7 +225,7 @@ export function SendSms() {
               <div className="flex justify-between text-muted-foreground">
                 <span>Tipo de envío</span>
                 <Badge variant={isFlash ? "secondary" : "outline"} className={isFlash ? "bg-amber-100 text-amber-900 border-amber-200" : ""}>
-                  {isFlash ? "⚡ Flash" : "Normal"}
+                  {isFlash ? "⚡ Conversaciones" : "Normal"}
                 </Badge>
               </div>
               <div className="flex justify-between text-muted-foreground">
