@@ -178,21 +178,65 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
       };
 
       if (data.templateId && templateData) {
-        const parameters = Object.keys(data.variables || {}).sort((a, b) => parseInt(a) - parseInt(b)).map(key => ({
-          type: "text",
-          text: data.variables![key]
-        }));
+        // Fetch real template components from Meta Graph API
+        console.log(`[whatsapp.meta_fetch] Consultando estructura real de la plantilla: ${templateData.name}`);
+        const tplResponse = await fetch(
+          `https://graph.facebook.com/v20.0/${account.business_account_id}/message_templates?name=${templateData.name}`,
+          {
+            headers: {
+              Authorization: `Bearer ${account.access_token}`,
+            },
+          }
+        );
+
+        if (!tplResponse.ok) {
+          throw new Error(`META_API_ERROR: No se pudo verificar la estructura de la plantilla en Meta. Status: ${tplResponse.status}`);
+        }
+
+        const tplResult = await tplResponse.json();
+        const metaTemplate = tplResult.data?.find((t: any) => t.name === templateData.name && t.language === templateData.language);
+
+        if (!metaTemplate) {
+          throw new Error(`META_API_ERROR: La plantilla ${templateData.name} (${templateData.language}) no existe en este WABA.`);
+        }
+
+        // Build components dynamically based on Meta's real structure
+        const components: any[] = [];
+
+        metaTemplate.components.forEach((comp: any) => {
+          if (comp.type === "BODY" || comp.type === "HEADER") {
+            // Count variables in this component text
+            const text = comp.text || "";
+            const matches = text.match(/{{(\d+)}}/g) || [];
+            const varCount = new Set(matches).size;
+
+            if (varCount > 0) {
+              const parameters: any[] = [];
+              for (let i = 1; i <= varCount; i++) {
+                const val = data.variables?.[i.toString()];
+                if (val !== undefined) {
+                  parameters.push({ type: "text", text: val });
+                }
+              }
+
+              if (parameters.length > 0) {
+                components.push({
+                  type: comp.type.toLowerCase(),
+                  parameters: parameters
+                });
+              }
+            }
+          }
+          // BUTTONS support can be added here if needed based on comp.buttons
+        });
 
         metaPayload = {
           ...metaPayload,
           type: "template",
           template: {
-            name: templateData.name,
-            language: { code: templateData.language },
-            components: parameters.length > 0 ? [{
-              type: "body",
-              parameters: parameters
-            }] : []
+            name: metaTemplate.name,
+            language: { code: metaTemplate.language },
+            components: components
           }
         };
       } else {
@@ -224,6 +268,10 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
         const metaErrorCode = metaResult.error?.code;
         const metaErrorMessage = metaResult.error?.message;
         
+        if (metaErrorCode === 132012) {
+          throw new Error(`META_TEMPLATE_PARAMETER_ERROR: Los parámetros enviados no coinciden con la estructura de la plantilla aprobada en Meta. Code: 132012, Msg: ${metaErrorMessage}`);
+        }
+
         if (metaResponse.status === 401 || metaResponse.status === 403) {
           throw new Error(`META_AUTH_ERROR: Meta rechazó las credenciales. Status: ${metaResponse.status}, Code: ${metaErrorCode}, Msg: ${metaErrorMessage}`);
         }
@@ -618,10 +666,47 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
       }
 
       // 3. Envío a Meta
-      const parameters = Object.keys(data.variables || {}).sort((a, b) => parseInt(a) - parseInt(b)).map(key => ({
-        type: "text",
-        text: data.variables![key]
-      }));
+      // Fetch real template components from Meta Graph API
+      console.log(`[whatsapp.meta_fetch_template] Consultando estructura real: ${template.name}`);
+      const tplResponse = await fetch(
+        `https://graph.facebook.com/v20.0/${account.business_account_id}/message_templates?name=${template.name}`,
+        {
+          headers: {
+            Authorization: `Bearer ${account.access_token}`,
+          },
+        }
+      );
+
+      if (!tplResponse.ok) {
+        throw new Error(`META_API_ERROR: No se pudo verificar la estructura de la plantilla en Meta. Status: ${tplResponse.status}`);
+      }
+
+      const tplResult = await tplResponse.json();
+      const metaTemplate = tplResult.data?.find((t: any) => t.name === template.name && t.language === template.language);
+
+      if (!metaTemplate) {
+        throw new Error(`META_API_ERROR: La plantilla ${template.name} (${template.language}) no existe en el WABA.`);
+      }
+
+      const components: any[] = [];
+      metaTemplate.components.forEach((comp: any) => {
+        if (comp.type === "BODY" || comp.type === "HEADER") {
+          const matches = (comp.text || "").match(/{{(\d+)}}/g) || [];
+          const varCount = new Set(matches).size;
+          if (varCount > 0) {
+            const parameters: any[] = [];
+            for (let i = 1; i <= varCount; i++) {
+              const val = data.variables?.[i.toString()];
+              if (val !== undefined) {
+                parameters.push({ type: "text", text: val });
+              }
+            }
+            if (parameters.length > 0) {
+              components.push({ type: comp.type.toLowerCase(), parameters });
+            }
+          }
+        }
+      });
 
       const toFormatted = data.recipient.startsWith("57") ? data.recipient : `57${data.recipient}`;
 
@@ -639,12 +724,9 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
             to: toFormatted,
             type: "template",
             template: {
-              name: template.name,
-              language: { code: template.language },
-              components: parameters.length > 0 ? [{
-                type: "body",
-                parameters: parameters
-              }] : []
+              name: metaTemplate.name,
+              language: { code: metaTemplate.language },
+              components: components
             }
           }),
         }
@@ -652,6 +734,10 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
 
       const metaResult = await metaResponse.json();
       if (!metaResponse.ok) {
+        const metaErrorCode = metaResult.error?.code;
+        if (metaErrorCode === 132012) {
+          throw new Error(`META_TEMPLATE_PARAMETER_ERROR: Parámetros no coinciden con plantilla Meta. Msg: ${metaResult.error?.message}`);
+        }
         if (metaResponse.status === 401 || metaResponse.status === 403) {
           throw new Error(`META_AUTH_ERROR: Meta rechazó credenciales. Code: ${metaResult.error?.code}, Msg: ${metaResult.error?.message}`);
         }
