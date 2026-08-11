@@ -125,6 +125,7 @@ export function WhatsAppTemplates() {
       footer: "",
       buttons: [],
     },
+    mode: "onChange"
   });
 
   const filteredTemplates = templates.filter(t => 
