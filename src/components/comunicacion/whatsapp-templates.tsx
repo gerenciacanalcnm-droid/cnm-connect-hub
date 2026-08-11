@@ -146,13 +146,24 @@ export function WhatsAppTemplates() {
 
   const onSubmit = async (values: z.infer<typeof templateSchema>) => {
     try {
-      // Extraer variables del body {{1}}, {{2}}, etc.
       const variables = values.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
       
-      await saveMutation.mutateAsync({
-        ...values,
+      const payload: any = {
+        name: values.name,
+        category: values.category,
+        language: values.language,
+        body: values.body,
+        footer: values.footer,
+        buttons: values.buttons,
         variables,
-      });
+        metadata: {
+          header_type: values.headerType,
+          header_text: values.headerText,
+          header_handle: values.headerHandle
+        }
+      };
+
+      await saveMutation.mutateAsync(payload);
       
       toast.success("Plantilla guardada localmente.");
       setIsCreateOpen(false);
