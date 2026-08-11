@@ -1,4 +1,4 @@
-import { Settings2, MessageSquare, MessageCircle, Mail, Activity, RefreshCw } from "lucide-react";
+import { Settings2, MessageSquare, MessageCircle, Mail, Activity, RefreshCw, Plus, Trash2, Smartphone, CheckCircle2, XCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,22 @@ import { testMetaConnection } from "@/lib/whatsapp-diagnostic.functions";
 import { getMetaTemplatesDetail } from "@/lib/whatsapp-diagnostic-detail.functions";
 import { syncWhatsAppTemplates } from "@/lib/whatsapp.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { useWhatsAppAccounts, useDeleteWhatsAppAccount, useSaveWhatsAppAccount, useTestSpecificWhatsAppConnection, useSyncWhatsAppTemplates } from "@/hooks/use-whatsapp";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
