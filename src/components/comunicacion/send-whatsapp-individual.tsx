@@ -343,7 +343,7 @@ export function SendWhatsAppIndividual() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>{mode === "individual" ? "Número de destino" : "Destinatarios Manuales"}</Label>
+                <Label>Número de destino</Label>
                 {mode === "individual" ? (
                   <Input
                     placeholder="3001234567"
