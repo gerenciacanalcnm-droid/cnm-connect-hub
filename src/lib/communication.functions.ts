@@ -327,10 +327,11 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
         company_id: CNM_COMPANY_ID,
         to_phone: data.to,
         body: data.body,
-        status: "sending" as any,
-        provider: data.provider,
+        status: "sending" as never,
+        provider: data.provider as never,
         cost: 0.19, 
       })
+
       .select("id")
       .single();
 
