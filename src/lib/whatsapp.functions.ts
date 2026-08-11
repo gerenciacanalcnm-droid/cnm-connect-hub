@@ -284,17 +284,16 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
     const batchId = data.batchId || crypto.randomUUID();
 
     // 2. Cobro atómico consolidado e Idempotencia
-    try {
-      // 2.1 Obtener company_id real del servidor
-      const { data: membership } = await context.supabase
-        .from("company_members")
-        .select("company_id")
-        .eq("user_id", context.userId)
-        .eq("is_active", true)
-        .maybeSingle();
-      
-      const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
+    const { data: membership } = await context.supabase
+      .from("company_members")
+      .select("company_id")
+      .eq("user_id", context.userId)
+      .eq("is_active", true)
+      .maybeSingle();
+    
+    const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
 
+    try {
       await trackServiceUsage({
         data: {
           company_id: realCompanyId,
@@ -305,7 +304,7 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
         },
       });
     } catch (err: any) {
-      throw err; // Saldo insuficiente u otro error comercial (Idempotencia manejada en applyWalletMovement)
+      throw err; // Saldo insuficiente u otro error comercial
     }
 
     // 3. Procesamiento por lotes (Chunks de 20 para evitar timeouts)
