@@ -50,7 +50,7 @@ export function WhatsAppTemplates() {
   // FASE 7: Agregar botón
   const addButton = (type: 'QUICK_REPLY' | 'URL' | 'PHONE') => {
     if (buttons.length >= 10) return;
-    setButtons([...buttons, { type, text: "Enviar a Meta", url: "", phoneNumber: "" }]);
+    setButtons([...buttons, { type, text: "", url: "", phoneNumber: "" }]);
   };
 
   if (!isEditorOpen) {
@@ -63,8 +63,14 @@ export function WhatsAppTemplates() {
           </Button>
         </div>
         <Card>
-          <CardContent className="p-12 text-center text-muted-foreground">
-            Presiona el botón para iniciar el editor mínimo seguro.
+          <CardContent className="p-12 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+              <Plus className="h-6 w-6 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Sin plantillas configuradas</h3>
+            <p className="text-sm text-slate-500 max-w-xs mx-auto">
+              Conecta una cuenta de WhatsApp Business para sincronizar y enviar plantillas
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -79,7 +85,7 @@ export function WhatsAppTemplates() {
           <Button variant="ghost" size="icon" onClick={() => setIsEditorOpen(false)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="font-semibold">Nuevo</span>
+          <span className="font-semibold text-slate-900">Nueva Plantilla</span>
         </div>
         
         <div className="space-y-4">
@@ -177,7 +183,7 @@ export function WhatsAppTemplates() {
                   <div key={i} className="bg-white/80 backdrop-blur-sm text-blue-600 text-sm py-2 rounded-lg border border-slate-200 text-center shadow-sm font-medium hover:bg-white transition-colors flex items-center justify-center gap-2">
                     {b.type === 'URL' && <MousePointer2 className="h-3 w-3" />}
                     {b.type === 'PHONE' && <Type className="h-3 w-3" />}
-                    {b.text || "Botón"}
+                    {b.text || (b.type === 'URL' ? "Visitar sitio" : b.type === 'PHONE' ? "Llamar" : "Botón")}
                   </div>
                 ))}
               </div>
@@ -188,8 +194,8 @@ export function WhatsAppTemplates() {
 
       {/* DERECHA: Configuración */}
       <div className="w-80 bg-white border-l p-6 overflow-y-auto flex flex-col">
-        <h2 className="font-bold mb-6 flex items-center gap-2">
-          100% listo
+        <h2 className="font-bold mb-6 flex items-center gap-2 text-slate-900">
+          Configuración
         </h2>
 
         {!selectedComponent && (
@@ -406,10 +412,14 @@ export function WhatsAppTemplates() {
         )}
 
         <div className="mt-auto pt-6 border-t space-y-3">
-          <Button className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" onClick={() => {
-            console.log("Saving...", { name, category, language, headerType, headerText, body, footer, buttons });
-            setIsEditorOpen(false);
-          }}>
+          <Button 
+            className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" 
+            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text)}
+            onClick={() => {
+              console.log("Saving...", { name, category, language, headerType, headerText, body, footer, buttons });
+              setIsEditorOpen(false);
+            }}
+          >
             Enviar a Meta
           </Button>
           <Button variant="ghost" className="w-full text-xs text-slate-400" onClick={() => setIsEditorOpen(false)}>
