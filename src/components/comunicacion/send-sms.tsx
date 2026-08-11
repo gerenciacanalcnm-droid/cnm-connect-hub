@@ -105,14 +105,27 @@ export function SendSms() {
     if (stats.valid === 0) return toast.error("Sin destinatarios válidos");
     if (cost > balance) return toast.error("Saldo insuficiente");
 
+    setSending(true);
     try {
-      await doSendBulk({ data: { recipients: allRecipients, body: msg, isFlash } });
-      toast.success("Envío programado");
+      await doSendBulk({ 
+        data: { 
+          recipients: allRecipients, 
+          body: msg, 
+          isFlash,
+          scheduledAt: mode === 'schedule' ? `${date}T${time}:00Z` : null
+        } 
+      });
+      toast.success(mode === 'schedule' ? "Envío programado" : "SMS enviado correctamente");
       setToManual("");
       setSelectedContacts(new Set());
+      setSelectedGroups(new Set());
+      setMsg("");
     } catch (e: any) {
       toast.error(e.message);
+    } finally {
+      setSending(false);
     }
+
   };
 
   return (
