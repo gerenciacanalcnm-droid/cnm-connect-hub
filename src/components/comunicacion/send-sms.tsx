@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
-import { Send, Zap, Calendar, Users, MessageSquare, Info, AlertCircle, Clock } from "lucide-react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { Send, Zap, Calendar, Users, MessageSquare, Info, AlertCircle, Clock, Search, X, Check, Trash2, FileUp, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,11 +20,27 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { SmsComposer } from "./sms-composer";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { sendSmsMessage } from "@/lib/communication.functions";
+import { sendBulkSms } from "@/lib/sms-bulk.functions";
+import { useCrmContacts } from "@/hooks/use-crm";
+import { useContactGroups } from "@/hooks/use-platform";
+import { useWallets, useRateTiers } from "@/hooks/use-commercial";
 import { formatCurrency } from "@/lib/format";
+import { smsStats } from "@/lib/sms-utils";
+
 
 type SendMode = "direct" | "bulk" | "schedule";
 
