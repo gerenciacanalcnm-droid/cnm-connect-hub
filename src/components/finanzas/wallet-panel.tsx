@@ -49,8 +49,10 @@ export function WalletPanel() {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("100000");
   const [method, setMethod] = useState("transferencia");
+  const [channel, setChannel] = useState<"sms" | "whatsapp" | "email" | "ia">("sms");
   const [reference, setReference] = useState("");
   const [notes, setNotes] = useState("");
+
 
   const wallet = useMemo(
     () => wallets.find((w) => w.companyId === company.id) ?? wallets[0],
@@ -66,7 +68,7 @@ export function WalletPanel() {
     await createRecharge.mutateAsync({
       company_id: company.id,
       amount: value,
-      channel: wallet?.channel ?? "sms",
+      channel: channel,
       payment_method: method,
       reference: reference.trim() || null,
       notes: notes.trim() || null,
@@ -196,6 +198,21 @@ export function WalletPanel() {
               />
             </div>
             <div className="space-y-1.5">
+              <Label>Servicio a recargar</Label>
+              <Select value={channel} onValueChange={(v: any) => setChannel(v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sms">SMS</SelectItem>
+                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="ia">IA (Nova)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+
               <Label>Método de pago</Label>
               <Select value={method} onValueChange={setMethod}>
                 <SelectTrigger>

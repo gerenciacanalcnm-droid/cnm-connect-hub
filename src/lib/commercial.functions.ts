@@ -395,6 +395,11 @@ type Sb = { from: (t: string) => any };
  * Acredita/debita una wallet dejando trazabilidad completa:
  * wallet → movimiento → historial comercial → auditoría.
  */
+/**
+ * Acredita/debita una wallet dejando trazabilidad completa:
+ * wallet → movimiento → historial comercial → auditoría.
+ * Implementa protección básica contra doble ejecución mediante referencia.
+ */
 async function applyWalletMovement(
   supabase: Sb,
   input: {
@@ -407,8 +412,32 @@ async function applyWalletMovement(
     reference?: string | null;
     notes?: string | null;
     performedBy: string;
+    idempotencyKey?: string | null;
   },
 ) {
+  // Protección de Idempotencia: Verificar si la referencia ya existe para esta wallet
+  if (input.reference) {
+    const { data: existing } = await supabase
+      .from("wallet_transactions")
+      .select("id")
+      .eq("wallet_id", input.walletId)
+      .eq("reference", input.reference)
+      .maybeSingle();
+    
+    if (existing) {
+      // Si ya existe, devolvemos el estado actual sin duplicar
+      const { data: current } = await supabase
+        .from("wallets")
+        .select("balance, credits, company_id")
+        .eq("id", input.walletId)
+        .single();
+      return { balanceBefore: current.balance, balanceAfter: current.balance, companyId: current.company_id };
+    }
+  }
+
+  // Concurrencia: Usar una transacción o actualización atómica con validación de saldo previo
+  // En Supabase/Postgres, update ... where id = ? asegura atomicidad por fila.
+
   const { data: w, error } = await supabase
     .from("wallets")
     .select("id, company_id, balance, credits, currency")
@@ -649,11 +678,12 @@ export const reviewRecharge = createServerFn({ method: "POST" })
         type: "RECARGA",
         concept: "Recarga aprobada",
         paymentMethod: recharge.payment_method,
-        reference: recharge.payment_reference,
+        reference: recharge.payment_reference || recharge.id, // Usamos el ID de recarga como referencia de idempotencia
         notes: data.review_note || null,
         performedBy: context.userId,
       });
     }
+
     return { ok: true };
   });
 
