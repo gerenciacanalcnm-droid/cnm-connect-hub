@@ -8,7 +8,7 @@ import { Loader } from "@/components/common/loader";
 import { useCommunicationSettings, useCommunicationProviders } from "@/hooks/use-communication";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { testMetaConnection } from "@/lib/whatsapp-diagnostic.functions";
+import { testMetaConnection, getMetaTemplatesDetail } from "@/lib/whatsapp-diagnostic.functions"; // I will merge them or fix import
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
