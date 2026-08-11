@@ -108,8 +108,14 @@ export function SendWhatsAppIndividual() {
 
   const validManualPhones = useMemo(() => {
     return toManual.split(/[\s,;]+/)
-      .map(p => p.trim())
-      .filter(p => /^3\d{9}$/.test(p))
+      .map(p => p.trim().replace(/\D/g, "")) // Remove non-digits
+      .map(p => {
+        // Normalize Colombian numbers
+        if (p.length === 10 && p.startsWith("3")) return "57" + p;
+        if (p.length === 12 && p.startsWith("573")) return p;
+        return p;
+      })
+      .filter(p => /^573\d{9}$/.test(p))
       .filter((v, i, a) => a.indexOf(v) === i);
   }, [toManual]);
 
@@ -118,20 +124,22 @@ export function SendWhatsAppIndividual() {
     validManualPhones.forEach(p => set.add(p));
     selectedContacts.forEach(id => {
       const c = contacts.find(c => c.id === id);
-      if (c && /^3\d{9}$/.test(c.phone)) set.add(c.phone);
-    });
-    // Add logic for groups if necessary
-    selectedGroups.forEach(groupId => {
-       // Ideally the groups hook would return members, but here we deduplicate later
-       // For now assume selection logic handles it or we'd need to fetch group members
+      if (c) {
+        const cleaned = c.phone.replace(/\D/g, "");
+        let normalized = cleaned;
+        if (cleaned.length === 10 && cleaned.startsWith("3")) normalized = "57" + cleaned;
+        if (/^573\d{9}$/.test(normalized)) set.add(normalized);
+      }
     });
     return Array.from(set);
-  }, [validManualPhones, selectedContacts, contacts, selectedGroups]);
+  }, [validManualPhones, selectedContacts, contacts]);
 
   const stats = useMemo(() => {
     if (mode === "individual") {
       const cleaned = toManual.trim().replace(/\D/g, "");
-      const valid = cleaned.length >= 10 && /^573\d{9}$|^3\d{9}$/.test(cleaned);
+      let normalized = cleaned;
+      if (cleaned.length === 10 && cleaned.startsWith("3")) normalized = "57" + cleaned;
+      const valid = normalized.length === 12 && /^573\d{9}$/.test(normalized);
       return { total: 1, valid: valid ? 1 : 0, invalid: !valid && toManual ? 1 : 0 };
     }
     const raw = toManual.split(/[\s,;]+/).filter(Boolean);
@@ -572,6 +580,61 @@ export function SendWhatsAppIndividual() {
               </Alert>
             )}
 
+            <div className="mt-4 p-3 bg-slate-50 border rounded-lg text-[10px] space-y-1 font-mono">
+              <div className="flex justify-between">
+                <span>Cuenta:</span>
+                <span className={connectedAccount ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
+                  {connectedAccount ? "OK" : "ERROR"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Número:</span>
+                <span className={stats.valid > 0 ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
+                  {stats.valid > 0 ? "OK" : "ERROR"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Plantilla:</span>
+                <span className={selectedTemplateId ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
+                  {selectedTemplateId ? "OK" : "ERROR"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Estado:</span>
+                <span className={String(selectedTemplate?.status) === 'APPROVED' ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
+                  {String(selectedTemplate?.status || "N/A")}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Variables:</span>
+                {selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0 ? (
+                  <span className={!Object.values(templateVariables).some(v => !v?.trim()) ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
+                    {!Object.values(templateVariables).some(v => !v?.trim()) ? "OK" : "FALTANTES"}
+                  </span>
+                ) : (
+                  <span className="text-emerald-600 font-bold">OK</span>
+                )}
+              </div>
+              <div className="flex justify-between">
+                <span>Destinatarios:</span>
+                <span>{stats.valid}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Costo:</span>
+                <span>{formatCurrency(totalCost)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Saldo:</span>
+                <span>{formatCurrency(balance)}</span>
+              </div>
+              <div className="flex justify-between border-t pt-1 mt-1">
+                <span>Saldo suficiente:</span>
+                <span className={!isInsufficient ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
+                  {!isInsufficient ? "SÍ" : "NO"}
+                </span>
+              </div>
+            </div>
+
             <Button
               onClick={handleSend}
               disabled={
@@ -579,12 +642,12 @@ export function SendWhatsAppIndividual() {
                 stats.valid === 0 || 
                 (messageType === 'text' ? !msg.trim() : !selectedTemplateId) || 
                 !connectedAccount ||
-                (messageType === 'template' && (selectedTemplate?.variables?.length ?? 0) > 0 && Object.values(templateVariables).some(v => !v.trim()))
+                (messageType === 'template' && selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0 && Object.values(templateVariables).some(v => !v?.trim()))
               }
-              className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+              className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4"
             >
               <Send className="h-4 w-4 mr-2" />
-              {isInsufficient ? 'Saldo Insuficiente' : 
+              {isInsufficient ? `Saldo insuficiente. Necesitas ${formatCurrency(totalCost)} para realizar este envío.` : 
                mode === 'individual' ? 'Enviar Ahora' : 
                mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'}
             </Button>
