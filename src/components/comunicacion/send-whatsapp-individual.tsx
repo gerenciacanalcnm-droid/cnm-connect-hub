@@ -140,6 +140,35 @@ export function SendWhatsAppIndividual() {
     if (messageType === "text" && !msg.trim()) return toast.error("El mensaje no puede estar vacío.");
     if (messageType === "template" && !selectedTemplateId) return toast.error("Selecciona una plantilla.");
 
+    if (mode === "schedule") {
+      if (!scheduledDate || !scheduledTime) return toast.error("Selecciona fecha y hora para la programación.");
+      const scheduledAt = `${scheduledDate}T${scheduledTime}:00`;
+
+      try {
+        await createScheduleMutation.mutateAsync({
+          accountId: connectedAccount.id,
+          recipients: allRecipients,
+          body: messageType === 'text' ? msg.trim() : undefined,
+          templateId: messageType === 'template' ? selectedTemplateId : undefined,
+          variables: messageType === 'template' ? templateVariables : undefined,
+          scheduledAt,
+          timezone,
+          estimatedCost: totalCost
+        });
+        toast.success("Envío de WhatsApp programado correctamente");
+        
+        setToManual("");
+        setSelectedContacts(new Set());
+        setMsg("");
+        setSelectedTemplateId("");
+        setScheduledDate("");
+        setScheduledTime("");
+      } catch (err: any) {
+        toast.error(err.message || "Error al programar WhatsApp");
+      }
+      return;
+    }
+
     try {
       if (messageType === "template") {
         // Por ahora envío individual con plantilla (se puede iterar para bulk)
