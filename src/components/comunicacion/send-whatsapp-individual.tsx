@@ -54,6 +54,7 @@ export function SendWhatsAppIndividual() {
 
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
+  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
 
   const { data: contactsData } = useContacts({ pageSize: 200 });
   const { data: groupsData } = useContactGroups();
@@ -72,7 +73,17 @@ export function SendWhatsAppIndividual() {
   const wallet = walletsData?.find(w => w.channel === 'whatsapp');
   const balance = wallet?.balance ?? 0;
   
-  const connectedAccount = accounts.find(a => a.status === 'connected');
+  const connectedAccount = useMemo(() => {
+    if (selectedAccountId) return accounts.find(a => a.id === selectedAccountId);
+    return accounts.find(a => a.isPrimary) || accounts.find(a => a.status === 'connected');
+  }, [accounts, selectedAccountId]);
+
+  useEffect(() => {
+    if (connectedAccount && !selectedAccountId) {
+      setSelectedAccountId(connectedAccount.id);
+    }
+  }, [connectedAccount, selectedAccountId]);
+
   
   const templates = useMemo(() => {
     return allTemplates.filter(t => (t.status as string) === 'APPROVED');
