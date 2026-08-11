@@ -181,11 +181,11 @@ export function WhatsAppSurveys() {
                   <SelectValue placeholder="Tipo de Cabecera" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NONE">Sin cabecera</SelectItem>
-                  <SelectItem value="TEXT">Texto</SelectItem>
-                  <SelectItem value="IMAGE">Imagen</SelectItem>
-                  <SelectItem value="VIDEO">Video</SelectItem>
-                  <SelectItem value="DOCUMENT">Documento</SelectItem>
+                  <SelectItem value="NONE" className="cursor-pointer">Sin cabecera</SelectItem>
+                  <SelectItem value="TEXT" className="cursor-pointer">Texto</SelectItem>
+                  <SelectItem value="IMAGE" className="cursor-pointer" disabled={type === 'INTERACTIVE_LIST'}>Imagen {type === 'INTERACTIVE_LIST' && "(Solo Botones)"}</SelectItem>
+                  <SelectItem value="VIDEO" className="cursor-pointer" disabled={type === 'INTERACTIVE_LIST'}>Video {type === 'INTERACTIVE_LIST' && "(Solo Botones)"}</SelectItem>
+                  <SelectItem value="DOCUMENT" className="cursor-pointer" disabled={type === 'INTERACTIVE_LIST'}>Documento {type === 'INTERACTIVE_LIST' && "(Solo Botones)"}</SelectItem>
                 </SelectContent>
               </Select>
 
