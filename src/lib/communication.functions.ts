@@ -395,10 +395,11 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
         company_id: CNM_COMPANY_ID,
         to_phone: data.to,
         body: data.body,
-        direction: "outbound" as any,
-        status: "sending" as any,
+        direction: "outbound" as never,
+        status: "sending" as never,
         cost: WA_COST,
       })
+
       .select("id")
       .single();
 
