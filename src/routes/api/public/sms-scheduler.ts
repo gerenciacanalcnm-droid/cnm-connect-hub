@@ -12,15 +12,24 @@ export const Route = createFileRoute('/api/public/sms-scheduler')({
           const authHeader = request.headers.get('Authorization');
           const cronSecret = process.env['CRON_SECRET'];
 
-          // Si el secreto está configurado, validamos por seguridad
-          if (cronSecret && authHeader) {
-            const token = authHeader.replace('Bearer ', '');
-            if (!timingSafeEqual(Buffer.from(token), Buffer.from(cronSecret))) {
-              return new Response('Unauthorized', { status: 401 });
-            }
-          } else if (cronSecret && !authHeader) {
-            // Si el secreto está en env pero no viene en el header, bloqueamos
-            return new Response('Unauthorized', { status: 401 });
+          // Validación estricta del CRON_SECRET
+          if (!cronSecret) {
+            console.error('CRON_SECRET not configured in environment');
+            return new Response('Configuration Error', { status: 500 });
+          }
+
+          if (!authHeader) {
+            return new Response('Unauthorized: Missing token', { status: 401 });
+          }
+
+          const token = authHeader.replace('Bearer ', '');
+          
+          // timingSafeEqual requires buffers of the same length
+          const tokenBuffer = Buffer.from(token);
+          const secretBuffer = Buffer.from(cronSecret);
+
+          if (tokenBuffer.length !== secretBuffer.length || !timingSafeEqual(tokenBuffer, secretBuffer)) {
+            return new Response('Unauthorized: Invalid token', { status: 401 });
           }
 
           // Ejecución del motor de procesamiento
