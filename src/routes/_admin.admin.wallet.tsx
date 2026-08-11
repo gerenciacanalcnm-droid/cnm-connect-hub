@@ -494,7 +494,9 @@ function WalletPage() {
               </Tabs>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
 
 
 
