@@ -31,6 +31,7 @@ import { Route as AppComunicacionRouteImport } from './routes/_app.comunicacion'
 import { Route as AppAutomatizacionesRouteImport } from './routes/_app.automatizaciones'
 import { Route as AppApiRouteImport } from './routes/_app.api'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
+import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicSmsSchedulerRouteImport } from './routes/api/public/sms-scheduler'
 import { Route as AdminAdminWalletRouteImport } from './routes/_admin.admin.wallet'
 import { Route as AdminAdminUsuariosRouteImport } from './routes/_admin.admin.usuarios'
@@ -167,6 +168,12 @@ const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicWhatsappWebhookRoute =
+  ApiPublicWhatsappWebhookRouteImport.update({
+    id: '/api/public/whatsapp-webhook',
+    path: '/api/public/whatsapp-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicSmsSchedulerRoute = ApiPublicSmsSchedulerRouteImport.update({
   id: '/api/public/sms-scheduler',
   path: '/api/public/sms-scheduler',
@@ -358,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
+  '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
 }
 export interface FileRoutesByTo {
@@ -407,6 +415,7 @@ export interface FileRoutesByTo {
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
+  '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
 }
 export interface FileRoutesById {
@@ -460,6 +469,7 @@ export interface FileRoutesById {
   '/_admin/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/_admin/admin/wallet': typeof AdminAdminWalletRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
+  '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
 }
 export interface FileRouteTypes {
@@ -511,6 +521,7 @@ export interface FileRouteTypes {
     | '/admin/usuarios'
     | '/admin/wallet'
     | '/api/public/sms-scheduler'
+    | '/api/public/whatsapp-webhook'
     | '/api/public/webhooks/wompi'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -560,6 +571,7 @@ export interface FileRouteTypes {
     | '/admin/usuarios'
     | '/admin/wallet'
     | '/api/public/sms-scheduler'
+    | '/api/public/whatsapp-webhook'
     | '/api/public/webhooks/wompi'
   id:
     | '__root__'
@@ -612,6 +624,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/usuarios'
     | '/_admin/admin/wallet'
     | '/api/public/sms-scheduler'
+    | '/api/public/whatsapp-webhook'
     | '/api/public/webhooks/wompi'
   fileRoutesById: FileRoutesById
 }
@@ -621,6 +634,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   ApiPublicSmsSchedulerRoute: typeof ApiPublicSmsSchedulerRoute
+  ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   ApiPublicWebhooksWompiRoute: typeof ApiPublicWebhooksWompiRoute
 }
 
@@ -779,6 +793,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/analytics'
       preLoaderRoute: typeof AppAnalyticsRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/api/public/whatsapp-webhook': {
+      id: '/api/public/whatsapp-webhook'
+      path: '/api/public/whatsapp-webhook'
+      fullPath: '/api/public/whatsapp-webhook'
+      preLoaderRoute: typeof ApiPublicWhatsappWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/sms-scheduler': {
       id: '/api/public/sms-scheduler'
@@ -1097,6 +1118,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   ApiPublicSmsSchedulerRoute: ApiPublicSmsSchedulerRoute,
+  ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   ApiPublicWebhooksWompiRoute: ApiPublicWebhooksWompiRoute,
 }
 export const routeTree = rootRouteImport
