@@ -493,7 +493,7 @@ export function SendWhatsAppIndividual() {
               className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
             >
               <Send className="h-4 w-4 mr-2" />
-              {mode === 'individual' ? 'Enviar Ahora' : 'Procesar Masivo'}
+              {mode === 'individual' ? 'Enviar Ahora' : mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'}
             </Button>
             
             <div className="flex items-center gap-2 p-3 rounded border bg-amber-50/50 border-amber-100 text-[11px] text-amber-800 italic">
