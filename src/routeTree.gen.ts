@@ -57,6 +57,7 @@ import { Route as AdminAdminConfigGeneralRouteImport } from './routes/_admin.adm
 import { Route as AdminAdminConfigApiRouteImport } from './routes/_admin.admin.config-api'
 import { Route as AdminAdminCommunicationRouteImport } from './routes/_admin.admin.communication'
 import { Route as AdminAdminAuditoriaRouteImport } from './routes/_admin.admin.auditoria'
+import { Route as ApiPublicWebhooksWompiRouteImport } from './routes/api/public/webhooks/wompi'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -298,6 +299,11 @@ const AdminAdminAuditoriaRoute = AdminAdminAuditoriaRouteImport.update({
   path: '/admin/auditoria',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicWebhooksWompiRoute = ApiPublicWebhooksWompiRouteImport.update({
+  id: '/api/public/webhooks/wompi',
+  path: '/api/public/webhooks/wompi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -345,6 +351,7 @@ export interface FileRoutesByFullPath {
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
+  '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -392,6 +399,7 @@ export interface FileRoutesByTo {
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
+  '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -443,6 +451,7 @@ export interface FileRoutesById {
   '/_admin/admin/tarifas': typeof AdminAdminTarifasRoute
   '/_admin/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/_admin/admin/wallet': typeof AdminAdminWalletRoute
+  '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -492,6 +501,7 @@ export interface FileRouteTypes {
     | '/admin/tarifas'
     | '/admin/usuarios'
     | '/admin/wallet'
+    | '/api/public/webhooks/wompi'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -539,6 +549,7 @@ export interface FileRouteTypes {
     | '/admin/tarifas'
     | '/admin/usuarios'
     | '/admin/wallet'
+    | '/api/public/webhooks/wompi'
   id:
     | '__root__'
     | '/'
@@ -589,6 +600,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/tarifas'
     | '/_admin/admin/usuarios'
     | '/_admin/admin/wallet'
+    | '/api/public/webhooks/wompi'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -596,6 +608,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  ApiPublicWebhooksWompiRoute: typeof ApiPublicWebhooksWompiRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -936,6 +949,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminAuditoriaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/webhooks/wompi': {
+      id: '/api/public/webhooks/wompi'
+      path: '/api/public/webhooks/wompi'
+      fullPath: '/api/public/webhooks/wompi'
+      preLoaderRoute: typeof ApiPublicWebhooksWompiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1056,6 +1076,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  ApiPublicWebhooksWompiRoute: ApiPublicWebhooksWompiRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
