@@ -416,6 +416,7 @@ export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
     }
 
     // 2. Llamada a Meta (Message Templates)
+    console.log(`[sync] Consultando plantillas para WABA: ${account.business_account_id}`);
     const response = await fetch(
       `https://graph.facebook.com/v20.0/${account.business_account_id}/message_templates?limit=100`,
       {
@@ -427,43 +428,67 @@ export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
 
     const result = await response.json();
     if (!response.ok) {
+      console.error("[sync] Error Meta API:", result);
       throw new Error(result.error?.message || "Error al sincronizar con Meta");
     }
 
     const templates = result.data || [];
+    console.log(`[sync] Meta devolvió ${templates.length} plantillas.`);
     
+    let updated = 0;
+    let errors = 0;
+
     // 3. Procesar y guardar en la base de datos
     for (const t of templates) {
-      const bodyComponent = t.components?.find((c: any) => c.type === "BODY");
-      const headerComponent = t.components?.find((c: any) => c.type === "HEADER");
-      const footerComponent = t.components?.find((c: any) => c.type === "FOOTER");
-      const buttonsComponent = t.components?.find((c: any) => c.type === "BUTTONS");
+      try {
+        console.log(`[sync] Procesando plantilla Meta: ID=${t.id}, Name=${t.name}, Status=${t.status}`);
+        
+        const bodyComponent = t.components?.find((c: any) => c.type === "BODY");
+        const headerComponent = t.components?.find((c: any) => c.type === "HEADER");
+        const footerComponent = t.components?.find((c: any) => c.type === "FOOTER");
+        const buttonsComponent = t.components?.find((c: any) => c.type === "BUTTONS");
 
-      const bodyText = bodyComponent?.text || "";
-      const variables = bodyText.match(/{{(\d+)}}/g) || [];
-      
-      const row = {
-        company_id: CNM_COMPANY_ID,
-        account_id: data.accountId,
-        external_id: t.id,
-        name: t.name,
-        category: t.category,
-        language: t.language,
-        status: t.status,
-        body: bodyText,
-        header: headerComponent?.text || null,
-        footer: footerComponent?.text || null,
-        buttons: buttonsComponent || null,
-        variables: variables as any,
-        updated_at: new Date().toISOString()
-      };
+        const bodyText = bodyComponent?.text || "";
+        const variables = bodyText.match(/{{(\d+)}}/g) || [];
+        
+        const row = {
+          company_id: CNM_COMPANY_ID,
+          account_id: data.accountId,
+          external_id: t.id,
+          name: t.name,
+          category: t.category,
+          language: t.language,
+          status: t.status,
+          body: bodyText,
+          header: headerComponent?.text || null,
+          footer: footerComponent?.text || null,
+          buttons: buttonsComponent || null,
+          variables: variables as any,
+          updated_at: new Date().toISOString()
+        };
 
-      await context.supabase
-        .from("whatsapp_templates")
-        .upsert(row, { onConflict: "company_id, name, language" });
+        const { error: upsertErr } = await context.supabase
+          .from("whatsapp_templates")
+          .upsert(row, { onConflict: "company_id, name, language" });
+
+        if (upsertErr) {
+          console.error(`[sync] Error al upsertar ${t.name}:`, upsertErr.message);
+          errors++;
+        } else {
+          updated++;
+        }
+      } catch (err: any) {
+        console.error(`[sync] Error inesperado en loop para ${t.name}:`, err.message);
+        errors++;
+      }
     }
 
-    return { ok: true, count: templates.length };
+    return { 
+      ok: true, 
+      count: templates.length,
+      updated,
+      errors
+    };
   });
 
 /**

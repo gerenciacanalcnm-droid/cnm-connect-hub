@@ -82,9 +82,18 @@ export function WhatsAppTemplates() {
 
   const syncMutation = useMutation({
     mutationFn: syncWhatsAppTemplates,
-    onSuccess: (res) => {
+    onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['whatsapp_templates'] });
-      toast.success(`Sincronización completada: ${res.count} plantillas.`);
+      toast.success(
+        <div className="flex flex-col gap-1">
+          <span className="font-bold text-sm">Sincronización completada</span>
+          <div className="text-xs text-slate-500">
+            <p>• {res.count} plantillas encontradas en Meta</p>
+            <p>• {res.updated} actualizadas/insertadas</p>
+            <p>• {res.errors} errores</p>
+          </div>
+        </div>
+      );
     },
     onError: (err: any) => toast.error(err.message)
   });
@@ -175,15 +184,23 @@ export function WhatsAppTemplates() {
               <Card key={tpl.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => { setEditingTemplate(tpl); setIsEditorOpen(true); }}>
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
-                    <Badge variant={tpl.status === 'APPROVED' ? 'default' : tpl.status === 'REJECTED' ? 'destructive' : 'secondary'}>
-                      {tpl.status}
-                    </Badge>
+                    <div className="flex gap-2">
+                      <Badge variant={tpl.status === 'APPROVED' ? 'default' : tpl.status === 'REJECTED' ? 'destructive' : 'secondary'}>
+                        {tpl.status}
+                      </Badge>
+                      {tpl.external_id && (
+                        <Badge variant="outline" className="text-[9px] bg-blue-50/50 border-blue-100 text-blue-600">Meta</Badge>
+                      )}
+                    </div>
                     <span className="text-[10px] text-slate-400 uppercase font-bold">{tpl.category}</span>
                   </div>
                   <h4 className="font-bold text-slate-900 truncate mb-2">{tpl.name}</h4>
                   <p className="text-xs text-slate-500 line-clamp-2 mb-4">{tpl.body}</p>
                   <div className="flex justify-between items-center text-[10px] text-slate-400">
-                    <span>{tpl.language.toUpperCase()}</span>
+                    <span className="flex items-center gap-1">
+                      <Globe className="h-3 w-3" />
+                      {tpl.language.toUpperCase()}
+                    </span>
                     <span>{new Date(tpl.updated_at).toLocaleDateString()}</span>
                   </div>
                 </CardContent>
