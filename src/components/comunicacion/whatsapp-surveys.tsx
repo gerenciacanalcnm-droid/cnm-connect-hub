@@ -416,7 +416,7 @@ export function WhatsAppSurveys() {
   return (
     <div className="p-8 space-y-8 max-w-[1200px] mx-auto">
       <div className="flex justify-between items-center">
-        <div>
+        <div className="text-slate-900">
           <h1 className="text-2xl font-bold text-slate-900">Centro de Encuestas</h1>
           <p className="text-slate-500 text-sm">Gestiona tus consultas interactivas vía WhatsApp Business.</p>
         </div>
