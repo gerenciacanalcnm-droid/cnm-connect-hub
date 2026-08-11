@@ -25,14 +25,15 @@ export const getMetaTemplatesDetail = createServerFn({ method: "POST" })
       },
       phone_details: null,
       waba_details: null,
+      waba_phone_numbers: [],
       templates: [],
       cnm_prueba_match: null,
       errors: [],
     };
 
     try {
-      // 1. Verify Phone Number and its WABA ownership
-      const phoneRes = await fetch(`https://graph.facebook.com/v20.0/${phoneNumberId}?fields=id,display_phone_number,whatsapp_business_account`, {
+      // 1. Verify Phone Number Details
+      const phoneRes = await fetch(`https://graph.facebook.com/v20.0/${phoneNumberId}?fields=id,display_phone_number,whatsapp_business_account,verified_name,status,quality_rating`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const phoneData = await phoneRes.json();
@@ -40,6 +41,17 @@ export const getMetaTemplatesDetail = createServerFn({ method: "POST" })
         report.phone_details = phoneData;
       } else {
         report.errors.push(`Phone API: ${phoneData.error?.message}`);
+      }
+
+      // 2. List WABA Phone Numbers to check membership correctly
+      const phoneNumbersRes = await fetch(`https://graph.facebook.com/v20.0/${businessAccountId}/phone_numbers`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const phoneNumbersData = await phoneNumbersRes.json();
+      if (phoneNumbersRes.ok) {
+        report.waba_phone_numbers = phoneNumbersData.data || [];
+      } else {
+        report.errors.push(`WABA Phone Numbers API: ${phoneNumbersData.error?.message}`);
       }
 
       // 2. Verify WABA Details
@@ -53,9 +65,9 @@ export const getMetaTemplatesDetail = createServerFn({ method: "POST" })
         report.errors.push(`WABA API: ${wabaData.error?.message}`);
       }
 
-      // 3. List all templates
+      // 4. List all templates
       const templatesRes = await fetch(
-        `https://graph.facebook.com/v20.0/${businessAccountId}/message_templates?limit=500&fields=name,language,status,category`,
+        `https://graph.facebook.com/v20.0/${businessAccountId}/message_templates?limit=500&fields=id,name,language,status,category`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
@@ -63,6 +75,7 @@ export const getMetaTemplatesDetail = createServerFn({ method: "POST" })
       const templatesData = await templatesRes.json();
       if (templatesRes.ok) {
         report.templates = (templatesData.data || []).map((t: any) => ({
+          id: t.id,
           name: t.name,
           language: t.language,
           status: t.status,
