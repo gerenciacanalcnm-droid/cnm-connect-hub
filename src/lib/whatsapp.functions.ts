@@ -427,7 +427,7 @@ export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
     // 1. Obtener credenciales
     const { data: account, error: accErr } = await context.supabase
       .from("whatsapp_accounts")
-      .select("business_account_id, access_token")
+      .select("business_account_id, access_token, company_id")
       .eq("id", data.accountId)
       .single();
 
@@ -470,10 +470,11 @@ export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
         const buttonsComponent = t.components?.find((c: any) => c.type === "BUTTONS");
 
         const bodyText = bodyComponent?.text || "";
-        const variables = bodyText.match(/{{(\d+)}}/g) || [];
+        const allVars = bodyText.match(/{{(\d+)}}/g) || [];
+        const variables = [...new Set(allVars)];
         
         const row = {
-          company_id: CNM_COMPANY_ID,
+          company_id: account.company_id,
           account_id: data.accountId,
           external_id: t.id,
           name: t.name,
@@ -548,10 +549,19 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
 
     let usageAmount = 0;
     if (!data.batchId) {
+      // 0. Obtener company_id real
+      const { data: membership } = await context.supabase
+        .from("company_members")
+        .select("company_id")
+        .eq("user_id", context.userId)
+        .eq("is_active", true)
+        .maybeSingle();
+      const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
+
       try {
         const usage = await trackServiceUsage({
           data: {
-            company_id: CNM_COMPANY_ID,
+            company_id: realCompanyId,
             channel: "whatsapp",
             units: 1,
             description: `WA Template (${template.name}) a ${data.recipient}`,
