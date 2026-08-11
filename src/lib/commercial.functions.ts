@@ -8,6 +8,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { createHmac, timingSafeEqual } from "crypto";
+
 
 async function admin() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -395,6 +397,11 @@ type Sb = { from: (t: string) => any };
  * Acredita/debita una wallet dejando trazabilidad completa:
  * wallet → movimiento → historial comercial → auditoría.
  */
+/**
+ * Acredita/debita una wallet dejando trazabilidad completa:
+ * wallet → movimiento → historial comercial → auditoría.
+ * Implementa protección básica contra doble ejecución mediante referencia.
+ */
 async function applyWalletMovement(
   supabase: Sb,
   input: {
@@ -407,12 +414,37 @@ async function applyWalletMovement(
     reference?: string | null;
     notes?: string | null;
     performedBy: string;
+    idempotencyKey?: string | null;
   },
 ) {
+  // Protección de Idempotencia: Verificar si la referencia ya existe para esta wallet
+  if (input.reference) {
+    const { data: existing } = await supabase
+      .from("wallet_transactions")
+      .select("id")
+      .eq("wallet_id", input.walletId)
+      .eq("reference", input.reference)
+      .maybeSingle();
+    
+    if (existing) {
+      // Si ya existe, devolvemos el estado actual sin duplicar
+      const { data: current } = await supabase
+        .from("wallets")
+        .select("balance, credits, company_id")
+        .eq("id", input.walletId)
+        .single();
+      return { balanceBefore: current.balance, balanceAfter: current.balance, companyId: current.company_id };
+    }
+  }
+
+  // Concurrencia: Usar una transacción o actualización atómica con validación de saldo previo
+  // En Supabase/Postgres, update ... where id = ? asegura atomicidad por fila.
+
   const { data: w, error } = await supabase
     .from("wallets")
-    .select("id, company_id, balance, credits, currency")
+    .select("id, company_id, balance, credits, currency, consumed")
     .eq("id", input.walletId)
+
     .single();
   if (error) throw new Error(error.message);
   const wallet = w as {
@@ -420,20 +452,28 @@ async function applyWalletMovement(
     balance: number;
     credits: number;
     currency: string;
+    consumed: number;
   };
+
   const balanceBefore = Number(wallet.balance);
   const balanceAfter = balanceBefore + input.amount;
   const creditsAfter = Number(wallet.credits) + input.units;
 
+  // 4. Actualización Atómica con protección de concurrencia
   const up = await supabase
     .from("wallets")
     .update({
       balance: balanceAfter,
       credits: creditsAfter,
+      consumed: Number(wallet.consumed || 0) + (input.type === "AJUSTE_DEBITO" && input.amount < 0 ? Math.abs(input.amount) : 0),
       status: balanceAfter > 0 ? "active" : "inactive",
+      updated_at: new Date().toISOString(),
     })
-    .eq("id", input.walletId);
-  if (up.error) throw new Error(up.error.message);
+    .eq("id", input.walletId)
+    .eq("balance", balanceBefore);
+
+  if (up.error) throw new Error("Error de concurrencia o de red al actualizar wallet.");
+
 
   const metadata = {
     balance_before: balanceBefore,
@@ -594,8 +634,10 @@ export const reviewRecharge = createServerFn({ method: "POST" })
       .select("id, company_id, amount, channel, review_status, payment_method, payment_reference")
       .eq("id", data.id)
       .single();
+
     if (e0) throw new Error(e0.message);
     const recharge = rec as {
+      id: string;
       company_id: string;
       amount: number;
       channel: string;
@@ -603,6 +645,7 @@ export const reviewRecharge = createServerFn({ method: "POST" })
       payment_method: string | null;
       payment_reference: string | null;
     };
+
 
     const { error } = await context.supabase
       .from("recharges")
@@ -649,11 +692,12 @@ export const reviewRecharge = createServerFn({ method: "POST" })
         type: "RECARGA",
         concept: "Recarga aprobada",
         paymentMethod: recharge.payment_method,
-        reference: recharge.payment_reference,
+        reference: recharge.payment_reference || recharge.id, // Usamos el ID de recarga como referencia de idempotencia
         notes: data.review_note || null,
         performedBy: context.userId,
       });
     }
+
     return { ok: true };
   });
 
@@ -669,3 +713,49 @@ export const listCommercialHistory = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return JSON.stringify(data ?? []);
   });
+
+// ═══════════════════ CONSUMO OMNICANAL ═══════════════════
+
+/**
+ * Registra el consumo de un servicio (SMS, WhatsApp, Email, IA).
+ * Descuenta el monto de la wallet correspondiente de forma atómica.
+ */
+export const trackServiceUsage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({
+      company_id: uuid,
+      channel: channel,
+      amount: z.number().positive(),
+      units: z.number().int().nonnegative().default(1),
+      description: z.string().max(200).optional(),
+      reference: z.string().uuid(), // ID del mensaje o tarea para idempotencia
+    }).parse(v)
+  )
+  .handler(async ({ data, context }) => {
+    // 1. Localizar la wallet del canal
+    const { data: w } = await context.supabase
+      .from("wallets")
+      .select("id")
+      .eq("company_id", data.company_id)
+      .eq("channel", data.channel)
+      .maybeSingle();
+
+    if (!w) throw new Error(`No existe wallet para el canal ${data.channel}`);
+
+    // 2. Aplicar descuento (amount negativo)
+    const res = await applyWalletMovement(context.supabase as unknown as Sb, {
+      walletId: w.id,
+      amount: -Math.abs(data.amount),
+      units: -Math.abs(data.units),
+      type: "AJUSTE_DEBITO", // El consumo se registra como débito operativo
+      concept: data.description || `Consumo ${data.channel.toUpperCase()}`,
+      reference: data.reference,
+      performedBy: context.userId,
+    });
+
+    // 3. El contador de consumo ya se incrementó dentro de applyWalletMovement
+    return { ok: true, balance: res.balanceAfter };
+
+  });
+

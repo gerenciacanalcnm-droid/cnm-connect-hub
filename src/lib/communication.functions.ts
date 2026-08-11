@@ -3,13 +3,15 @@
  * Plantillas y Campañas multicanal.
  *
  * Todo IO pasa por `requireSupabaseAuth` → RLS aplicada como el usuario.
- * Ninguna llamada sale hacia Meta en este Sprint.
+ * El envío descuenta saldo de la wallet correspondiente de forma atómica.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { trackServiceUsage } from "./commercial.functions";
 
 const CNM_COMPANY_ID = "00000000-0000-4000-8000-000000000001";
+
 
 const departmentSchema = z.enum(["ventas", "soporte", "cobranza", "marketing", "general"]);
 const channelSchema = z.enum(["sms", "whatsapp", "email"]);
@@ -301,3 +303,138 @@ export const getChannelAnalytics = createServerFn({ method: "GET" })
       },
     };
   });
+
+// ═══════════════════ ENVÍO DE MENSAJES CON DESCUENTO DE SALDO ═══════════════════
+
+/**
+ * Envía un SMS y descuenta el saldo de la wallet de la empresa.
+ * Implementa idempotencia mediante el ID del mensaje generado.
+ */
+export const sendSmsMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({
+      to: z.string().min(8),
+      body: z.string().min(1),
+      provider: z.string().optional().default("CNM"),
+    }).parse(v)
+  )
+  .handler(async ({ data, context }) => {
+    // 1. Registrar mensaje en DB (Estado: pending)
+    const { data: sms, error: smsErr } = await context.supabase
+      .from("sms_messages")
+      .insert({
+        company_id: CNM_COMPANY_ID,
+        to_phone: data.to,
+        body: data.body,
+        status: "sending" as never,
+        provider: data.provider as never,
+        cost: 0.19, 
+      })
+
+      .select("id")
+      .single();
+
+
+    if (smsErr) throw new Error(smsErr.message);
+
+    // 2. Descontar saldo de la wallet (Atómico)
+    try {
+      await trackServiceUsage({
+        data: {
+          company_id: CNM_COMPANY_ID,
+          channel: "sms",
+          amount: 0.19,
+          units: 1,
+          description: `Envío SMS a ${data.to}`,
+          reference: sms.id,
+        },
+      });
+    } catch (err: any) {
+
+      // Si falla el cobro (ej. saldo insuficiente), marcamos como fallido
+      await context.supabase
+        .from("sms_messages")
+        .update({ status: "failed", error_message: err.message } as never)
+        .eq("id", sms.id);
+      throw err;
+    }
+
+    // 3. Enviar a Gateway (Simulado para este Sprint)
+    await new Promise(r => setTimeout(r, 500));
+    
+    // 4. Actualizar estado final
+    await context.supabase
+      .from("sms_messages")
+      .update({ status: "sent" as never, sent_at: new Date().toISOString() } as never)
+      .eq("id", sms.id);
+
+    return { ok: true, messageId: sms.id };
+  });
+
+/**
+ * Envía un mensaje de WhatsApp y descuenta el saldo.
+ */
+export const sendWhatsAppMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({
+      to: z.string().min(8),
+      body: z.string().min(1),
+      accountId: z.string().uuid(),
+    }).parse(v)
+  )
+  .handler(async ({ data, context }) => {
+    // Tarifa WA: 0.50 por mensaje de salida
+    const WA_COST = 0.50;
+
+    // 1. Registrar mensaje
+    const { data: msg, error: msgErr } = await context.supabase
+      .from("whatsapp_messages")
+      .insert({
+        company_id: CNM_COMPANY_ID,
+        to_phone: data.to,
+        body: data.body,
+        direction: "outbound" as never,
+        status: "sending" as never,
+        cost: WA_COST,
+      })
+
+      .select("id")
+      .single();
+
+
+    if (msgErr) throw new Error(msgErr.message);
+
+    // 2. Cobro atómico
+    try {
+      await trackServiceUsage({
+        data: {
+          company_id: CNM_COMPANY_ID,
+          channel: "whatsapp",
+          amount: WA_COST,
+          units: 1,
+          description: `Salida WA a ${data.to}`,
+          reference: msg.id,
+        },
+      });
+    } catch (err: any) {
+
+      await context.supabase
+        .from("whatsapp_messages")
+        .update({ status: "failed" } as never)
+        .eq("id", msg.id);
+      throw err;
+    }
+
+    // 3. Simulación de envío
+    await new Promise(r => setTimeout(r, 600));
+
+    await context.supabase
+      .from("whatsapp_messages")
+      .update({ status: "sent" as never } as never)
+      .eq("id", msg.id);
+
+    return { ok: true, messageId: msg.id };
+  });
+
