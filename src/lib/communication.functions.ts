@@ -359,7 +359,11 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
       // Si falla el cobro (ej. saldo insuficiente), marcamos como fallido
       await context.supabase
         .from("sms_messages")
-        .update({ status: "failed", error_message: err.message } as never)
+        .update({ 
+          status: "failed", 
+          error_message: err.message,
+          metadata: { failure_type: "INSUFFICIENT_BALANCE" }
+        } as never)
         .eq("id", sms.id);
       throw err;
     }
@@ -425,7 +429,10 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
     } catch (err: any) {
       await context.supabase
         .from("whatsapp_messages")
-        .update({ status: "failed" } as never)
+        .update({ 
+          status: "failed",
+          metadata: { failure_type: "INSUFFICIENT_BALANCE", error: err.message }
+        } as never)
         .eq("id", msg.id);
       throw err;
     }
