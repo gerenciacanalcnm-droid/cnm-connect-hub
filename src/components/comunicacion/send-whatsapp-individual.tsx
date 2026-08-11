@@ -65,6 +65,7 @@ export function SendWhatsAppIndividual() {
   const sendIndividualMutation = useSendWhatsAppIndividual();
   const sendBulkMutation = useSendWhatsAppBulk();
   const sendTemplateMutation = useSendWhatsAppTemplate();
+  const createScheduleMutation = useCreateWhatsAppSchedule();
 
   const contacts = contactsData?.items ?? [];
   const groups = groupsData ?? [];
