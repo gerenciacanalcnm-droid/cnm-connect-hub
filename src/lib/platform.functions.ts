@@ -540,16 +540,6 @@ export const deleteConversationMap = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-  .handler(async ({ context }) => {
-    const { data, error } = await (context.supabase as any)
-      .from("nova_knowledge")
-      .select("*")
-      .eq("company_id", CNM_COMPANY_ID)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    return data;
-  });
-
 export const saveNovaKnowledge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => NovaKnowledgeSchema.parse(v))
