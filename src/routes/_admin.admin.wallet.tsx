@@ -326,8 +326,10 @@ function WalletPage() {
 
           {managed && (
             <div className="space-y-4">
-              <div className={formMode ? "hidden" : "block"}>
-                <div className="grid gap-3 sm:grid-cols-3">
+              {/* Force clean layout for the main view when no form is active */}
+              {!formMode ? (
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-3">
                 <Card>
                   <CardContent className="p-4">
                     <div className="text-xs text-muted-foreground">Saldo actual</div>
@@ -491,9 +493,9 @@ function WalletPage() {
                   </div>
                 </TabsContent>
               </Tabs>
-            </div>
-          </div>
-        )}
+                </div>
+              ) : null}
+
 
 
 
