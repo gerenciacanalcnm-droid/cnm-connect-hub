@@ -45,15 +45,18 @@ function NovaMapsPage() {
 
   const handleCreate = () => {
     upsertMutation.mutate({
-      name: 'Nuevo Mapa de Conversación',
-      description: 'Descripción del flujo',
-      status: 'BORRADOR',
-      nodes: [
-        { id: 'node_1', type: 'MENSAJE', data: { text: 'Hola, ¿en qué podemos ayudarte?' } }
-      ],
-      edges: []
-    });
+      data: {
+        name: 'Nuevo Mapa de Conversación',
+        description: 'Descripción del flujo',
+        status: 'BORRADOR',
+        nodes: [
+          { id: 'node_1', type: 'MENSAJE', data: { text: 'Hola, ¿en qué podemos ayudarte?' } }
+        ],
+        edges: []
+      }
+    } as any);
   };
+
 
   return (
     <div className="p-6 space-y-6">
