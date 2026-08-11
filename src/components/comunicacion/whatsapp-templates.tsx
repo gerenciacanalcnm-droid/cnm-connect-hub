@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { 
   FileText, 
   RefreshCw, 
@@ -13,7 +13,13 @@ import {
   Plus,
   Send,
   Eye,
-  Type
+  Type,
+  Image as ImageIcon,
+  Video,
+  File as FileIcon,
+  MousePointer2,
+  Trash2,
+  Variable
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
