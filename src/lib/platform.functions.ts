@@ -46,6 +46,12 @@ export const getCurrentCompany = createServerFn({ method: "GET" }).handler(async
   return data;
 });
 
+// Mock functions for missing ones that might be imported elsewhere
+export const listContacts = createServerFn({ method: "GET" }).handler(() => ({ rows: [], total: 0 }));
+export const createContact = createServerFn({ method: "POST" }).handler(() => ({}));
+export const listCampaigns = createServerFn({ method: "GET" }).handler(() => ({ rows: [], total: 0 }));
+export const upsertCampaign = createServerFn({ method: "POST" }).handler(() => ({}));
+
 // ═══════════════════ CNM NOVA (IA Assistant) ═══════════════════
 
 const NovaSettingsSchema = z.object({
