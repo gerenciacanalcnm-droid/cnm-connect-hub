@@ -329,7 +329,7 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
         body: data.body,
         status: "sending" as never,
         provider: data.provider as never,
-        is_flash: data.isFlash, // Asegurar que esta columna exista en la tabla
+        is_flash: data.isFlash as never,
       })
       .select("id")
       .single();
