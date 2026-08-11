@@ -1,34 +1,43 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-export function SkeletonTable({ rows = 8, cols = 5 }: { rows?: number; cols?: number }) {
-  return (
-    <div className="space-y-2 rounded-xl border border-border bg-card p-4">
-      <div className="flex gap-3 border-b border-border pb-3">
-        {Array.from({ length: cols }).map((_, i) => (
-          <Skeleton key={i} className="h-4 flex-1" />
-        ))}
-      </div>
-      {Array.from({ length: rows }).map((_, r) => (
-        <div key={r} className="flex gap-3 py-2">
-          {Array.from({ length: cols }).map((_, c) => (
-            <Skeleton key={c} className="h-4 flex-1" />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
+interface SkeletonTableProps {
+  columnCount?: number;
+  rowCount?: number;
 }
 
-export function SkeletonCards({ count = 4 }: { count?: number }) {
+export function SkeletonTable({ columnCount = 5, rowCount = 5 }: SkeletonTableProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-border bg-card p-4">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="mt-3 h-8 w-32" />
-          <Skeleton className="mt-2 h-3 w-full" />
-        </div>
-      ))}
+    <div className="rounded-md border bg-card">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {Array.from({ length: columnCount }).map((_, i) => (
+              <TableHead key={i}>
+                <Skeleton className="h-4 w-[100px]" />
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: rowCount }).map((_, i) => (
+            <TableRow key={i}>
+              {Array.from({ length: columnCount }).map((_, j) => (
+                <TableCell key={j}>
+                  <Skeleton className="h-4 w-full" />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
