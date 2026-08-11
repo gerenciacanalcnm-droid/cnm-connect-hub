@@ -683,7 +683,7 @@ export function SendWhatsAppIndividual() {
             </div>
 
             <Button
-              className="w-full mt-2 font-bold uppercase tracking-tight"
+              className="w-full mt-4 font-bold uppercase tracking-tight h-11"
               disabled={
                 !connectedAccount || 
                 stats.valid === 0 || 
@@ -696,36 +696,15 @@ export function SendWhatsAppIndividual() {
               }
               onClick={handleSend}
             >
+              <Send className="h-4 w-4 mr-2" />
               {sendIndividualMutation.isPending || sendTemplateMutation.isPending ? (
                 "Procesando..."
               ) : (
-                "Enviar Ahora"
+                mode === 'individual' ? 'Enviar Ahora' : mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'
               )}
-            </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-
-            <Button
-              onClick={handleSend}
-              disabled={
-                isInsufficient || 
-                stats.valid === 0 || 
-                (messageType === 'text' ? !msg.trim() : !selectedTemplateId) || 
-                !connectedAccount ||
-                (messageType === 'template' && selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0 && Object.keys(templateVariables).some(k => !templateVariables[k]?.trim()))
-              }
-              className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4"
-            >
-              <Send className="h-4 w-4 mr-2" />
-              {isInsufficient ? `Saldo insuficiente. Necesitas ${formatCurrency(totalCost)} para realizar este envío.` : 
-               mode === 'individual' ? 'Enviar Ahora' : 
-               mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'}
             </Button>
             
-            <div className="flex items-center gap-2 p-3 rounded border bg-amber-50/50 border-amber-100 text-[11px] text-amber-800 italic">
+            <div className="flex items-center gap-2 p-3 rounded border bg-amber-50/50 border-amber-100 text-[11px] text-amber-800 italic mt-4">
                <Info className="h-3 w-3 shrink-0" />
                <p>Los envíos de plantillas están sujetos a las políticas comerciales de Meta.</p>
             </div>
