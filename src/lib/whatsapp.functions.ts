@@ -223,3 +223,118 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
       throw err;
     }
   });
+
+/**
+ * Procesa el envío masivo de WhatsApp.
+ * Realiza un cobro atómico por el total del lote antes de procesar.
+ */
+export const sendBulkWhatsApp = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({
+      recipients: z.array(z.string().min(10)),
+      body: z.string().min(1),
+      accountId: z.string().uuid(),
+    }).parse(v)
+  )
+  .handler(async ({ data, context }) => {
+    const { recipients, body, accountId } = data;
+    const total = recipients.length;
+
+    if (total === 0) throw new Error("No hay destinatarios.");
+
+    // 1. Obtener credenciales
+    const { data: account, error: accErr } = await context.supabase
+      .from("whatsapp_accounts")
+      .select("phone_number_id, access_token")
+      .eq("id", accountId)
+      .single();
+
+    if (accErr || !account) throw new Error("Cuenta de WhatsApp no válida.");
+
+    const batchId = crypto.randomUUID();
+
+    // 2. Cobro atómico consolidado
+    try {
+      await trackServiceUsage({
+        data: {
+          company_id: CNM_COMPANY_ID,
+          channel: "whatsapp",
+          units: total,
+          description: `Envío Masivo WA (${total} dest.)`,
+          reference: batchId,
+        },
+      });
+    } catch (err: any) {
+      throw err; // Saldo insuficiente u otro error comercial
+    }
+
+    // 3. Procesamiento por lotes (Chunks de 20 para evitar timeouts)
+    const results = { sent: 0, failed: 0, details: [] as any[] };
+    const chunks = [];
+    for (let i = 0; i < recipients.length; i += 20) {
+      chunks.push(recipients.slice(i, i + 20));
+    }
+
+    for (const chunk of chunks) {
+      const chunkPromises = chunk.map(async (to) => {
+        try {
+          const toFormatted = to.startsWith("57") ? to : `57${to}`;
+          
+          const metaResponse = await fetch(
+            `https://graph.facebook.com/v20.0/${account.phone_number_id}/messages`,
+            {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${account.access_token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                messaging_product: "whatsapp",
+                recipient_type: "individual",
+                to: toFormatted,
+                type: "text",
+                text: { body },
+              }),
+            }
+          );
+
+          const metaResult = await metaResponse.json();
+          const isOk = metaResponse.ok;
+
+          // Registrar en la DB
+          await context.supabase.from("whatsapp_messages").insert({
+            company_id: CNM_COMPANY_ID,
+            to_phone: to,
+            body,
+            direction: "outbound",
+            status: isOk ? "sent" : "failed",
+            metadata: { batch_id: batchId, ...metaResult },
+            cost: 0, 
+          } as never);
+
+          if (isOk) {
+            results.sent++;
+          } else {
+            results.failed++;
+            results.details.push({ to, error: metaResult.error?.message });
+          }
+        } catch (err: any) {
+          results.failed++;
+          results.details.push({ to, error: err.message });
+        }
+      });
+
+      await Promise.all(chunkPromises);
+    }
+
+    return { 
+      ok: true, 
+      batchId, 
+      total, 
+      sent: results.sent, 
+      failed: results.failed,
+      errors: results.details 
+    };
+  });
+
