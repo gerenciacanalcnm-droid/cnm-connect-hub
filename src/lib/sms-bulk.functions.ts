@@ -59,14 +59,12 @@ export const sendBulkSms = createServerFn({ method: "POST" })
           to_phone: to,
           body,
           status: (scheduledAt ? "queued" : "sent") as any,
-          is_flash: isFlash,
           sent_at: scheduledAt ? null : new Date().toISOString(),
-          scheduled_at: scheduledAt || null,
-          metadata: { batch_id: batchId }
-        }))
+        } as any))
       );
       if (error) console.error("Error inserting bulk sms chunk:", error);
     }
+
 
 
     return { ok: true, batchId, total: totalRecipients };
