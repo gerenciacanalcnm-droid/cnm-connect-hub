@@ -4,6 +4,8 @@ import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SendSms } from "@/components/comunicacion/send-sms";
 import { SmsHistory } from "@/components/comunicacion/sms-history";
+import { ChannelOverview } from "@/components/comunicacion/channel-overview";
+import { WhatsAppAccounts } from "@/components/comunicacion/whatsapp-accounts";
 import { ConversationCenter } from "@/components/comunicacion/conversation-center";
 import { EmailMarketing } from "@/components/comunicacion/email-marketing";
 import { CommunicationSettings } from "@/components/comunicacion/communication-settings";
