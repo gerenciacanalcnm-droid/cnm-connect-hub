@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { whatsappRepository } from "@/repositories/whatsapp.repository";
 import { queryKeys } from "./queries/keys";
+import { createWhatsAppSchedule, listWhatsAppSchedules, cancelWhatsAppSchedule } from "@/lib/whatsapp.functions";
 
 export function useWhatsAppAccounts() {
   return useQuery({
