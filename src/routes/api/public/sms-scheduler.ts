@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { processPendingSmsSchedules } from '@/lib/sms-schedule.functions';
+import { executePendingSchedules } from '@/lib/sms-schedule.server';
+import { supabaseAdmin } from '@/integrations/supabase/client.server';
+
 import { timingSafeEqual } from 'crypto';
 
 export const Route = createFileRoute('/api/public/sms-scheduler')({
