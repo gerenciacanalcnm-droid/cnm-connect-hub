@@ -131,7 +131,7 @@ export function WhatsAppSurveys() {
   // --- Render Editor ---
   if (isEditorOpen) {
     return (
-      <div className="flex h-screen bg-slate-50 overflow-hidden">
+      <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-900">
         {/* PANEL IZQUIERDO: Configuración */}
         <div className="w-80 bg-white border-r flex flex-col shadow-sm">
           <div className="p-4 border-b bg-slate-50/50 flex items-center justify-between">
@@ -154,8 +154,8 @@ export function WhatsAppSurveys() {
                   <SelectValue placeholder="Tipo de Encuesta" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="INTERACTIVE_LIST">Lista Interactiva (2-10 opciones)</SelectItem>
-                  <SelectItem value="INTERACTIVE_BUTTONS">Botones (1-3 opciones)</SelectItem>
+                  <SelectItem value="INTERACTIVE_LIST" className="cursor-pointer">Lista Interactiva (2-10 opciones)</SelectItem>
+                  <SelectItem value="INTERACTIVE_BUTTONS" className="cursor-pointer">Botones (1-3 opciones)</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -170,16 +170,22 @@ export function WhatsAppSurveys() {
             <section className="space-y-3">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Contenido (Meta compatible)</label>
               
-              <Select value={headerType} onValueChange={(v: HeaderType) => setHeaderType(v)}>
+              <Select value={headerType} onValueChange={(v: HeaderType) => {
+                if (type === 'INTERACTIVE_LIST' && v !== 'NONE' && v !== 'TEXT') {
+                  toast.warning("Las listas interactivas solo soportan cabeceras de texto o ninguna.");
+                  return;
+                }
+                setHeaderType(v);
+              }}>
                 <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue placeholder="Tipo de Cabecera" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NONE">Sin cabecera</SelectItem>
-                  <SelectItem value="TEXT">Texto</SelectItem>
-                  <SelectItem value="IMAGE">Imagen</SelectItem>
-                  <SelectItem value="VIDEO">Video</SelectItem>
-                  <SelectItem value="DOCUMENT">Documento</SelectItem>
+                  <SelectItem value="NONE" className="cursor-pointer">Sin cabecera</SelectItem>
+                  <SelectItem value="TEXT" className="cursor-pointer">Texto</SelectItem>
+                  <SelectItem value="IMAGE" className="cursor-pointer" disabled={type === 'INTERACTIVE_LIST'}>Imagen {type === 'INTERACTIVE_LIST' && "(Solo Botones)"}</SelectItem>
+                  <SelectItem value="VIDEO" className="cursor-pointer" disabled={type === 'INTERACTIVE_LIST'}>Video {type === 'INTERACTIVE_LIST' && "(Solo Botones)"}</SelectItem>
+                  <SelectItem value="DOCUMENT" className="cursor-pointer" disabled={type === 'INTERACTIVE_LIST'}>Documento {type === 'INTERACTIVE_LIST' && "(Solo Botones)"}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -306,19 +312,35 @@ export function WhatsAppSurveys() {
                         {headerText || "TEXTO DE CABECERA"}
                       </div>
                     ) : headerType === 'IMAGE' ? (
-                      <div className="flex flex-col items-center text-slate-400">
-                        <ImageIcon className="h-8 w-8 mb-2 opacity-50" />
-                        <span className="text-[10px] font-medium">[IMAGEN]</span>
+                      <div className="flex flex-col items-center text-slate-400 w-full aspect-video justify-center bg-slate-100">
+                        {headerUrl ? (
+                          <img src={headerUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }} />
+                        ) : (
+                          <>
+                            <ImageIcon className="h-8 w-8 mb-2 opacity-50" />
+                            <span className="text-[10px] font-medium">[IMAGEN]</span>
+                          </>
+                        )}
                       </div>
                     ) : headerType === 'VIDEO' ? (
-                      <div className="flex flex-col items-center text-slate-400">
-                        <Video className="h-8 w-8 mb-2 opacity-50" />
-                        <span className="text-[10px] font-medium">[VIDEO]</span>
+                      <div className="flex flex-col items-center text-slate-400 w-full aspect-video justify-center bg-slate-800">
+                        {headerUrl ? (
+                          <video src={headerUrl} className="w-full h-full object-cover" muted />
+                        ) : (
+                          <>
+                            <Video className="h-8 w-8 mb-2 opacity-50" />
+                            <span className="text-[10px] font-medium">[VIDEO]</span>
+                          </>
+                        )}
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center text-slate-400">
+                      <div className="flex flex-col items-center text-slate-400 p-4 border-2 border-dashed border-slate-200 m-2 rounded w-full">
                         <FileText className="h-8 w-8 mb-2 opacity-50" />
-                        <span className="text-[10px] font-medium">[DOCUMENTO]</span>
+                        <span className="text-[10px] font-medium truncate w-full text-center">
+                          {headerUrl ? headerUrl.split('/').pop() : "[DOCUMENTO]"}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -345,11 +367,17 @@ export function WhatsAppSurveys() {
                     </div>
                   ) : (
                     <div className="space-y-px bg-slate-100">
-                      {options.filter(o => o.label).map((opt, i) => (
-                        <div key={i} className="bg-white p-2.5 text-blue-500 text-[13px] text-center font-semibold hover:bg-slate-50 cursor-pointer">
-                          {opt.label}
+                      {options.filter(o => o.label).length > 0 ? (
+                        options.filter(o => o.label).map((opt, i) => (
+                          <div key={i} className="bg-white p-2.5 text-blue-500 text-[13px] text-center font-semibold hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-b-0">
+                            {opt.label}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="bg-white p-2.5 text-slate-400 text-[13px] text-center italic">
+                          Agrega botones...
                         </div>
-                      ))}
+                      )}
                     </div>
                   )}
                 </div>
@@ -388,7 +416,7 @@ export function WhatsAppSurveys() {
   return (
     <div className="p-8 space-y-8 max-w-[1200px] mx-auto">
       <div className="flex justify-between items-center">
-        <div>
+        <div className="text-slate-900">
           <h1 className="text-2xl font-bold text-slate-900">Centro de Encuestas</h1>
           <p className="text-slate-500 text-sm">Gestiona tus consultas interactivas vía WhatsApp Business.</p>
         </div>
@@ -404,7 +432,7 @@ export function WhatsAppSurveys() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Métricas Globales (Placeholder dinámico) */}
         <Card className="bg-blue-600 border-none shadow-lg shadow-blue-200">
           <CardContent className="p-6">
