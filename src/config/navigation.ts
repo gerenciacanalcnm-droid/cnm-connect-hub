@@ -37,7 +37,7 @@ export const primaryNavigation: NavSection[] = [
         description: "Visión general de tu cuenta",
       },
       {
-        title: "Conversaciones",
+        title: "Comunicación",
         to: "/comunicacion",
         icon: MessageSquare,
         description: "SMS, WhatsApp y Email",
@@ -46,7 +46,7 @@ export const primaryNavigation: NavSection[] = [
         title: "CRM",
         to: "/crm",
         icon: Users,
-        description: "Contactos y segmentos",
+        description: "Contactos y conversaciones",
       },
       {
         title: "Automatizaciones",
