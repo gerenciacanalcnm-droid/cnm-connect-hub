@@ -37,14 +37,24 @@ export function CommunicationSettings() {
   const providers = useCommunicationProviders();
   const [diagnostic, setDiagnostic] = useState<any>(null);
   const [testing, setTesting] = useState(false);
+  const [detail, setDetail] = useState<any>(null);
   const runDiagnostic = useServerFn(testMetaConnection);
+  const runDetail = useServerFn(getMetaTemplatesDetail);
 
   const handleDiagnostic = async () => {
     setTesting(true);
     setDiagnostic(null);
+    setDetail(null);
     try {
       const res = await runDiagnostic();
       setDiagnostic(res);
+      
+      // Si falla cnm_prueba, lanzamos el detalle automáticamente
+      if (res && 'CNM_PRUEBA' in res && res.CNM_PRUEBA === "NO ENCONTRADA") {
+        const detailRes = await runDetail();
+        setDetail(detailRes);
+      }
+
       if (res && 'PHONE_NUMBER' in res && res.PHONE_NUMBER === "OK" && res.WABA === "OK" && res.TEMPLATES === "OK") {
         toast.success("Conexión con Meta verificada");
       } else {
@@ -56,6 +66,7 @@ export function CommunicationSettings() {
       setTesting(false);
     }
   };
+
 
 
   if (isLoading || !settings) return <Loader />;
