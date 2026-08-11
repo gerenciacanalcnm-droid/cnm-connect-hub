@@ -369,7 +369,7 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
 
           // Registrar en la DB
           await context.supabase.from("whatsapp_messages").insert({
-            company_id: CNM_COMPANY_ID,
+            company_id: realCompanyId,
             account_id: accountId,
             to_phone: to,
             body: templateId ? templateData.body : body,
