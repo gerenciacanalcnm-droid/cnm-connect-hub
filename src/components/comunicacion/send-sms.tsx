@@ -131,16 +131,22 @@ export function SendSms() {
       if (mode === 'schedule') {
         if (!date || !time) throw new Error("Debes seleccionar fecha y hora");
         
+        // Construct local date/time string. 
+        // We'll let the server handle the timezone if possible, or send a specific format.
+        // For simplicity and to meet requirement 9, we'll send it as is and the server will treat it as local to the company timezone.
+        const scheduledAt = `${date}T${time}:00`;
+        
         await doCreateSchedule({
           data: {
             recipients: allRecipients,
             body: msg,
             isFlash,
-            scheduledAt: `${date}T${time}:00`, // Timezone handled by DB or explicit string
+            scheduledAt,
             timezone: companyTimezone,
             estimatedCost: cost
           }
         });
+
         toast.success("Envío programado correctamente");
         refetchSchedules();
       } else {
