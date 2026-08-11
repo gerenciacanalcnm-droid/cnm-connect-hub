@@ -174,7 +174,9 @@ export function WhatsAppTemplates() {
             {buttons.length > 0 && (
               <div className="space-y-1 mt-3">
                 {buttons.map((b, i) => (
-                  <div key={i} className="bg-white/80 backdrop-blur-sm text-blue-600 text-sm py-2 rounded-lg border border-slate-200 text-center shadow-sm font-medium hover:bg-white transition-colors">
+                  <div key={i} className="bg-white/80 backdrop-blur-sm text-blue-600 text-sm py-2 rounded-lg border border-slate-200 text-center shadow-sm font-medium hover:bg-white transition-colors flex items-center justify-center gap-2">
+                    {b.type === 'URL' && <MousePointer2 className="h-3 w-3" />}
+                    {b.type === 'PHONE' && <Type className="h-3 w-3" />}
                     {b.text || "Botón"}
                   </div>
                 ))}
