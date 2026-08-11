@@ -198,26 +198,28 @@ export function CommunicationSettings() {
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="p-3 rounded-lg border bg-muted/30">
                     <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Phone Number</p>
-                    <Badge variant={diagnostic.PHONE_NUMBER === "OK" ? "default" : "destructive"}>
-                      {diagnostic.PHONE_NUMBER}
-                    </Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge variant={diagnostic.PHONE_NUMBER === "OK" ? "default" : "destructive"}>
+                        {diagnostic.PHONE_NUMBER === "OK" ? "✅ Encontrado en Meta" : diagnostic.PHONE_NUMBER}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="p-3 rounded-lg border bg-muted/30">
                     <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">WABA Account</p>
                     <Badge variant={diagnostic.WABA === "OK" ? "default" : "destructive"}>
-                      {diagnostic.WABA}
+                      {diagnostic.WABA === "OK" ? "✅ Encontrado" : diagnostic.WABA}
                     </Badge>
                   </div>
                   <div className="p-3 rounded-lg border bg-muted/30">
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Templates API</p>
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">PHONE → WABA</p>
+                    <Badge variant={detail?.waba_phone_numbers?.some((p: any) => p.id === detail.config?.phoneNumberId) ? "default" : "destructive"}>
+                      {detail?.waba_phone_numbers?.some((p: any) => p.id === detail.config?.phoneNumberId) ? "✅ Pertenece" : "ERROR"}
+                    </Badge>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-muted/30">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Templates</p>
                     <Badge variant={diagnostic.TEMPLATES === "OK" ? "default" : "destructive"}>
-                      {diagnostic.TEMPLATES}
-                    </Badge>
-                  </div>
-                  <div className="p-3 rounded-lg border bg-muted/30">
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">CNM_PRUEBA</p>
-                    <Badge variant={diagnostic.CNM_PRUEBA === "ENCONTRADA" ? "default" : "secondary"}>
-                      {diagnostic.CNM_PRUEBA}
+                      {diagnostic.TEMPLATES === "OK" ? `✅ ${detail?.templates?.length || 0} encontradas` : diagnostic.TEMPLATES}
                     </Badge>
                   </div>
                 </div>
@@ -260,8 +262,10 @@ export function CommunicationSettings() {
                     <p className="text-blue-400 mt-2">// Propiedad WABA</p>
                     <p>WABA real del Phone Number: {detail.phone_details?.whatsapp_business_account?.id || 'NO ENCONTRADO'}</p>
                     <p>Número: {detail.phone_details?.display_phone_number || 'N/A'}</p>
+                    <p>Verified Name: {detail.phone_details?.verified_name || 'N/A'}</p>
                     <p>Estado: {detail.phone_details?.status || 'N/A'}</p>
-                    <p>Calificación: {detail.phone_details?.quality_rating || 'N/A'}</p>
+                    <p>Quality Rating: {detail.phone_details?.quality_rating || 'N/A'}</p>
+                    <p>Code Verification: {detail.phone_details?.code_verification_status || 'N/A'}</p>
                     <p>¿Phone pertenece al WABA?: {
                       detail.waba_phone_numbers?.some((p: any) => p.id === detail.config?.phoneNumberId) ? 'SÍ' : 'NO (ERROR CRÍTICO)'
                     }</p>
