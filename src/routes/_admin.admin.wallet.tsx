@@ -360,6 +360,24 @@ function WalletPage() {
                 <Button variant="outline" onClick={() => openForm("adjust")}>
                   <Minus className="mr-1.5 h-4 w-4" /> Ajustar saldo
                 </Button>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  const tabsTrigger = document.querySelector('[value="movimientos"]') as HTMLElement;
+                  tabsTrigger?.click();
+                }}>
+                  Ver movimientos
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  const tabsTrigger = document.querySelector('[value="recargas"]') as HTMLElement;
+                  tabsTrigger?.click();
+                }}>
+                  Ver recargas
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  const tabsTrigger = document.querySelector('[value="consumo"]') as HTMLElement;
+                  tabsTrigger?.click();
+                }}>
+                  Ver consumo
+                </Button>
               </div>
 
               <Tabs defaultValue="movimientos">
@@ -412,10 +430,40 @@ function WalletPage() {
                               {formatCurrency(r.amount, r.currency)}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {fmtDate(r.createdAt)} · {r.mode}
+                              {fmtDate(r.createdAt)} · {r.mode} · {r.gatewayCode ?? "manual"}
+                              {r.receiptPath && <span className="ml-2 text-primary underline cursor-pointer">Ver comprobante</span>}
                             </div>
                           </div>
-                          <Badge variant="outline">{r.reviewStatus}</Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{r.reviewStatus}</Badge>
+                            {r.reviewStatus === "pendiente" && (
+                              <div className="flex gap-1">
+                                <Button size="xs" variant="ghost" className="h-7 text-success" onClick={async () => {
+                                  if(confirm("¿Aprobar esta recarga?")) {
+                                    const { reviewRecharge } = await import("@/lib/commercial.functions");
+                                    try {
+                                      await reviewRecharge({ data: { id: r.id, status: "aprobada", note: "Aprobada por Super Admin" } });
+                                      toast.success("Recarga aprobada");
+                                    } catch (e: any) {
+                                      toast.error(e.message);
+                                    }
+                                  }
+                                }}>Aprobar</Button>
+                                <Button size="xs" variant="ghost" className="h-7 text-destructive" onClick={async () => {
+                                  const note = prompt("Motivo del rechazo:");
+                                  if(note) {
+                                    const { reviewRecharge } = await import("@/lib/commercial.functions");
+                                    try {
+                                      await reviewRecharge({ data: { id: r.id, status: "rechazada", note } });
+                                      toast.success("Recarga rechazada");
+                                    } catch (e: any) {
+                                      toast.error(e.message);
+                                    }
+                                  }
+                                }}>Rechazar</Button>
+                              </div>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </ul>
