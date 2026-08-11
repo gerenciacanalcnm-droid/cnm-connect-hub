@@ -48,6 +48,10 @@ export function SendWhatsAppIndividual() {
   const [toManual, setToManual] = useState("");
   const [msg, setMsg] = useState("");
   
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [timezone, setTimezone] = useState("America/Bogota");
+
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
 
