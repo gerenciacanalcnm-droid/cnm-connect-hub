@@ -30,19 +30,19 @@ export function InvoicesTable() {
       {
         accessorKey: "issuedAt",
         header: "Emitida",
-        cell: ({ row }) => new Date(row.original.issuedAt).toLocaleDateString("es-MX"),
+        cell: ({ row }) => new Date(row.original.issuedAt).toLocaleDateString("es-CO"),
       },
       {
         accessorKey: "dueAt",
         header: "Vence",
-        cell: ({ row }) => new Date(row.original.dueAt).toLocaleDateString("es-MX"),
+        cell: ({ row }) => new Date(row.original.dueAt).toLocaleDateString("es-CO"),
       },
       {
         accessorKey: "amount",
         header: "Importe",
         cell: ({ row }) => (
           <span className="font-semibold">
-            {formatCurrency(row.original.amount, row.original.currency, "es-MX")}
+            {formatCurrency(row.original.amount, row.original.currency)}
           </span>
         ),
       },

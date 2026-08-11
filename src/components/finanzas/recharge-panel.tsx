@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import { Sparkles, CreditCard, Landmark, Wallet } from "lucide-react";
+import { Sparkles, CreditCard, Landmark, Wallet, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,56 +14,89 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useRechargePackages, useBalance } from "@/hooks/use-recharges";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { toast } from "sonner";
 import type { RechargePackage } from "@/types/recharge";
 
+
 export function RechargePanel() {
-  const { data: packages } = useRechargePackages();
-  const { data: balance } = useBalance();
   const [selected, setSelected] = useState<RechargePackage | null>(null);
   const [method, setMethod] = useState("card");
+
+  const packages: RechargePackage[] = [
+    { id: "p1", name: "Básico", smsCredits: 1000, price: 50000, currency: "COP", popular: false },
+    {
+      id: "p2",
+      name: "Profesional",
+      smsCredits: 5000,
+      price: 200000,
+      currency: "COP",
+      popular: true,
+      bonus: 500,
+    },
+    {
+      id: "p3",
+      name: "Empresarial",
+      smsCredits: 20000,
+      price: 700000,
+      currency: "COP",
+      popular: false,
+      bonus: 3000,
+    },
+    {
+      id: "p4",
+      name: "Master",
+      smsCredits: 100000,
+      price: 3000000,
+      currency: "COP",
+      popular: false,
+      bonus: 20000,
+    },
+  ];
+
 
   const packs = packages ?? [];
 
   return (
     <div className="space-y-6">
+      <Alert variant="destructive" className="border-warning/50 bg-warning/5 text-warning-foreground">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Módulo en transición</AlertTitle>
+        <AlertDescription>
+          Estamos migrando este panel al nuevo motor de Wallet. Por favor, realiza tus recargas
+          desde la pestaña <strong>Wallet</strong> para asegurar que tu saldo se acredite
+          correctamente.
+        </AlertDescription>
+      </Alert>
+
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="bg-gradient-to-br from-nova/95 to-primary text-primary-foreground">
+        <Card className="bg-gradient-to-br from-nova/95 to-primary text-primary-foreground opacity-80">
           <CardContent className="p-5">
             <div className="flex items-center gap-2 text-xs uppercase tracking-wider opacity-80">
-              <Wallet className="h-4 w-4" /> Saldo disponible
+              <Wallet className="h-4 w-4" /> Saldo (Histórico)
             </div>
-            <div className="mt-3 text-3xl font-semibold">
-              {balance ? formatCurrency(balance.amount, balance.currency, "es-MX") : "—"}
-            </div>
-            <div className="mt-1 text-sm opacity-90">
-              {balance ? `${formatNumber(balance.smsCredits)} SMS disponibles` : ""}
-            </div>
+            <div className="mt-3 text-3xl font-semibold">{formatCurrency(0, "COP")}</div>
+            <div className="mt-1 text-sm opacity-90">0 SMS disponibles</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="opacity-80">
           <CardContent className="p-5">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">
               Consumo mes
             </div>
-            <div className="mt-3 text-3xl font-semibold">
-              {formatCurrency(12_480, "MXN", "es-MX")}
-            </div>
-            <div className="mt-1 text-sm text-muted-foreground">62 400 SMS enviados</div>
+            <div className="mt-3 text-3xl font-semibold">{formatCurrency(0, "COP")}</div>
+            <div className="mt-1 text-sm text-muted-foreground">0 SMS enviados</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="opacity-80">
           <CardContent className="p-5">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Proyección</div>
-            <div className="mt-3 text-3xl font-semibold">
-              {formatCurrency(18_200, "MXN", "es-MX")}
-            </div>
+            <div className="mt-3 text-3xl font-semibold">{formatCurrency(0, "COP")}</div>
             <div className="mt-1 text-sm text-muted-foreground">estimado fin de mes</div>
           </CardContent>
         </Card>
       </div>
+
 
       <div>
         <h2 className="mb-3 text-lg font-semibold">Paquetes de recarga</h2>
@@ -83,7 +117,7 @@ export function RechargePanel() {
               <CardContent className="flex flex-1 flex-col space-y-3">
                 <div>
                   <div className="text-3xl font-semibold">
-                    {formatCurrency(p.price, p.currency, "es-MX")}
+                    {formatCurrency(p.price, p.currency)}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {formatNumber(p.smsCredits)} SMS
@@ -112,7 +146,7 @@ export function RechargePanel() {
             <DialogTitle>Confirmar recarga · {selected?.name}</DialogTitle>
             <DialogDescription>
               {selected &&
-                `${formatNumber(selected.smsCredits + (selected.bonus ?? 0))} SMS por ${formatCurrency(selected.price, selected.currency, "es-MX")}`}
+                `${formatNumber(selected.smsCredits + (selected.bonus ?? 0))} SMS por ${formatCurrency(selected.price, selected.currency)}`}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">

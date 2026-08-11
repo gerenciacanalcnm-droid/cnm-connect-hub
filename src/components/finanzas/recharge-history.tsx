@@ -10,7 +10,7 @@ import { formatCurrency, formatNumber } from "@/lib/format";
 import type { Recharge } from "@/types/recharge";
 
 const METHOD_ICON = { card: CreditCard, transfer: Landmark, paypal: Wallet };
-const METHOD_LABEL = { card: "Tarjeta", transfer: "SPEI", paypal: "PayPal" };
+const METHOD_LABEL = { card: "Tarjeta", transfer: "Transferencia", paypal: "PayPal" };
 
 export function RechargeHistory() {
   const { data, isLoading, error, refetch } = useRecharges();
@@ -21,10 +21,8 @@ export function RechargeHistory() {
         accessorKey: "createdAt",
         header: "Fecha",
         cell: ({ row }) =>
-          new Date(row.original.createdAt).toLocaleString("es-MX", {
-            dateStyle: "short",
-            timeStyle: "short",
-          }),
+          new Date(row.original.createdAt).toLocaleString("es-CO"),
+
       },
       {
         accessorKey: "reference",
@@ -36,7 +34,7 @@ export function RechargeHistory() {
         header: "Monto",
         cell: ({ row }) => (
           <span className="font-semibold">
-            {formatCurrency(row.original.amount, row.original.currency, "es-MX")}
+            {formatCurrency(row.original.amount, row.original.currency)}
           </span>
         ),
       },
