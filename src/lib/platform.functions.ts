@@ -11,6 +11,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { processAutomationTrigger } from "./automation-engine.server";
 
 const CNM_COMPANY_ID = "00000000-0000-4000-8000-000000000001";
 
@@ -245,6 +246,22 @@ export const createContact = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
+
+    // Disparar automatización "Nuevo contacto"
+    if (row) {
+      await processAutomationTrigger(
+        CNM_COMPANY_ID,
+        "new_contact",
+        {
+          contact_id: row.id,
+          first_name: row.first_name,
+          phone: row.phone,
+          tags: row.tags
+        },
+        `new_contact_${row.id}`
+      );
+    }
+
     return row;
   });
 

@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { supabaseAdmin } from '@/integrations/supabase/client.server';
+import { processAutomationTrigger } from '@/lib/automation-engine.server';
 
 export const Route = createFileRoute('/api/public/whatsapp-webhook')({
   server: {
@@ -95,6 +96,31 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   .from('whatsapp_messages')
                   .update(updateData)
                   .eq('id', msg.id);
+              }
+            }
+          }
+
+          // Procesar mensajes entrantes para disparar automatizaciones
+          const messages = value?.messages;
+          if (messages && Array.isArray(messages)) {
+            for (const message of messages) {
+              const from = message.from;
+              const text = message.text?.body;
+              
+              // Buscar la cuenta para obtener el company_id
+              const { data: account } = await supabaseAdmin
+                .from('whatsapp_accounts')
+                .select('company_id')
+                .eq('phone_number_id', value.metadata?.phone_number_id)
+                .maybeSingle();
+
+              if (account) {
+                await processAutomationTrigger(
+                  account.company_id,
+                  'whatsapp_message',
+                  { phone: from, text: text, wamid: message.id },
+                  message.id
+                );
               }
             }
           }
