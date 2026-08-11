@@ -17,7 +17,7 @@ async function admin() {
 }
 
 const uuid = z.string().uuid();
-const channel = z.enum(["sms", "whatsapp", "email"]);
+const channel = z.enum(["sms", "whatsapp", "email", "ia"]);
 
 // ═══════════════════ CATÁLOGO DE FUNCIONALIDADES ═══════════════════
 export const listCommercialFeatures = createServerFn({ method: "GET" }).handler(async () => {

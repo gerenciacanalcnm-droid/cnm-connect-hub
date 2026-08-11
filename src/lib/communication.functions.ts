@@ -438,3 +438,44 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
     return { ok: true, messageId: msg.id };
   });
 
+/**
+ * Envía un Email y descuenta el saldo de la wallet.
+ */
+export const sendEmailMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({
+      to: z.string().email(),
+      subject: z.string().min(1),
+      body: z.string().min(1),
+    }).parse(v)
+  )
+  .handler(async ({ data, context }) => {
+    // Tarifa Email: 0.05 por envío
+    const EMAIL_COST = 0.05;
+
+    // 1. Cobro atómico (Sin registro previo de tabla específica aún, usamos UUID para ref)
+    const reference = crypto.randomUUID();
+    
+    try {
+      await trackServiceUsage({
+        data: {
+          company_id: CNM_COMPANY_ID,
+          channel: "email",
+          amount: EMAIL_COST,
+          units: 1,
+          description: `Envío Email a ${data.to}: ${data.subject}`,
+          reference: reference,
+        },
+      });
+    } catch (err: any) {
+      throw err;
+    }
+
+    // 2. Simulación de envío
+    await new Promise(r => setTimeout(r, 400));
+
+    return { ok: true, reference };
+  });
+
+
