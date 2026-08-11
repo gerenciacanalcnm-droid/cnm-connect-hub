@@ -246,7 +246,7 @@ export function WhatsAppChannelConfig() {
         </div>
       )}
 
-      <Alert variant="warning" className="border-amber-500/20 bg-amber-500/5">
+      <Alert className="border-amber-500/20 bg-amber-500/5">
         <ShieldAlert className="h-4 w-4 text-amber-600" />
         <AlertTitle className="text-sm font-medium text-amber-800">Seguridad de Datos</AlertTitle>
         <AlertDescription className="text-xs text-amber-700">

@@ -36,15 +36,10 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
         try {
           const payload = await request.json();
           
-          // TODO: Implementar validación de firma X-Hub-Signature-256
-          
-          // Log temporal para depuración (según SPRINT 10 FASE 1, evitamos logs sensibles en prod)
-          // console.log('WhatsApp Webhook Received:', JSON.stringify(payload));
-
           // Guardar el evento en la tabla de webhooks para procesamiento asíncrono posterior
           await supabaseAdmin.from('whatsapp_webhooks').insert({
-            payload: payload,
-            processed: false
+            event_type: payload?.entry?.[0]?.changes?.[0]?.field || 'unknown',
+            payload: payload
           });
 
           return new Response('OK', { status: 200 });

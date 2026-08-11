@@ -36,7 +36,7 @@ export function useSetPrimaryWhatsAppAccount() {
 export function useConnectWhatsAppMeta() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Parameters<typeof whatsappRepository.connectMeta>[0]["data"]) => 
+    mutationFn: (data: any) => 
       whatsappRepository.connectMeta({ data }),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.whatsapp.accounts }),
   });
@@ -44,7 +44,7 @@ export function useConnectWhatsAppMeta() {
 
 export function useTestWhatsAppConnection() {
   return useMutation({
-    mutationFn: (data: Parameters<typeof whatsappRepository.testConnection>[0]["data"]) => 
+    mutationFn: (data: any) => 
       whatsappRepository.testConnection({ data }),
   });
 }
