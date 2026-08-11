@@ -63,48 +63,8 @@ function DashboardPage() {
     { label: "Recargar saldo", description: "Añadir créditos", icon: CreditCard, tone: "primary" },
   ];
 
-  const timeline: TimelineItem[] = [
-    {
-      id: "1",
-      time: "Hace 2 min",
-      title: "Campaña «Promo Noviembre» enviada",
-      description: "2.480 destinatarios · 98,7% entregados",
-      icon: Send,
-      tone: "primary",
-    },
-    {
-      id: "2",
-      time: "Hace 5 min",
-      title: "Nuevo cliente en el CRM",
-      description: "María González · Segmento VIP",
-      icon: UserPlus,
-      tone: "success",
-    },
-    {
-      id: "3",
-      time: "Hace 8 min",
-      title: "API REST utilizada",
-      description: "POST /messages · 120 envíos",
-      icon: Bolt,
-      tone: "info",
-    },
-    {
-      id: "4",
-      time: "Hace 10 min",
-      title: "Recarga de saldo aprobada",
-      description: "+50.000 SMS · Método: tarjeta",
-      icon: Wallet,
-      tone: "nova",
-    },
-    {
-      id: "5",
-      time: "Hace 15 min",
-      title: "Nuevo ticket de soporte",
-      description: "#1284 · Prioridad media",
-      icon: Ticket,
-      tone: "warning",
-    },
-  ];
+  const timeline: TimelineItem[] = [];
+
 
   const sample = [12, 18, 14, 22, 19, 28, 26, 34, 30, 42, 38, 46];
 
@@ -156,84 +116,78 @@ function DashboardPage() {
             index={0}
             tone="primary"
             label="Saldo disponible"
-            value="$1.284.500"
+            value="$0"
             unit="COP"
             icon={Wallet}
-            delta={{ value: "+12,4%", direction: "up" }}
-            progress={{ value: 72, label: "Del plan mensual" }}
+            hint="Ir a Finanzas > Wallet"
           />
           <KpiCard
             index={1}
             tone="info"
             label="SMS disponibles"
-            value="72.480"
+            value="0"
             icon={MessageSquare}
-            hint="≈ 24 días de operación"
-            progress={{ value: 62, label: "Uso del cupo" }}
+            hint="Requiere recarga"
           />
           <KpiCard
             index={2}
             tone="success"
             label="SMS enviados hoy"
-            value="4.126"
+            value="0"
             icon={Send}
-            delta={{ value: "+8,1%", direction: "up" }}
-            sparkline={sample}
+            sparkline={[0, 0, 0, 0, 0, 0]}
           />
           <KpiCard
             index={3}
             tone="primary"
             label="SMS este mes"
-            value="184.230"
+            value="0"
             icon={TrendingUp}
-            delta={{ value: "+22,3%", direction: "up" }}
-            sparkline={sample.map((v) => v + 6)}
+            sparkline={[0, 0, 0, 0, 0, 0]}
           />
           <KpiCard
             index={4}
             tone="success"
             label="Tasa de entrega"
-            value="98,7"
+            value="0"
             unit="%"
             icon={CheckCircle2}
-            progress={{ value: 98.7, label: "Entrega global" }}
+            progress={{ value: 0, label: "Sin datos" }}
           />
           <KpiCard
             index={5}
             tone="warning"
             label="Flash SMS"
-            value="1.204"
+            value="0"
             icon={Zap}
-            delta={{ value: "-2,4%", direction: "down" }}
-            sparkline={[8, 12, 10, 14, 11, 9, 13, 10, 12, 8, 11, 9]}
+            sparkline={[0, 0, 0, 0, 0, 0]}
           />
           <KpiCard
             index={6}
             tone="nova"
             label="Campañas activas"
-            value="7"
+            value="0"
             icon={Rocket}
-            hint="3 programadas · 4 en curso"
+            hint="Sin actividad"
           />
           <KpiCard
             index={7}
             tone="info"
             label="Prospectos nuevos"
-            value="342"
+            value="0"
             icon={Users}
-            delta={{ value: "+18,9%", direction: "up" }}
-            sparkline={[4, 6, 5, 8, 7, 9, 8, 12, 11, 14, 13, 16]}
+            sparkline={[0, 0, 0, 0, 0, 0]}
           />
           <KpiCard
             index={8}
             tone="nova"
             label="Automatizaciones"
-            value="12"
+            value="0"
             icon={Activity}
-            hint="Ejecutándose ahora"
-            progress={{ value: 85, label: "Éxito 24h" }}
+            hint="Esperando eventos"
           />
         </div>
+
       </section>
 
       {/* Bottom row: Quick actions + Timeline */}
@@ -272,7 +226,14 @@ function DashboardPage() {
               Ver todo
             </button>
           </div>
-          <ActivityTimeline items={timeline} />
+          {timeline.length > 0 ? (
+            <ActivityTimeline items={timeline} />
+          ) : (
+            <p className="py-10 text-center text-xs text-muted-foreground">
+              No hay actividad reciente.
+            </p>
+          )}
+
         </motion.aside>
       </section>
     </div>
