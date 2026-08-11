@@ -256,11 +256,37 @@ export function SendSms() {
 
 
         <Card>
-          <CardContent className="pt-6">
-            <SmsComposer value={msg} onChange={setMsg} />
+          <CardHeader>
+            <CardTitle className="text-lg">Mensaje</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <SmsComposer value={msg} onChange={setMsg} rows={5} />
           </CardContent>
         </Card>
+
+        {mode === "schedule" && (
+          <Card className="border-primary/20 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Clock className="h-5 w-5 text-primary" /> Detalles de Programación
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Fecha de envío</Label>
+                  <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Hora (24h)</Label>
+                  <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
+
 
       <div className="space-y-6">
         <Card className="sticky top-6">
