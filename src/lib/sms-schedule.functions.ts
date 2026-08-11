@@ -22,6 +22,14 @@ export const createSmsSchedule = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { recipients, body, isFlash, scheduledAt, timezone, estimatedCost } = data;
     
+    // Si scheduledAt no tiene offset, asumimos el de la zona horaria.
+    // Para America/Bogota es -05:00.
+    let finalScheduledAt = scheduledAt;
+    if (!scheduledAt.includes('Z') && !scheduledAt.includes('+') && !scheduledAt.includes('-')) {
+      const offset = timezone === 'America/Bogota' ? '-05:00' : '-05:00'; // Simplificado para Colombia
+      finalScheduledAt = `${scheduledAt}${offset}`;
+    }
+
     const { data: row, error } = await context.supabase
       .from("sms_schedules")
       .insert({
@@ -30,7 +38,7 @@ export const createSmsSchedule = createServerFn({ method: "POST" })
         recipients,
         body,
         is_flash: isFlash,
-        scheduled_at: scheduledAt,
+        scheduled_at: finalScheduledAt,
         timezone,
         estimated_cost: estimatedCost,
         reference: crypto.randomUUID(),
@@ -42,6 +50,7 @@ export const createSmsSchedule = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
+
 
 export const listSmsSchedules = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
