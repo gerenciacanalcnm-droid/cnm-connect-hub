@@ -1,9 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+/**
+ * Diagnostic function to verify connection with Meta Cloud API.
+ * 
+ * Rules:
+ * 1. Do not expose WHATSAPP_ACCESS_TOKEN.
+ * 2. Only return secure diagnostic information.
+ */
 export const testMetaConnection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    // Read secrets inside handler
     const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
     const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
     const businessAccountId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
@@ -15,7 +23,13 @@ export const testMetaConnection = createServerFn({ method: "POST" })
       };
     }
 
-    const results: any = {
+    const results: {
+      PHONE_NUMBER: string;
+      WABA: string;
+      TEMPLATES: string;
+      CNM_PRUEBA: string;
+      raw_errors: string[];
+    } = {
       PHONE_NUMBER: "ERROR",
       WABA: "ERROR",
       TEMPLATES: "ERROR",
@@ -24,47 +38,63 @@ export const testMetaConnection = createServerFn({ method: "POST" })
     };
 
     try {
-      // 1. PHONE NUMBER INFO
+      // PRUEBA 1: PHONE NUMBER INFO
       const phoneResponse = await fetch(`https://graph.facebook.com/v20.0/${phoneNumberId}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        method: "GET",
+        headers: { 
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
       });
-      const phoneData = await phoneResponse.json();
+      
       if (phoneResponse.ok) {
         results.PHONE_NUMBER = "OK";
       } else {
-        results.raw_errors.push(`PHONE: ${phoneData.error?.code} - ${phoneData.error?.message}`);
+        const errData = await phoneResponse.json().catch(() => ({}));
+        results.raw_errors.push(`PHONE [${phoneResponse.status}]: ${errData.error?.code || 'N/A'} - ${errData.error?.message || 'Unknown'}`);
       }
 
-      // 2. WABA INFO
+      // PRUEBA 2: WABA INFO
       const wabaResponse = await fetch(`https://graph.facebook.com/v20.0/${businessAccountId}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        method: "GET",
+        headers: { 
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
       });
-      const wabaData = await wabaResponse.json();
+      
       if (wabaResponse.ok) {
         results.WABA = "OK";
       } else {
-        results.raw_errors.push(`WABA: ${wabaData.error?.code} - ${wabaData.error?.message}`);
+        const errData = await wabaResponse.json().catch(() => ({}));
+        results.raw_errors.push(`WABA [${wabaResponse.status}]: ${errData.error?.code || 'N/A'} - ${errData.error?.message || 'Unknown'}`);
       }
 
-      // 3. TEMPLATES
+      // PRUEBA 3: TEMPLATES
       const templatesResponse = await fetch(
         `https://graph.facebook.com/v20.0/${businessAccountId}/message_templates?limit=100`,
         {
-          headers: { Authorization: `Bearer ${accessToken}` },
+          method: "GET",
+          headers: { 
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          },
         }
       );
-      const templatesData = await templatesResponse.json();
+      
       if (templatesResponse.ok) {
         results.TEMPLATES = "OK";
+        const templatesData = await templatesResponse.json();
         const found = templatesData.data?.some((t: any) => t.name === "cnm_prueba");
         if (found) {
           results.CNM_PRUEBA = "ENCONTRADA";
         }
       } else {
-        results.raw_errors.push(`TEMPLATES: ${templatesData.error?.code} - ${templatesData.error?.message}`);
+        const errData = await templatesResponse.json().catch(() => ({}));
+        results.raw_errors.push(`TEMPLATES [${templatesResponse.status}]: ${errData.error?.code || 'N/A'} - ${errData.error?.message || 'Unknown'}`);
       }
     } catch (e: any) {
-      results.raw_errors.push(`CRITICAL: ${e.message}`);
+      results.raw_errors.push(`CRITICAL_FETCH: ${e.message}`);
     }
 
     return results;
