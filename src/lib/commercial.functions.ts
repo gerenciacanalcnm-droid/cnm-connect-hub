@@ -626,6 +626,7 @@ export const reviewRecharge = createServerFn({ method: "POST" })
 
     if (e0) throw new Error(e0.message);
     const recharge = rec as {
+      id: string;
       company_id: string;
       amount: number;
       channel: string;
@@ -633,6 +634,7 @@ export const reviewRecharge = createServerFn({ method: "POST" })
       payment_method: string | null;
       payment_reference: string | null;
     };
+
 
     const { error } = await context.supabase
       .from("recharges")
