@@ -63,8 +63,14 @@ export function WhatsAppTemplates() {
           </Button>
         </div>
         <Card>
-          <CardContent className="p-12 text-center text-muted-foreground">
-            Presiona el botón para iniciar el editor mínimo seguro.
+          <CardContent className="p-12 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+              <Plus className="h-6 w-6 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Sin plantillas configuradas</h3>
+            <p className="text-sm text-slate-500 max-w-xs mx-auto">
+              Conecta una cuenta de WhatsApp Business para sincronizar y enviar plantillas
+            </p>
           </CardContent>
         </Card>
       </div>
