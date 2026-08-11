@@ -84,9 +84,17 @@ const templateSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").regex(/^[a-z0-9_]+$/, "Solo minúsculas, números y guiones bajos"),
   category: z.string().min(1, "La categoría es requerida"),
   language: z.string().min(1, "El idioma es requerido"),
-  header: z.string().optional(),
+  headerType: z.enum(["NONE", "TEXT", "IMAGE", "VIDEO", "DOCUMENT"]).default("NONE"),
+  headerText: z.string().optional(),
+  headerHandle: z.string().optional(),
   body: z.string().min(1, "El cuerpo del mensaje es requerido"),
   footer: z.string().optional(),
+  buttons: z.array(z.object({
+    type: z.enum(["QUICK_REPLY", "URL", "PHONE"]),
+    text: z.string().min(1),
+    url: z.string().optional(),
+    phoneNumber: z.string().optional(),
+  })).max(10).optional(),
 });
 
 export function WhatsAppTemplates() {
