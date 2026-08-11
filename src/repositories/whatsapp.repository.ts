@@ -1,5 +1,5 @@
 import { whatsappService, type WhatsAppService } from "@/services/whatsapp.service";
-import { testWhatsAppConnection, saveWhatsAppCredentials, sendWhatsAppIndividual } from "@/lib/whatsapp.functions";
+import { testWhatsAppConnection, saveWhatsAppCredentials, sendWhatsAppIndividual, sendBulkWhatsApp } from "@/lib/whatsapp.functions";
 
 export const whatsappRepository = {
   listAccounts: () => whatsappService.listAccounts(),
@@ -14,4 +14,5 @@ export const whatsappRepository = {
   testConnection: testWhatsAppConnection,
   connectMeta: saveWhatsAppCredentials,
   sendIndividual: sendWhatsAppIndividual,
+  sendBulk: sendBulkWhatsApp,
 };
