@@ -133,7 +133,7 @@ export function SendWhatsAppIndividual() {
   const isInsufficient = balance < totalCost;
 
   const handleSend = async () => {
-    if (!connectedAccount) return toast.error("No hay una cuenta de WhatsApp conectada.");
+    if (!connectedAccount) return toast.error("Conecta primero una cuenta de WhatsApp Business para enviar esta plantilla a Meta.");
     if (stats.valid === 0) return toast.error("Sin destinatarios válidos.");
     if (isInsufficient) return toast.error("Saldo insuficiente.");
 
