@@ -5,7 +5,7 @@ import { SkeletonTable } from "@/components/common/skeleton-table";
 import { ErrorState } from "@/components/common/error-state";
 import { useWhatsAppSchedules, useCancelWhatsAppSchedule } from "@/hooks/use-whatsapp";
 import { Button } from "@/components/ui/button";
-import { XCircle, Calendar, MessageCircle, Account } from "lucide-react";
+import { XCircle, Calendar, MessageCircle, User } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/format";
 
