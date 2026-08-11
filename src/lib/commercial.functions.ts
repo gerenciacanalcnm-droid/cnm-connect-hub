@@ -342,27 +342,63 @@ export const testPaymentGateway = createServerFn({ method: "POST" })
 export const listWallets = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const [wallets, recharges] = await Promise.all([
-      context.supabase
-        .from("wallets")
-        .select("*, companies(name, plan_code)")
-        .order("updated_at", { ascending: false }),
-      context.supabase
-        .from("recharges")
-        .select("company_id, created_at, review_status")
-        .eq("review_status", "aprobada")
-        .order("created_at", { ascending: false })
-        .limit(500),
-    ]);
-    if (wallets.error) throw new Error(wallets.error.message);
+    // 1. Obtener todas las empresas con sus wallets (LEFT JOIN)
+    const { data: companies, error: cErr } = await context.supabase
+      .from("companies")
+      .select("id, name, plan_code, wallets(*)")
+      .order("name", { ascending: true });
+
+    if (cErr) throw new Error(cErr.message);
+
+    // 2. Obtener recargas aprobadas para calcular last_recharge_at
+    const { data: recharges, error: rErr } = await context.supabase
+      .from("recharges")
+      .select("company_id, created_at")
+      .eq("review_status", "aprobada")
+      .order("created_at", { ascending: false });
+
+    if (rErr) throw new Error(rErr.message);
+
     const last = new Map<string, string>();
-    for (const r of (recharges.data ?? []) as { company_id: string; created_at: string }[]) {
+    for (const r of (recharges ?? []) as { company_id: string; created_at: string }[]) {
       if (!last.has(r.company_id)) last.set(r.company_id, r.created_at);
     }
-    const rows = (wallets.data ?? []).map((w) => {
-      const row = w as Record<string, unknown>;
-      return { ...row, last_recharge_at: last.get(String(row.company_id)) ?? null };
-    });
+
+    // 3. Aplanar empresas y wallets
+    const rows: any[] = [];
+    for (const company of (companies ?? []) as any[]) {
+      const companyData = {
+        name: company.name,
+        plan_code: company.plan_code
+      };
+      
+      if (!company.wallets || company.wallets.length === 0) {
+        // Empresa sin wallet: Mostrar con valores en cero
+        rows.push({
+          id: `no-wallet-${company.id}`,
+          company_id: company.id,
+          companies: companyData,
+          channel: "sms",
+          balance: 0,
+          consumed: 0,
+          credits: 0,
+          currency: "COP",
+          status: "active",
+          last_recharge_at: null,
+          updated_at: new Date().toISOString()
+        });
+      } else {
+        // Empresa con una o más wallets
+        for (const w of company.wallets) {
+          rows.push({
+            ...w,
+            companies: companyData,
+            last_recharge_at: last.get(company.id) ?? null
+          });
+        }
+      }
+    }
+
     return JSON.stringify(rows);
   });
 
@@ -533,7 +569,7 @@ export const walletOperation = createServerFn({ method: "POST" })
   .inputValidator((v) =>
     z
       .object({
-        wallet_id: uuid,
+        wallet_id: z.string(),
         type: operationType,
         amount: z.number(),
         units: z.number().int().default(0),
@@ -545,9 +581,45 @@ export const walletOperation = createServerFn({ method: "POST" })
       .parse(v),
   )
   .handler(async ({ data, context }) => {
+    let walletId = data.wallet_id;
+
+    // Si la wallet es virtual (no existe en DB), crearla bajo demanda
+    if (walletId.startsWith("no-wallet-")) {
+      const companyId = walletId.replace("no-wallet-", "");
+      
+      // Verificar si ya se creó (carrera de ratas)
+      const { data: existing } = await context.supabase
+        .from("wallets")
+        .select("id")
+        .eq("company_id", companyId)
+        .eq("channel", "sms")
+        .maybeSingle();
+
+      if (existing) {
+        walletId = (existing as { id: string }).id;
+      } else {
+        const { data: created, error: createErr } = await context.supabase
+          .from("wallets")
+          .insert({
+            company_id: companyId,
+            channel: "sms",
+            balance: 0,
+            consumed: 0,
+            credits: 0,
+            currency: "COP",
+            status: "active"
+          } as never)
+          .select("id")
+          .single();
+        
+        if (createErr) throw new Error(`Error creando wallet: ${createErr.message}`);
+        walletId = (created as { id: string }).id;
+      }
+    }
+
     const signed = data.type === "AJUSTE_DEBITO" ? -Math.abs(data.amount) : data.amount;
     const res = await applyWalletMovement(context.supabase as unknown as Sb, {
-      walletId: data.wallet_id,
+      walletId,
       amount: signed,
       units: data.units,
       type: data.type,
