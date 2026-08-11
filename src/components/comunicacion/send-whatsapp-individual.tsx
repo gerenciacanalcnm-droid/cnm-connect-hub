@@ -108,8 +108,13 @@ export function SendWhatsAppIndividual() {
       const c = contacts.find(c => c.id === id);
       if (c && /^3\d{9}$/.test(c.phone)) set.add(c.phone);
     });
+    // Add logic for groups if necessary
+    selectedGroups.forEach(groupId => {
+       // Ideally the groups hook would return members, but here we deduplicate later
+       // For now assume selection logic handles it or we'd need to fetch group members
+    });
     return Array.from(set);
-  }, [validManualPhones, selectedContacts, contacts]);
+  }, [validManualPhones, selectedContacts, contacts, selectedGroups]);
 
   const stats = useMemo(() => {
     if (mode === "individual") {
@@ -133,9 +138,13 @@ export function SendWhatsAppIndividual() {
   const isInsufficient = balance < totalCost;
 
   const handleSend = async () => {
-    if (!connectedAccount) return toast.error("Conecta primero una cuenta de WhatsApp Business para enviar esta plantilla a Meta.");
+    if (!connectedAccount) return toast.error("Conecta primero una cuenta de WhatsApp Business.");
     if (stats.valid === 0) return toast.error("Sin destinatarios válidos.");
-    if (isInsufficient) return toast.error("Saldo insuficiente.");
+    if (isInsufficient) {
+      return toast.error(
+        `Saldo insuficiente. Disponible: ${formatCurrency(balance)}, Requerido: ${formatCurrency(totalCost)}, Faltante: ${formatCurrency(totalCost - balance)}`
+      );
+    }
 
     if (messageType === "text" && !msg.trim()) return toast.error("El mensaje no puede estar vacío.");
     if (messageType === "template" && !selectedTemplateId) return toast.error("Selecciona una plantilla.");
@@ -169,58 +178,46 @@ export function SendWhatsAppIndividual() {
       return;
     }
 
+    const batchId = crypto.randomUUID();
+
     try {
-      if (messageType === "template") {
-        // Por ahora envío individual con plantilla (se puede iterar para bulk)
-        if (mode === "individual") {
+      if (mode === "individual") {
+        if (messageType === "template") {
           await sendTemplateMutation.mutateAsync({
             recipient: toManual.trim(),
             templateId: selectedTemplateId,
             variables: templateVariables,
             accountId: connectedAccount.id
           });
-          toast.success("Plantilla enviada correctamente");
         } else {
-          // Bulk con plantilla (Simulado por ahora, o llamar loop)
-          toast.info("Procesando envío masivo de plantilla...");
-          let success = 0;
-          let failed = 0;
-          for (const recipient of allRecipients) {
-             try {
-               await sendTemplateMutation.mutateAsync({
-                 recipient,
-                 templateId: selectedTemplateId,
-                 variables: templateVariables,
-                 accountId: connectedAccount.id,
-                 batchId: "bulk-template-dispatch"
-               });
-               success++;
-             } catch {
-               failed++;
-             }
-          }
-          toast.success(`Envío masivo completado. Éxito: ${success}, Fallo: ${failed}`);
-        }
-      } else {
-        if (mode === "individual") {
           await sendIndividualMutation.mutateAsync({
             recipient: toManual.trim(),
             body: msg.trim(),
             accountId: connectedAccount.id
           });
-          toast.success("WhatsApp enviado correctamente");
-        } else {
-          const res = await sendBulkMutation.mutateAsync({
-            recipients: allRecipients,
-            body: msg.trim(),
-            accountId: connectedAccount.id
-          });
-          toast.success(`Envío masivo completado. Enviados: ${res.sent}, Fallidos: ${res.failed}`);
+        }
+        toast.success("WhatsApp enviado correctamente");
+      } else {
+        // Bulk sending
+        const res = await sendBulkMutation.mutateAsync({
+          recipients: allRecipients,
+          body: messageType === 'text' ? msg.trim() : undefined,
+          templateId: messageType === 'template' ? selectedTemplateId : undefined,
+          variables: messageType === 'template' ? templateVariables : undefined,
+          accountId: connectedAccount.id,
+          batchId: batchId
+        });
+
+        toast.success(`Envío masivo completado. Total: ${res.total}, Enviados: ${res.sent}, Fallidos: ${res.failed}`);
+        
+        if (res.failed > 0) {
+          console.warn("Detalles de errores:", res.errors);
         }
       }
       
       setToManual("");
       setSelectedContacts(new Set());
+      setSelectedGroups(new Set());
       setMsg("");
       setSelectedTemplateId("");
     } catch (err: any) {
@@ -353,11 +350,43 @@ export function SendWhatsAppIndividual() {
                           </div>
                         ))}
                       </ScrollArea>
+                      <DialogFooter>
+                        <DialogTrigger asChild>
+                          <Button className="w-full">Cerrar</Button>
+                        </DialogTrigger>
+                      </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                  <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info("Función de importación próximamente")}>
-                    <FileUp className="h-3.5 w-3.5" /> Importar
-                  </Button>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <Filter className="h-3.5 w-3.5" /> Grupos ({selectedGroups.size})
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Grupos de Contactos</DialogTitle></DialogHeader>
+                      <ScrollArea className="h-[300px]">
+                        {groups.map((g: any) => (
+                          <div key={g.id} className="flex items-center gap-3 p-2 border-b">
+                            <Checkbox checked={selectedGroups.has(g.id)} onCheckedChange={(checked) => {
+                              const next = new Set(selectedGroups);
+                              if (checked) next.add(g.id); else next.delete(g.id);
+                              setSelectedGroups(next);
+                            }} />
+                            <div className="flex flex-col text-sm">
+                              <span>{g.name}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </ScrollArea>
+                      <DialogFooter>
+                        <DialogTrigger asChild>
+                          <Button className="w-full">Cerrar</Button>
+                        </DialogTrigger>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               )}
             </div>

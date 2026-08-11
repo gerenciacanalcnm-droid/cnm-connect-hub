@@ -90,7 +90,14 @@ export function useSendWhatsAppIndividual() {
 
 export function useSendWhatsAppBulk() {
   return useMutation({
-    mutationFn: (data: { recipients: string[]; body: string; accountId: string }) => 
+    mutationFn: (data: { 
+      recipients: string[]; 
+      body?: string; 
+      templateId?: string; 
+      variables?: Record<string, string>; 
+      accountId: string; 
+      batchId?: string 
+    }) => 
       whatsappRepository.sendBulk({ data }),
   });
 }
