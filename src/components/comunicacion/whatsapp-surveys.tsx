@@ -48,9 +48,11 @@ export function WhatsAppSurveys() {
     setIsSaving(true);
     try {
       await saveSurveyFn({
-        title,
-        question,
-        options
+        data: {
+          title,
+          question,
+          options
+        }
       });
       toast.success("Encuesta guardada correctamente.");
       setIsEditorOpen(false);
