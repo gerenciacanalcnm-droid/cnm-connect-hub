@@ -210,7 +210,7 @@ export const listConversations = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     let q = context.supabase
       .from("whatsapp_conversations")
-      .select("*")
+      .select("*, contact:contacts(id, name, whatsapp_phone)")
       .order("last_message_at", { ascending: false, nullsFirst: false })
       .limit(200);
     if (data.channel && data.channel !== "email") q = q.eq("channel", data.channel);
