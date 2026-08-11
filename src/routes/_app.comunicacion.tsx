@@ -26,7 +26,7 @@ function ComunicacionPage() {
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <PageHeader
-        title="Conversaciones"
+        title="Comunicación"
         description="Gestiona SMS, WhatsApp Business y Email desde un único centro omnicanal."
       />
 
