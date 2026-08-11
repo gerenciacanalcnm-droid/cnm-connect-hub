@@ -59,20 +59,36 @@ export function SendSms() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("09:00");
 
-
   const [toManual, setToManual] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
   
+  const queryClient = useQueryClient();
   const { data: contactsData } = useContacts({ pageSize: 200 });
   const { data: groupsData } = useContactGroups();
   const { data: walletsData } = useWallets();
   const { data: tiersData } = useRateTiers();
+  const { data: companyData } = useServerFn(getCurrentCompany)({ data: undefined }) as any; // Using serverFn directly as hook might hydration mismatch if not handled
 
   const contacts = contactsData?.items ?? [];
   const groups = groupsData ?? [];
   const wallet = walletsData?.find(w => w.channel === 'sms');
   const balance = wallet?.balance ?? 0;
+  const companyTimezone = companyData?.timezone ?? "America/Bogota";
+
+  const fetchSchedules = useServerFn(listSmsSchedules);
+  const { data: schedulesRaw, refetch: refetchSchedules } = useQuery({
+    queryKey: ["sms-schedules"],
+    queryFn: async () => {
+      const res = await fetchSchedules();
+      return JSON.parse(res as string);
+    }
+  });
+  const schedules = (schedulesRaw ?? []) as any[];
+
+  const doSendBulk = useServerFn(sendBulkSms);
+  const doCreateSchedule = useServerFn(createSmsSchedule);
+  const doCancelSchedule = useServerFn(cancelSmsSchedule);
 
   const validManualPhones = useMemo(() => {
     return toManual.split(/[\s,;]+/)
@@ -103,8 +119,6 @@ export function SendSms() {
     return (tier?.unitPrice ?? 30) * stats.valid;
   }, [stats.valid, tiersData]);
 
-  const doSendBulk = useServerFn(sendBulkSms);
-
   const handleSend = async (isFlash: boolean) => {
     if (!msg.trim()) return toast.error("Mensaje vacío");
     if (stats.valid === 0) return toast.error("Sin destinatarios válidos");
@@ -112,15 +126,33 @@ export function SendSms() {
 
     setSending(true);
     try {
-      await doSendBulk({ 
-        data: { 
-          recipients: allRecipients, 
-          body: msg, 
-          isFlash,
-          scheduledAt: mode === 'schedule' ? `${date}T${time}:00Z` : null
-        } 
-      });
-      toast.success(mode === 'schedule' ? "Envío programado" : "SMS enviado correctamente");
+      if (mode === 'schedule') {
+        if (!date || !time) throw new Error("Debes seleccionar fecha y hora");
+        
+        await doCreateSchedule({
+          data: {
+            recipients: allRecipients,
+            body: msg,
+            isFlash,
+            scheduledAt: `${date}T${time}:00`, // Timezone handled by DB or explicit string
+            timezone: companyTimezone,
+            estimatedCost: cost
+          }
+        });
+        toast.success("Envío programado correctamente");
+        refetchSchedules();
+      } else {
+        await doSendBulk({ 
+          data: { 
+            recipients: allRecipients, 
+            body: msg, 
+            isFlash,
+            scheduledAt: null
+          } 
+        });
+        toast.success("SMS enviado correctamente");
+      }
+      
       setToManual("");
       setSelectedContacts(new Set());
       setSelectedGroups(new Set());
@@ -130,8 +162,18 @@ export function SendSms() {
     } finally {
       setSending(false);
     }
-
   };
+
+  const handleCancel = async (id: string) => {
+    try {
+      await doCancelSchedule({ data: { id } });
+      toast.success("Programación cancelada");
+      refetchSchedules();
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
