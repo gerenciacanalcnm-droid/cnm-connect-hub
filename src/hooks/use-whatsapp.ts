@@ -33,6 +33,22 @@ export function useSetPrimaryWhatsAppAccount() {
   });
 }
 
+export function useConnectWhatsAppMeta() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => 
+      whatsappRepository.connectMeta({ data }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.whatsapp.accounts }),
+  });
+}
+
+export function useTestWhatsAppConnection() {
+  return useMutation({
+    mutationFn: (data: any) => 
+      whatsappRepository.testConnection({ data }),
+  });
+}
+
 export function useWhatsAppTemplates() {
   return useQuery({
     queryKey: queryKeys.whatsapp.templates,
