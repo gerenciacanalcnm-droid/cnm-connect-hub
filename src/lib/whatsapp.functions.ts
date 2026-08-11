@@ -297,14 +297,26 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
     if (total === 0) throw new Error("No hay destinatarios.");
     if (!body && !templateId) throw new Error("Se requiere mensaje o plantilla.");
 
-    // 1. Obtener credenciales
+    // 1. Autenticación y Empresa
+    const { data: membership, error: memErr } = await context.supabase
+      .from("company_members")
+      .select("company_id")
+      .eq("user_id", context.userId)
+      .eq("is_active", true)
+      .maybeSingle();
+    
+    if (memErr) throw new Error(`AUTH_USER_ERROR: Membresía. ${memErr.message}`);
+    const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
+
+    // 2. Obtener credenciales
     const { data: account, error: accErr } = await context.supabase
       .from("whatsapp_accounts")
-      .select("phone_number_id, access_token")
+      .select("phone_number_id, access_token, company_id")
       .eq("id", accountId)
       .single();
 
-    if (accErr || !account) throw new Error("Cuenta de WhatsApp no válida.");
+    if (accErr || !account) throw new Error(`DB_AUTH_ERROR: Cuenta no válida o sin acceso.`);
+    if (account.company_id !== realCompanyId) throw new Error("DB_AUTH_ERROR: Cuenta no pertenece a la empresa.");
 
     // Si es plantilla, verificarla
     let templateData: any = null;
@@ -313,23 +325,12 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
         .from("whatsapp_templates")
         .select("*")
         .eq("id", templateId)
+        .eq("company_id", realCompanyId)
         .single();
-      if (tplErr || !tpl) throw new Error("Plantilla no encontrada.");
-      if (tpl.status !== "APPROVED") throw new Error("La plantilla no está aprobada.");
+      if (tplErr || !tpl) throw new Error(`DB_AUTH_ERROR: Plantilla no encontrada.`);
+      if (tpl.status !== "APPROVED") throw new Error(`META_API_ERROR: Plantilla no aprobada.`);
       templateData = tpl;
     }
-
-    const batchId = data.batchId || crypto.randomUUID();
-
-    // 2. Cobro atómico consolidado e Idempotencia
-    const { data: membership } = await context.supabase
-      .from("company_members")
-      .select("company_id")
-      .eq("user_id", context.userId)
-      .eq("is_active", true)
-      .maybeSingle();
-    
-    const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
 
     try {
       await trackServiceUsage({
