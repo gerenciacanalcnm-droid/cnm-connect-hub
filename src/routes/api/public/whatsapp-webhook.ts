@@ -183,13 +183,13 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               if (isNovaActive && !isAssigned && !isClosed) {
                 try {
                   // 1. Buscar Mapa Activo
-                  const { data: activeMap } = await supabaseAdmin
-                    .from('conversation_maps')
+                  const { data: activeMap } = await (supabaseAdmin.from as any)('conversation_maps')
                     .select('*')
                     .eq('company_id', account.company_id)
                     .eq('status', 'ACTIVO')
                     .limit(1)
                     .maybeSingle();
+
 
                   let responseText = null;
 
