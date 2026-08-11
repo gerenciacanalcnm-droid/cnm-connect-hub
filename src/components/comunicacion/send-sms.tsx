@@ -410,7 +410,109 @@ export function SendSms() {
           </CardContent>
         </Card>
       </div>
+      </div>
+
+      {/* Listado de Programaciones */}
+      <div className="lg:col-span-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl flex items-center gap-2">
+                <History className="h-5 w-5 text-primary" /> Programaciones de Envío
+              </CardTitle>
+              <CardDescription>Consulta y gestiona tus envíos programados</CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => refetchSchedules()}>
+              <Clock className="h-4 w-4 mr-2" /> Actualizar
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {schedules.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+                <Calendar className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                <p>No tienes programaciones activas</p>
+              </div>
+            ) : (
+              <div className="rounded-md border overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/50 border-b">
+                    <tr>
+                      <th className="text-left p-3 font-medium">Fecha y Hora</th>
+                      <th className="text-left p-3 font-medium">Tipo</th>
+                      <th className="text-left p-3 font-medium">Destinatarios</th>
+                      <th className="text-left p-3 font-medium">Costo Est.</th>
+                      <th className="text-left p-3 font-medium">Estado</th>
+                      <th className="text-right p-3 font-medium">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {schedules.map((s) => (
+                      <tr key={s.id} className="hover:bg-muted/30 transition-colors">
+                        <td className="p-3">
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {format(new Date(s.scheduled_at), "PPP", { locale: es })}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(s.scheduled_at), "p")} ({s.timezone})
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          {s.is_flash ? (
+                            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 gap-1">
+                              <Zap className="h-3 w-3" /> Flash
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 gap-1">
+                              <Send className="h-3 w-3" /> Normal
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="p-3 font-mono">{s.recipients?.length ?? 0}</td>
+                        <td className="p-3 font-medium">{formatCurrency(s.estimated_cost)}</td>
+                        <td className="p-3">
+                          <Badge 
+                            variant="secondary" 
+                            className={
+                              s.status === 'COMPLETADO' ? "bg-green-100 text-green-700" :
+                              s.status === 'FALLIDO' ? "bg-red-100 text-red-700" :
+                              s.status === 'CANCELADO' ? "bg-gray-100 text-gray-700" :
+                              s.status === 'ENVIANDO' || s.status === 'PROCESANDO' ? "bg-blue-100 text-blue-700 animate-pulse" :
+                              "bg-primary/10 text-primary"
+                            }
+                          >
+                            {s.status}
+                          </Badge>
+                          {s.error_reason && (
+                            <p className="text-[10px] text-destructive mt-1 max-w-[150px] truncate" title={s.error_reason}>
+                              {s.error_reason}
+                            </p>
+                          )}
+                        </td>
+                        <td className="p-3 text-right">
+                          {s.status === 'PROGRAMADO' && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-destructive hover:bg-red-50"
+                              onClick={() => handleCancel(s.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
+
 
