@@ -64,9 +64,11 @@ export function SendSms() {
     try {
       // En un masivo real, esto llamaría a una función de batch
       const res = await doSend({
-        to: destMode === "manual" ? to.split(',')[0].trim() : "BATCH_PROCESS",
-        body: msg,
-        isFlash: flash
+        data: {
+          to: destMode === "manual" ? to.split(',')[0].trim() : "BATCH_PROCESS",
+          body: msg,
+          isFlash: flash
+        }
       });
       
       if (res.ok) {
