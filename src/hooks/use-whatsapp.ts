@@ -33,29 +33,29 @@ export function useSetPrimaryWhatsAppAccount() {
   });
 }
 
+export function useConnectWhatsAppMeta() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Parameters<typeof whatsappRepository.connectMeta>[0]["data"]) => 
+      whatsappRepository.connectMeta({ data }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.whatsapp.accounts }),
+  });
+}
+
+export function useTestWhatsAppConnection() {
+  return useMutation({
+    mutationFn: (data: Parameters<typeof whatsappRepository.testConnection>[0]["data"]) => 
+      whatsappRepository.testConnection({ data }),
+  });
+}
+
 export function useWhatsAppTemplates() {
   return useQuery({
     queryKey: queryKeys.whatsapp.templates,
     queryFn: () => whatsappRepository.listTemplates(),
   });
 }
-
-export function useSaveWhatsAppTemplate() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: whatsappRepository.saveTemplate,
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.whatsapp.templates }),
-  });
-}
-
-export function useDeleteWhatsAppTemplate() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: whatsappRepository.removeTemplate,
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.whatsapp.templates }),
-  });
-}
-
+...
 export function useWhatsAppCampaigns() {
   return useQuery({
     queryKey: queryKeys.whatsapp.campaigns,
