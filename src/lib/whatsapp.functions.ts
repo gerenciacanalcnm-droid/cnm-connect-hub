@@ -285,9 +285,19 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
 
     // 2. Cobro atómico consolidado e Idempotencia
     try {
+      // 2.1 Obtener company_id real del servidor
+      const { data: membership } = await context.supabase
+        .from("company_members")
+        .select("company_id")
+        .eq("user_id", context.userId)
+        .eq("is_active", true)
+        .maybeSingle();
+      
+      const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
+
       await trackServiceUsage({
         data: {
-          company_id: CNM_COMPANY_ID,
+          company_id: realCompanyId,
           channel: "whatsapp",
           units: total,
           description: `Envío Masivo WA (${total} dest.) - ${templateData?.name || 'Texto'}`,
