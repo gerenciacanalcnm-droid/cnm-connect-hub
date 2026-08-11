@@ -126,7 +126,7 @@ export function ConversationCenter() {
     }
   };
 
-  const active = allConversations.find((c) => c.id === activeId) ?? null;
+  const active = conversations.find((c: Conversation) => c.id === activeId) ?? null;
   const assignedUser = active?.assignedTo ? users.find(u => u.id === active.assignedTo) : null;
 
   return (
