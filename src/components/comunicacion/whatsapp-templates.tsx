@@ -261,27 +261,182 @@ export function WhatsAppTemplates() {
                 {/* DERECHA: Configuración */}
                 <div className="w-80 p-6 border-l overflow-y-auto space-y-4">
                   <h4 className="font-semibold text-sm border-b pb-2 mb-4">CONFIGURACIÓN</h4>
-                  {selectedComponent === "BODY" && (
-                    <Form {...form}>
-                      <FormField control={form.control} name="body" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Cuerpo del mensaje</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} ref={bodyRef} className="h-32" />
-                          </FormControl>
-                          <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => {
-                            const cursor = bodyRef.current?.selectionStart || 0;
-                            const text = form.getValues("body");
-                            const newText = text.slice(0, cursor) + "{{1}}" + text.slice(cursor);
-                            form.setValue("body", newText);
-                          }}>
-                            <Variable className="h-4 w-4 mr-2" /> Insertar variable
-                          </Button>
-                        </FormItem>
-                      )} />
-                    </Form>
+                  {!selectedComponent && (
+                    <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 opacity-50">
+                      <MousePointer2 className="h-12 w-12 mb-4" />
+                      <p className="text-sm">Selecciona un componente de la izquierda para configurarlo.</p>
+                    </div>
                   )}
-                  {/* Otros componentes... */}
+
+                  <Form {...form}>
+                    <form className="space-y-6">
+                      {selectedComponent === "HEADER" && (
+                        <div className="space-y-4">
+                          <FormField control={form.control} name="headerType" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Tipo de encabezado</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="NONE">Sin encabezado</SelectItem>
+                                  <SelectItem value="TEXT">Texto</SelectItem>
+                                  <SelectItem value="IMAGE">Imagen</SelectItem>
+                                  <SelectItem value="VIDEO">Video</SelectItem>
+                                  <SelectItem value="DOCUMENT">Documento</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FormItem>
+                          )} />
+                          {form.watch("headerType") === "TEXT" && (
+                            <FormField control={form.control} name="headerText" render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Contenido del encabezado</FormLabel>
+                                <FormControl><Input {...field} placeholder="Máx. 60 caracteres" maxLength={60} /></FormControl>
+                              </FormItem>
+                            )} />
+                          )}
+                          {["IMAGE", "VIDEO", "DOCUMENT"].includes(form.watch("headerType")) && (
+                            <div className="p-4 bg-muted rounded-lg border text-xs text-muted-foreground flex items-center gap-2">
+                              <Info className="h-4 w-4" />
+                              El archivo se especificará al momento del envío.
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {selectedComponent === "BODY" && (
+                        <div className="space-y-4">
+                          <FormField control={form.control} name="body" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cuerpo del mensaje</FormLabel>
+                              <FormControl>
+                                <Textarea {...field} ref={bodyRef} className="h-48 resize-none" placeholder="Escribe aquí tu mensaje..." />
+                              </FormControl>
+                              <Button 
+                                type="button"
+                                size="sm" 
+                                variant="outline" 
+                                className="w-full mt-2 gap-2" 
+                                onClick={() => {
+                                  const textarea = bodyRef.current;
+                                  if (!textarea) return;
+                                  const start = textarea.selectionStart;
+                                  const end = textarea.selectionEnd;
+                                  const text = form.getValues("body");
+                                  const variables = (text.match(/\{\{\d+\}\}/g) || []);
+                                  const nextIndex = variables.length + 1;
+                                  const newText = text.substring(0, start) + `{{${nextIndex}}}` + text.substring(end);
+                                  form.setValue("body", newText);
+                                  // Re-focus and set cursor position after {{n}}
+                                  setTimeout(() => {
+                                    textarea.focus();
+                                    const newPos = start + nextIndex.toString().length + 4;
+                                    textarea.setSelectionRange(newPos, newPos);
+                                  }, 0);
+                                }}
+                              >
+                                <Variable className="h-4 w-4" /> Insertar variable
+                              </Button>
+                              <FormDescription>Máximo 1024 caracteres.</FormDescription>
+                            </FormItem>
+                          )} />
+                          
+                          {/* Variables detectadas */}
+                          <div className="space-y-2 pt-2">
+                            <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Variables Detectadas</h5>
+                            {(form.watch("body").match(/\{\{\d+\}\}/g) || []).map((v, i) => (
+                              <div key={i} className="flex items-center gap-2 bg-slate-50 p-2 rounded border text-sm">
+                                <Badge variant="outline" className="bg-indigo-50 font-mono text-indigo-600 border-indigo-200">{v}</Badge>
+                                <span className="text-xs text-muted-foreground">Ejemplo: [Valor real]</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedComponent === "FOOTER" && (
+                        <FormField control={form.control} name="footer" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Pie de página (opcional)</FormLabel>
+                            <FormControl><Input {...field} placeholder="Máx. 60 caracteres" maxLength={60} /></FormControl>
+                            <FormDescription>Texto pequeño al final del mensaje.</FormDescription>
+                          </FormItem>
+                        )} />
+                      )}
+
+                      {selectedComponent === "BUTTONS" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <FormLabel>Botones ({form.watch("buttons")?.length || 0}/10)</FormLabel>
+                            <Button 
+                              type="button" 
+                              size="sm" 
+                              variant="ghost" 
+                              className="h-7 text-xs gap-1"
+                              disabled={(form.watch("buttons")?.length || 0) >= 10}
+                              onClick={() => {
+                                const current = form.getValues("buttons") || [];
+                                form.setValue("buttons", [...current, { type: "QUICK_REPLY", text: "Nueva respuesta" }]);
+                              }}
+                            >
+                              <Plus className="h-3 w-3" /> Agregar
+                            </Button>
+                          </div>
+                          <div className="space-y-3">
+                            {form.watch("buttons")?.map((button, index) => (
+                              <div key={index} className="p-3 bg-slate-50 rounded-lg border space-y-3 relative group">
+                                <Button 
+                                  type="button"
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => {
+                                    const current = form.getValues("buttons") || [];
+                                    form.setValue("buttons", current.filter((_, i) => i !== index));
+                                  }}
+                                >
+                                  <Trash2 className="h-3 w-3 text-destructive" />
+                                </Button>
+                                <FormField control={form.control} name={`buttons.${index}.type`} render={({ field }) => (
+                                  <FormItem>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="QUICK_REPLY">Respuesta rápida</SelectItem>
+                                        <SelectItem value="URL">Enlace (URL)</SelectItem>
+                                        <SelectItem value="PHONE">Teléfono</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </FormItem>
+                                )} />
+                                <FormField control={form.control} name={`buttons.${index}.text`} render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl><Input {...field} placeholder="Texto del botón" className="h-8 text-xs" /></FormControl>
+                                  </FormItem>
+                                )} />
+                                {button.type === "URL" && (
+                                  <FormField control={form.control} name={`buttons.${index}.url`} render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl><Input {...field} placeholder="https://..." className="h-8 text-xs" /></FormControl>
+                                    </FormItem>
+                                  )} />
+                                )}
+                                {button.type === "PHONE" && (
+                                  <FormField control={form.control} name={`buttons.${index}.phoneNumber`} render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl><Input {...field} placeholder="+54 11..." className="h-8 text-xs" /></FormControl>
+                                    </FormItem>
+                                  )} />
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </form>
+                  </Form>
                 </div>
               </div>
               <DialogFooter className="p-6 border-t flex justify-end gap-2">
