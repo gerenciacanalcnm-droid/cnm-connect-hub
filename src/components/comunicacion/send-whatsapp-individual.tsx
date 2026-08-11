@@ -32,7 +32,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { useWallets, useRateTiers } from "@/hooks/use-commercial";
 import { formatCurrency } from "@/lib/format";
-import { useWhatsAppAccounts, useSendWhatsAppIndividual, useSendWhatsAppBulk, useWhatsAppTemplates, useSendWhatsAppTemplate } from "@/hooks/use-whatsapp";
+import { useWhatsAppAccounts, useSendWhatsAppIndividual, useSendWhatsAppBulk, useWhatsAppTemplates, useSendWhatsAppTemplate, useCreateWhatsAppSchedule } from "@/hooks/use-whatsapp";
 import { useContacts } from "@/hooks/use-contacts";
 import { useContactGroups } from "@/hooks/use-platform";
 
