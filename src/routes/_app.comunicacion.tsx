@@ -4,8 +4,6 @@ import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SendSms } from "@/components/comunicacion/send-sms";
 import { SmsHistory } from "@/components/comunicacion/sms-history";
-import { ChannelOverview } from "@/components/comunicacion/channel-overview";
-import { WhatsAppAccounts } from "@/components/comunicacion/whatsapp-accounts";
 import { ConversationCenter } from "@/components/comunicacion/conversation-center";
 import { EmailMarketing } from "@/components/comunicacion/email-marketing";
 import { CommunicationSettings } from "@/components/comunicacion/communication-settings";
@@ -32,14 +30,12 @@ function ComunicacionPage() {
         description="Gestiona SMS, WhatsApp Business y Email desde un único centro omnicanal."
       />
 
-      <div className="mb-6">
-        <ChannelOverview />
-      </div>
+      {/* ChannelOverview removed to simplify UI as requested */}
 
       <Tabs defaultValue="enviar" className="w-full">
         <TabsList className="mb-6 flex overflow-x-auto h-auto w-full gap-1 p-1 bg-muted/50">
           <TabsTrigger value="enviar" className="gap-1.5 flex-1 min-w-[100px]">
-            <Send className="h-3.5 w-3.5" /> SMS
+            <Send className="h-3.5 w-3.5" /> Enviar SMS
           </TabsTrigger>
           <TabsTrigger value="conversaciones" className="gap-1.5 flex-1 min-w-[130px]">
             <Inbox className="h-3.5 w-3.5" /> Conversaciones
@@ -68,7 +64,13 @@ function ComunicacionPage() {
           <SmsHistory />
         </TabsContent>
         <TabsContent value="whatsapp">
-          <WhatsAppAccounts />
+          <div className="p-8 text-center border rounded-lg bg-muted/20">
+            <MessageCircle className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-medium">WhatsApp Business</h3>
+            <p className="text-muted-foreground max-w-md mx-auto mt-2">
+              Conecta tu cuenta de WhatsApp Business API para gestionar conversaciones y campañas omnicanal.
+            </p>
+          </div>
         </TabsContent>
         <TabsContent value="email">
           <EmailMarketing />
