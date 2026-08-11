@@ -432,7 +432,7 @@ export function WhatsAppSurveys() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Métricas Globales (Placeholder dinámico) */}
         <Card className="bg-blue-600 border-none shadow-lg shadow-blue-200">
           <CardContent className="p-6">
