@@ -48,10 +48,12 @@ type SendMode = "direct" | "bulk" | "schedule";
 export function SendSms() {
   const [mode, setMode] = useState<SendMode>("direct");
   const [msg, setMsg] = useState("");
+  const [sending, setSending] = useState(false);
   
   // Programación
   const [date, setDate] = useState("");
   const [time, setTime] = useState("09:00");
+
 
   const [toManual, setToManual] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
