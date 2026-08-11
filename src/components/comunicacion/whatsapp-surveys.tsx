@@ -170,7 +170,13 @@ export function WhatsAppSurveys() {
             <section className="space-y-3">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Contenido (Meta compatible)</label>
               
-              <Select value={headerType} onValueChange={(v: HeaderType) => setHeaderType(v)}>
+              <Select value={headerType} onValueChange={(v: HeaderType) => {
+                if (type === 'INTERACTIVE_LIST' && v !== 'NONE' && v !== 'TEXT') {
+                  toast.warning("Las listas interactivas solo soportan cabeceras de texto o ninguna.");
+                  return;
+                }
+                setHeaderType(v);
+              }}>
                 <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue placeholder="Tipo de Cabecera" />
                 </SelectTrigger>
