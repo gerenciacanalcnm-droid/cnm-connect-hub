@@ -207,7 +207,7 @@ function WalletPage() {
         cell: (c) => (
           <Button size="sm" variant="outline" onClick={() => setManaged(c.row.original)}>
             <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
-            Gestionar saldo
+            completo
           </Button>
         ),
       },
@@ -318,7 +318,7 @@ function WalletPage() {
       >
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Gestionar saldo — {managed?.companyName}</DialogTitle>
+            <DialogTitle>completo — {managed?.companyName}</DialogTitle>
             <DialogDescription>
               Canal {managed?.channel.toUpperCase()} · Plan {managed?.planCode ?? "sin plan"}
             </DialogDescription>
