@@ -807,8 +807,8 @@ export const listAuditLogs = createServerFn({ method: "GET" })
     if (data.action) q = q.eq("action", data.action);
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
-    const normalized = (rows ?? []).map((r) => ({ ...r, ip: r.ip == null ? null : String(r.ip) }));
-    return { rows: normalized, total: count ?? 0 };
+    const normalized = (rows ?? []).map((r) => ({ ...r, ip: r.ip == null ? null : String(r.ip) as any }));
+    return { rows: normalized as any, total: count ?? 0 };
   });
 
 // ═══════════════════ SYSTEM LOGS ═══════════════════
@@ -857,12 +857,12 @@ export const listAutomations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
-      .from("automations")
+      .from("automations" as any)
       .select("*")
       .eq("company_id", CNM_COMPANY_ID)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return data ?? [];
+    return (data ?? []) as any;
   });
 
 const AutomationInputSchema = z.object({
@@ -891,26 +891,26 @@ export const upsertAutomation = createServerFn({ method: "POST" })
     };
     const q = data.id
       ? context.supabase
-          .from("automations")
+          .from("automations" as any)
           .update(row as never)
           .eq("id", data.id)
           .select()
           .single()
       : context.supabase
-          .from("automations")
+          .from("automations" as any)
           .insert(row as never)
           .select()
           .single();
     const { data: saved, error } = await q;
     if (error) throw new Error(error.message);
-    return saved;
+    return saved as any;
   });
 
 export const deleteAutomation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("automations").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("automations" as any).delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -930,7 +930,7 @@ export const listAutomationLogs = createServerFn({ method: "GET" })
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
     let q = context.supabase
-      .from("automation_logs")
+      .from("automation_logs" as any)
       .select("*", { count: "exact" })
       .eq("company_id", CNM_COMPANY_ID)
       .order("executed_at", { ascending: false })
@@ -938,5 +938,5 @@ export const listAutomationLogs = createServerFn({ method: "GET" })
     if (data.automation_id) q = q.eq("automation_id", data.automation_id);
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
-    return { rows: rows ?? [], total: count ?? 0 };
+    return { rows: (rows ?? []) as any, total: count ?? 0 } as any;
   });
