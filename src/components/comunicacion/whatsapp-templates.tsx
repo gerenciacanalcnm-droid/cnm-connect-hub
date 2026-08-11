@@ -116,7 +116,7 @@ export function WhatsAppTemplates() {
   const form = useForm<z.infer<typeof templateSchema>>({
     resolver: zodResolver(templateSchema),
     defaultValues: {
-      name: "",
+      name: `template_${Date.now()}`,
       category: "MARKETING",
       language: "es",
       headerType: "NONE",
