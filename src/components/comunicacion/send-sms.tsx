@@ -60,262 +60,154 @@ export function SendSms() {
   const doSend = useServerFn(sendSmsMessage);
 
   // Estimaciones (Mock - deberían venir del motor comercial)
-  const recipientsCount = useMemo(() => {
-    if (destMode === "crm") return 1250; // Mock de contactos seleccionados
-    return to.split(/[\s,;]+/).filter(n => n.trim().length > 5).length;
-  }, [to, destMode]);
+  const [toManual, setToManual] = useState("");
+  const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
+  const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
+  
+  const { data: contactsData } = useContacts({ pageSize: 200 });
+  const { data: groupsData } = useContactGroups();
+  const { data: walletsData } = useWallets();
+  const { data: tiersData } = useRateTiers();
 
-  const basePrice = isFlash ? 105 : 30; // Precios de prueba
-  const estimatedCost = recipientsCount * basePrice;
-  const [wallet, setWallet] = useState<{ balance: number } | null>(null);
+  const contacts = contactsData?.items ?? [];
+  const groups = groupsData ?? [];
+  const wallet = walletsData?.find(w => w.channel === 'sms');
   const balance = wallet?.balance ?? 0;
 
-  // En una implementación real, usaríamos un hook que consulte la wallet del contexto de empresa
-  useEffect(() => {
-    // Simular carga de saldo
-    setWallet({ balance: 150000 });
-  }, []);
+  const validManualPhones = useMemo(() => {
+    return toManual.split(/[\s,;]+/)
+      .map(p => p.trim())
+      .filter(p => /^3\d{9}$/.test(p))
+      .filter((v, i, a) => a.indexOf(v) === i);
+  }, [toManual]);
 
-  const handleSend = async (flash: boolean = false) => {
-    if (!msg.trim()) return toast.error("El mensaje no puede estar vacío");
-    if (recipientsCount === 0) return toast.error("Agregue destinatarios");
-    
-    if (estimatedCost > balance) {
-      return toast.error("Saldo insuficiente");
-    }
+  const allRecipients = useMemo(() => {
+    const set = new Set<string>();
+    validManualPhones.forEach(p => set.add(p));
+    selectedContacts.forEach(id => {
+      const c = contacts.find(c => c.id === id);
+      if (c && /^3\d{9}$/.test(c.phone)) set.add(c.phone);
+    });
+    return Array.from(set);
+  }, [validManualPhones, selectedContacts, contacts]);
 
-    setSending(true);
+  const stats = useMemo(() => {
+    const raw = toManual.split(/[\s,;]+/).filter(Boolean);
+    const valid = allRecipients.length;
+    const invalid = raw.length - validManualPhones.length;
+    return { total: raw.length + selectedContacts.size, valid, invalid };
+  }, [toManual, allRecipients, selectedContacts]);
+
+  const cost = useMemo(() => {
+    const tier = tiersData?.find(t => stats.valid >= t.fromQty && (t.toQty === 0 || stats.valid <= t.toQty));
+    return (tier?.unitPrice ?? 30) * stats.valid;
+  }, [stats.valid, tiersData]);
+
+  const doSendBulk = useServerFn(sendBulkSms);
+
+  const handleSend = async (isFlash: boolean) => {
+    if (!msg.trim()) return toast.error("Mensaje vacío");
+    if (stats.valid === 0) return toast.error("Sin destinatarios válidos");
+    if (cost > balance) return toast.error("Saldo insuficiente");
+
     try {
-      // En un masivo real, esto llamaría a una función de batch
-      const res = await doSend({
-        data: {
-          to: destMode === "manual" ? to.split(',')[0].trim() : "BATCH_PROCESS",
-          body: msg,
-          isFlash: flash
-        }
-      });
-      
-      if (res.ok) {
-        toast.success(mode === "schedule" ? "SMS programado" : "SMS enviado correctamente");
-        if (mode === "direct") setTo("");
-        setMsg("");
-      }
+      await doSendBulk({ data: { recipients: allRecipients, body: msg, isFlash } });
+      toast.success("Envío programado");
+      setToManual("");
+      setSelectedContacts(new Set());
     } catch (e: any) {
-      toast.error(e.message || "Error al enviar");
-    } finally {
-      setSending(false);
+      toast.error(e.message);
     }
   };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <div className="space-y-6">
-        {/* Selector de Modo */}
         <Card>
           <CardContent className="pt-6">
             <Tabs value={mode} onValueChange={(v) => setMode(v as SendMode)}>
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="direct" className="gap-2">
-                  <Send className="h-4 w-4" /> Enviar ahora
-                </TabsTrigger>
-                <TabsTrigger value="bulk" className="gap-2">
-                  <Users className="h-4 w-4" /> Masivo
-                </TabsTrigger>
-                <TabsTrigger value="schedule" className="gap-2">
-                  <Calendar className="h-4 w-4" /> Programar
-                </TabsTrigger>
+                <TabsTrigger value="direct">Enviar ahora</TabsTrigger>
+                <TabsTrigger value="bulk">Masivo</TabsTrigger>
+                <TabsTrigger value="schedule">Programar</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardContent>
         </Card>
 
-        {/* Destinatarios */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Destinatarios</CardTitle>
-            <CardDescription>Indica a quién quieres enviar el mensaje</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-4">
-              <Button 
-                variant={destMode === "manual" ? "default" : "outline"} 
-                size="sm"
-                onClick={() => setDestMode("manual")}
-                className="flex-1"
-              >
-                Manual (Números)
-              </Button>
-              <Button 
-                variant={destMode === "crm" ? "default" : "outline"} 
-                size="sm"
-                onClick={() => setDestMode("crm")}
-                className="flex-1"
-              >
-                Contactos / CRM
-              </Button>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label>Manual (comas)</Label>
+              <Textarea 
+                value={toManual} 
+                onChange={(e) => setToManual(e.target.value)}
+                placeholder="3001234567, 3109876543"
+                className="font-mono"
+              />
             </div>
-
-            {destMode === "manual" ? (
-              <div className="space-y-2">
-                <Label>Números de teléfono</Label>
-                <Textarea 
-                  placeholder="3001234567, 3109876543..."
-                  value={to}
-                  onChange={(e) => setTo(e.target.value)}
-                  className="min-h-[80px] font-mono text-sm"
-                />
-                <p className="text-[11px] text-muted-foreground">
-                  Separa los números por comas o espacios.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label>Seleccionar Contactos o Grupos</Label>
-                <Select defaultValue="all">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Toda la base (1.250 contactos)</SelectItem>
-                    <SelectItem value="vips">Clientes VIP (120)</SelectItem>
-                    <SelectItem value="mkt">Marketing Octubre (450)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full">Seleccionar Contactos ({selectedContacts.size})</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-xl">
+                <DialogHeader><DialogTitle>Seleccionar contactos</DialogTitle></DialogHeader>
+                <ScrollArea className="h-[400px]">
+                  {contacts.map(c => (
+                    <div key={c.id} className="flex items-center gap-3 p-2 border-b">
+                      <Checkbox 
+                        checked={selectedContacts.has(c.id)}
+                        onCheckedChange={checked => {
+                          const next = new Set(selectedContacts);
+                          if (checked) next.add(c.id); else next.delete(c.id);
+                          setSelectedContacts(next);
+                        }}
+                      />
+                      <span>{c.firstName} {c.lastName} ({c.phone})</span>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
 
-        {/* Mensaje */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Mensaje</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <SmsComposer 
-              value={msg} 
-              onChange={setMsg} 
-              rows={5}
-              placeholder="Escribe el contenido de tu mensaje..."
-            />
+          <CardContent className="pt-6">
+            <SmsComposer value={msg} onChange={setMsg} />
           </CardContent>
         </Card>
-
-        {/* Programación (Condicional) */}
-        {mode === "schedule" && (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Clock className="h-5 w-5 text-primary" /> Detalles de Programación
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Fecha de envío</Label>
-                  <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Hora (24h)</Label>
-                  <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
-      {/* Sidebar de Resumen */}
       <div className="space-y-6">
         <Card className="sticky top-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Info className="h-4 w-4" /> Resumen de Envío
-            </CardTitle>
+            <CardTitle>Resumen</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2.5 text-sm">
-              <div className="flex justify-between text-muted-foreground">
-                <span>Destinatarios</span>
-                <span className="font-medium text-foreground">{recipientsCount}</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>Tipo de envío</span>
-                <Badge variant={isFlash ? "secondary" : "outline"} className={isFlash ? "bg-amber-100 text-amber-900 border-amber-200" : ""}>
-                  {isFlash ? "⚡ SMS Flash" : "Normal"}
-                </Badge>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>Costo unitario</span>
-                <span className="font-medium text-foreground">{formatCurrency(basePrice)}</span>
-              </div>
-              
-              <Separator className="my-2" />
-              
-              <div className="flex justify-between text-base font-semibold">
-                <span>Costo Total</span>
-                <span>{formatCurrency(estimatedCost)}</span>
-              </div>
-
-              <div className="rounded-lg bg-muted p-3 space-y-1.5 mt-4">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Saldo disponible</span>
-                  <span>{formatCurrency(balance)}</span>
-                </div>
-                <div className="flex justify-between text-xs font-medium">
-                  <span>Saldo resultante</span>
-                  <span className={balance < estimatedCost ? "text-destructive" : "text-green-600"}>
-                    {formatCurrency(balance - estimatedCost)}
-                  </span>
-                </div>
-              </div>
+            <div className="flex justify-between">
+              <span>Válidos</span>
+              <span className="font-bold text-green-600">{stats.valid}</span>
             </div>
-
-            {balance < estimatedCost && (
-              <Alert variant="destructive" className="py-2 px-3">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-xs">
-                  Saldo insuficiente para completar el envío.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="grid gap-2 pt-2">
-              <Button 
-                onClick={() => handleSend(false)} 
-                disabled={sending || balance < estimatedCost}
-                className="w-full gap-2"
-              >
-                <Send className="h-4 w-4" />
-                {mode === "schedule" ? "Programar Envío" : "Enviar ahora"}
-              </Button>
-              
-              <Button 
-                variant="outline"
-                onClick={() => {
-                  setIsFlash(true);
-                  handleSend(true);
-                }}
-                disabled={sending || balance < (recipientsCount * 105)}
-                className="w-full gap-2 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
-              >
-                <Zap className="h-4 w-4 text-amber-500" />
-                ⚡ Enviar SMS Flash
-              </Button>
+            <div className="flex justify-between">
+              <span>Inválidos</span>
+              <span className="font-bold text-red-600">{stats.invalid}</span>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Info lateral */}
-        <Card className="bg-muted/50 border-none shadow-none">
-          <CardContent className="pt-6 text-[11px] text-muted-foreground leading-relaxed">
-            <p>
-              El costo final puede variar según la cantidad de partes del mensaje. 
-              Un SMS normal tiene 160 caracteres. Los mensajes concatenados descuentan múltiples unidades de la wallet.
-            </p>
+            <Separator />
+            <div className="flex justify-between font-bold text-lg">
+              <span>Costo</span>
+              <span>{formatCurrency(cost)} COP</span>
+            </div>
+            <Button className="w-full" onClick={() => handleSend(false)} disabled={balance < cost}>Enviar</Button>
+            <Button variant="outline" className="w-full" onClick={() => handleSend(true)} disabled={balance < cost}>⚡ SMS Flash</Button>
           </CardContent>
         </Card>
       </div>
     </div>
   );
+
 }
