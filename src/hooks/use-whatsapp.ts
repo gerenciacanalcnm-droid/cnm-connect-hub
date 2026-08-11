@@ -104,6 +104,14 @@ export function useSyncWhatsAppTemplates() {
   });
 }
 
+export function useSubmitWhatsAppTemplateToMeta() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => submitWhatsAppTemplateToMeta({ data: { id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.whatsapp.templates }),
+  });
+}
+
 export function useSendWhatsAppTemplate() {
   return useMutation({
     mutationFn: (data: { recipient: string; templateId: string; variables?: Record<string, string>; accountId: string; batchId?: string }) => 
