@@ -35,8 +35,9 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { sendSmsMessage } from "@/lib/communication.functions";
 import { sendBulkSms } from "@/lib/sms-bulk.functions";
-import { useCrmContacts } from "@/hooks/use-crm";
-import { useContactGroups } from "@/hooks/use-platform";
+import { useContacts } from "@/hooks/use-contacts";
+import { useContactGroups, usePermissions } from "@/hooks/use-platform";
+
 import { useWallets, useRateTiers } from "@/hooks/use-commercial";
 import { formatCurrency } from "@/lib/format";
 import { smsStats } from "@/lib/sms-utils";
