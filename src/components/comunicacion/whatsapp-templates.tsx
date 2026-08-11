@@ -354,7 +354,7 @@ export function WhatsAppTemplates() {
                           // Primero guardamos y luego enviamos
                           const values = form.getValues();
                           const variables = values.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
-                          const saved = await saveMutation.mutateAsync({ ...values, variables });
+                          const saved = await saveMutation.mutateAsync({ ...values, variables }) as any;
                           if (saved?.id) {
                             await handleSubmitToMeta(saved.id);
                             setIsCreateOpen(false);
