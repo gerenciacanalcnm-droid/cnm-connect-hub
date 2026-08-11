@@ -635,7 +635,7 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
       // 1. Cargar plantilla y cuenta
       const [tplRes, accRes] = await Promise.all([
         context.supabase.from("whatsapp_templates").select("*").eq("id", data.templateId).eq("company_id", companyId).single(),
-        context.supabase.from("whatsapp_accounts").select("phone_number_id, access_token, company_id").eq("id", data.accountId).single()
+        context.supabase.from("whatsapp_accounts").select("phone_number_id, access_token, company_id, business_account_id").eq("id", data.accountId).single()
       ]);
 
       if (tplRes.error || !tplRes.data) throw new Error(`DB_AUTH_ERROR: Plantilla no encontrada: ${tplRes.error?.message || 'NULL'}`);
