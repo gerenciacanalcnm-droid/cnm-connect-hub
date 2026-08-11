@@ -17,7 +17,7 @@ async function admin() {
 }
 
 const uuid = z.string().uuid();
-const channel = z.enum(["sms", "whatsapp", "email", "ia"]);
+const channel = z.enum(["sms", "whatsapp", "email", "ia", "sms_flash"]);
 
 // ═══════════════════ CATÁLOGO DE FUNCIONALIDADES ═══════════════════
 export const listCommercialFeatures = createServerFn({ method: "GET" }).handler(async () => {
@@ -726,35 +726,60 @@ export const trackServiceUsage = createServerFn({ method: "POST" })
     z.object({
       company_id: uuid,
       channel: channel,
-      amount: z.number().positive(),
       units: z.number().int().nonnegative().default(1),
       description: z.string().max(200).optional(),
       reference: z.string(), // ID del mensaje o tarea para idempotencia
       isFlash: z.boolean().optional().default(false),
+      messageType: z.string().optional(),
     }).parse(v)
   )
-
   .handler(async ({ data, context }) => {
-    // 1. Localizar la wallet del canal
+    // 1. Obtener la compañía y su plan para consultar la tarifa
+    const { data: company, error: cErr } = await context.supabase
+      .from("companies")
+      .select("plan_code")
+      .eq("id", data.company_id)
+      .single();
+    if (cErr) throw new Error("Compañía no encontrada");
+
+    // 2. Consultar la tarifa real en el Motor Comercial
+    // Buscamos en rate_tiers filtrando por canal y volumen (units)
+    // Nota: Podríamos filtrar por plan_code si rate_tiers tuviera esa columna,
+    // de lo contrario usamos las globales filtradas por sort_order/volumen.
+    const { data: tiers, error: tErr } = await context.supabase
+      .from("rate_tiers")
+      .select("unit_price, from_qty, to_qty")
+      .eq("channel", data.isFlash ? "sms_flash" : data.channel)
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    if (tErr) throw new Error("Error consultando tarifas");
+
+    // Encontrar el tier que corresponde a la cantidad de unidades
+    const tier = tiers?.find(t => data.units >= (t.from_qty || 0) && (t.to_qty === 0 || data.units <= t.to_qty));
+    
+    if (!tier) {
+      throw new Error(`Tarifa no disponible para el servicio ${data.channel}${data.isFlash ? ' (Flash)' : ''}. Por favor contacte a soporte.`);
+    }
+
+    const unitPrice = tier.unit_price;
+    const finalAmount = unitPrice * data.units;
+
+    // 3. Localizar la wallet del canal (El canal de wallet para SMS y SMS_FLASH es el mismo: 'sms')
+    const walletChannel = (data.channel === "sms" || data.channel === "sms_flash") ? "sms" : data.channel;
+    
     const { data: w } = await context.supabase
       .from("wallets")
       .select("id")
       .eq("company_id", data.company_id)
-      .eq("channel", data.channel)
+      .eq("channel", walletChannel)
       .maybeSingle();
 
-    if (!w) throw new Error(`No existe wallet para el canal ${data.channel}`);
+    if (!w) throw new Error(`No existe wallet para el canal ${walletChannel}`);
 
-    // 2. Determinar tarifa (SMS Flash tiene recargo)
-    let finalAmount = data.amount;
-    let finalConcept = data.description || `Consumo ${data.channel.toUpperCase()}`;
+    const finalConcept = data.description || `Consumo ${data.channel.toUpperCase()}${data.isFlash ? ' (FLASH)' : ''}`;
     
-    if (data.channel === "sms" && data.isFlash) {
-      finalAmount = data.amount * 1.5; // Recargo 50% por Flash
-      finalConcept += " (FLASH)";
-    }
-
-    // 3. Aplicar descuento (amount negativo)
+    // 4. Aplicar descuento (amount negativo)
     const res = await applyWalletMovement(context.supabase as unknown as Sb, {
       walletId: w.id,
       amount: -Math.abs(finalAmount),
@@ -765,9 +790,11 @@ export const trackServiceUsage = createServerFn({ method: "POST" })
       performedBy: context.userId,
     });
 
-
-    // 3. El contador de consumo ya se incrementó dentro de applyWalletMovement
-    return { ok: true, balance: res.balanceAfter };
-
+    return { 
+      ok: true, 
+      balance: res.balanceAfter,
+      rate: unitPrice,
+      amount: finalAmount
+    };
   });
 

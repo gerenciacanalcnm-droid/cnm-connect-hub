@@ -40,8 +40,10 @@ type Draft = {
 
 const CHANNELS: { value: CommercialChannel; label: string }[] = [
   { value: "sms", label: "SMS" },
+  { value: "sms_flash", label: "SMS Flash" },
   { value: "whatsapp", label: "WhatsApp" },
   { value: "email", label: "Email" },
+  { value: "ia", label: "IA (Base)" },
 ];
 
 function TarifasPage() {

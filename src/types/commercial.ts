@@ -4,7 +4,7 @@
  * rate_tiers, commercial_promotions, payment_gateways, wallets, recharges).
  */
 
-export type CommercialChannel = "sms" | "whatsapp" | "email";
+export type CommercialChannel = "sms" | "whatsapp" | "email" | "ia" | "sms_flash";
 
 export type CommercialFeature = {
   key: string;
