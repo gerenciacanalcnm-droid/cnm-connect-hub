@@ -1790,6 +1790,68 @@ export type Database = {
           },
         ]
       }
+      sms_schedules: {
+        Row: {
+          body: string
+          company_id: string
+          created_at: string
+          error_reason: string | null
+          estimated_cost: number
+          id: string
+          is_flash: boolean
+          metadata: Json
+          recipients: string[]
+          reference: string
+          scheduled_at: string
+          status: Database["public"]["Enums"]["sms_schedule_status"]
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          company_id: string
+          created_at?: string
+          error_reason?: string | null
+          estimated_cost?: number
+          id?: string
+          is_flash?: boolean
+          metadata?: Json
+          recipients: string[]
+          reference: string
+          scheduled_at: string
+          status?: Database["public"]["Enums"]["sms_schedule_status"]
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          company_id?: string
+          created_at?: string
+          error_reason?: string | null
+          estimated_cost?: number
+          id?: string
+          is_flash?: boolean
+          metadata?: Json
+          recipients?: string[]
+          reference?: string
+          scheduled_at?: string
+          status?: Database["public"]["Enums"]["sms_schedule_status"]
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_schedules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_logs: {
         Row: {
           context: Json
@@ -2772,6 +2834,13 @@ export type Database = {
       preferred_channel: "sms" | "whatsapp" | "email"
       provider_kind: "sms" | "whatsapp"
       recharge_status: "pending" | "completed" | "failed" | "refunded"
+      sms_schedule_status:
+        | "PROGRAMADO"
+        | "PROCESANDO"
+        | "ENVIANDO"
+        | "COMPLETADO"
+        | "FALLIDO"
+        | "CANCELADO"
       template_kind: "sms" | "whatsapp" | "email"
       transaction_type: "credit" | "debit" | "refund" | "adjustment"
       wa_department: "ventas" | "soporte" | "cobranza" | "marketing" | "general"
@@ -2936,6 +3005,14 @@ export const Constants = {
       preferred_channel: ["sms", "whatsapp", "email"],
       provider_kind: ["sms", "whatsapp"],
       recharge_status: ["pending", "completed", "failed", "refunded"],
+      sms_schedule_status: [
+        "PROGRAMADO",
+        "PROCESANDO",
+        "ENVIANDO",
+        "COMPLETADO",
+        "FALLIDO",
+        "CANCELADO",
+      ],
       template_kind: ["sms", "whatsapp", "email"],
       transaction_type: ["credit", "debit", "refund", "adjustment"],
       wa_department: ["ventas", "soporte", "cobranza", "marketing", "general"],
