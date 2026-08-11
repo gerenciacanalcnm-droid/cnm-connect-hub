@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { trackServiceUsage } from "./commercial.functions";
+import { Database } from "@/integrations/supabase/types";
+
+type Tables = Database["public"]["Tables"];
 
 const uuid = z.string().uuid();
 
@@ -29,13 +32,13 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
     // 2. Validar Encuesta y Opciones
     const { data: survey, error: survErr } = await supabase
       .from("whatsapp_surveys")
-      .select("*, whatsapp_survey_options(*)")
+      .select("*, options:whatsapp_survey_options(*)")
       .eq("id", data.surveyId)
       .eq("company_id", data.companyId)
       .single();
 
     if (survErr || !survey) throw new Error("Encuesta no encontrada.");
-    const options = survey.whatsapp_survey_options || [];
+    const options = (survey as any).options || [];
     if (options.length < 2) throw new Error("La encuesta debe tener al menos 2 opciones.");
 
     // 3. Preparar mensaje interactivo Meta
@@ -83,7 +86,6 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
 
     try {
       // 5. Motor Comercial: Cobro e Idempotencia
-      // trackServiceUsage maneja validación de Wallet y WalletMovement
       await trackServiceUsage({
         data: {
           company_id: data.companyId,
@@ -125,7 +127,6 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
       return { ok: true, messageId, metaId: metaResult.messages?.[0]?.id };
 
     } catch (err: any) {
-      // Revertir estado si falla
       await supabase
         .from("whatsapp_messages")
         .update({ status: "failed", error_code: "send_error" } as any)
@@ -148,14 +149,14 @@ export const saveSurvey = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     
-    // Obtener company_id del usuario
-    const { data: profile } = await supabase
+    // Obtener company_id del usuario desde profiles
+    const { data: profile, error: profErr } = await supabase
       .from("profiles")
       .select("company_id")
       .eq("id", userId)
       .single();
     
-    if (!profile?.company_id) throw new Error("Empresa no identificada.");
+    if (profErr || !profile?.company_id) throw new Error("Empresa no identificada.");
 
     const { data: survey, error } = await supabase
       .from("whatsapp_surveys")
