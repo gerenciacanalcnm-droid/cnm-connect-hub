@@ -8,6 +8,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { createHmac, timingSafeEqual } from "crypto";
+
 
 async function admin() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -702,3 +704,53 @@ export const listCommercialHistory = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return JSON.stringify(data ?? []);
   });
+
+// ═══════════════════ CONSUMO OMNICANAL ═══════════════════
+
+/**
+ * Registra el consumo de un servicio (SMS, WhatsApp, Email, IA).
+ * Descuenta el monto de la wallet correspondiente de forma atómica.
+ */
+export const trackServiceUsage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({
+      company_id: uuid,
+      channel: channel,
+      amount: z.number().positive(),
+      units: z.number().int().nonnegative().default(1),
+      description: z.string().max(200).optional(),
+      reference: z.string().uuid(), // ID del mensaje o tarea para idempotencia
+    }).parse(v)
+  )
+  .handler(async ({ data, context }) => {
+    // 1. Localizar la wallet del canal
+    const { data: w } = await context.supabase
+      .from("wallets")
+      .select("id")
+      .eq("company_id", data.company_id)
+      .eq("channel", data.channel)
+      .maybeSingle();
+
+    if (!w) throw new Error(`No existe wallet para el canal ${data.channel}`);
+
+    // 2. Aplicar descuento (amount negativo)
+    const res = await applyWalletMovement(context.supabase as unknown as Sb, {
+      walletId: w.id,
+      amount: -Math.abs(data.amount),
+      units: -Math.abs(data.units),
+      type: "AJUSTE_DEBITO", // El consumo se registra como débito operativo
+      concept: data.description || `Consumo ${data.channel.toUpperCase()}`,
+      reference: data.reference,
+      performedBy: context.userId,
+    });
+
+    // 3. Incrementar contador de consumo acumulado en la wallet (atómico)
+    await context.supabase.rpc('increment_wallet_consumed', {
+      w_id: w.id,
+      val: Math.abs(data.amount)
+    });
+
+    return { ok: true, balance: res.balanceAfter };
+  });
+
