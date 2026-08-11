@@ -201,7 +201,7 @@ export const listConversations = createServerFn({ method: "GET" })
     z
       .object({
         channel: channelSchema.optional(),
-        status: z.enum(["open", "pending", "closed", "archived"]).optional(),
+        status: z.enum(["open", "pending", "closed", "archived", "SIN_ASIGNAR", "ASIGNADA", "EN_ATENCION", "CERRADA"]).optional(),
         search: z.string().optional(),
       })
       .partial()
@@ -244,7 +244,7 @@ export const updateConversation = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        status: z.enum(["open", "pending", "closed", "archived"]).optional(),
+        status: z.enum(["open", "pending", "closed", "archived", "SIN_ASIGNAR", "ASIGNADA", "EN_ATENCION", "CERRADA"]).optional(),
         assignedTo: z.string().uuid().optional().nullable(),
         tags: z.array(z.string()).optional(),
       })
@@ -255,6 +255,45 @@ export const updateConversation = createServerFn({ method: "POST" })
     if (data.status) patch["status"] = data.status;
     if (data.assignedTo !== undefined) patch["assigned_to"] = data.assignedTo;
     if (data.tags) patch["tags"] = data.tags;
+
+    // Auditoría de transferencia/asignación
+    if (data.assignedTo !== undefined || data.status) {
+      const { data: current } = await context.supabase
+        .from("whatsapp_conversations")
+        .select("assigned_to, status, company_id")
+        .eq("id", data.id)
+        .single();
+
+      if (current) {
+        let action = "conversation_update";
+        let detail = `Conversación ${data.id} actualizada.`;
+
+        if (data.assignedTo !== undefined && data.assignedTo !== current.assigned_to) {
+          action = "conversation_transfer";
+          detail = `Transferencia de asesor: anterior ${current.assigned_to ?? 'ninguno'} -> nuevo ${data.assignedTo ?? 'sin asignar'}.`;
+        } else if (data.status && data.status !== current.status) {
+          action = "conversation_status_change";
+          detail = `Cambio de estado: ${current.status} -> ${data.status}.`;
+        }
+
+        await context.supabase.from("audit_logs").insert({
+          company_id: current.company_id,
+          user_id: context.userId,
+          module: "communication",
+          action,
+          detail,
+          metadata: {
+            conversation_id: data.id,
+            previous_assigned_to: current.assigned_to,
+            new_assigned_to: data.assignedTo,
+            previous_status: current.status,
+            new_status: data.status,
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
+    }
+
     const { error } = await context.supabase
       .from("whatsapp_conversations")
       .update(patch as never)
