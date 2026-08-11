@@ -258,27 +258,38 @@ export function WhatsAppTemplates() {
                     )}
                     <div className="text-sm whitespace-pre-wrap">
                       {(() => {
-                        const body = form.watch("body") || "Cuerpo del mensaje...";
-                        // Replace {{n}} with real examples if provided, otherwise default to "Ejemplo"
-                        return body.replace(/\{\{(\d+)\}\}/g, (match, number) => {
-                          const examples: Record<string, string> = {
-                            "1": "Juan",
-                            "2": "12345",
-                            "3": "Bogotá",
-                            "4": "Premium"
-                          };
-                          return examples[number] || `[Variable ${number}]`;
-                        });
+                        try {
+                          const body = form.watch("body") || "Cuerpo del mensaje...";
+                          // Replace {{n}} with real examples if provided, otherwise default to "Ejemplo"
+                          return body.replace(/\{\{(\d+)\}\}/g, (match, number) => {
+                            const examples: Record<string, string> = {
+                              "1": "Juan",
+                              "2": "12345",
+                              "3": "Bogotá",
+                              "4": "Premium"
+                            };
+                            return examples[number] || `[Variable ${number}]`;
+                          });
+                        } catch (e) {
+                          return "Error en preview de cuerpo";
+                        }
                       })()}
                     </div>
                     {form.watch("footer") && (
                       <div className="text-[11px] text-slate-500 pt-1 border-t border-black/10">{form.watch("footer")}</div>
                     )}
-                    {form.watch("buttons")?.map((b, i) => (
-                      <div key={i} className="bg-white text-blue-600 text-sm py-1 rounded border text-center shadow-sm font-medium">
-                        {b.text || "Botón sin texto"}
-                      </div>
-                    ))}
+                    {(() => {
+                      try {
+                        const buttons = form.watch("buttons");
+                        return buttons?.map((b: any, i: number) => (
+                          <div key={i} className="bg-white text-blue-600 text-sm py-1 rounded border text-center shadow-sm font-medium">
+                            {b?.text || "Botón sin texto"}
+                          </div>
+                        ));
+                      } catch (e) {
+                        return <div className="text-xs text-destructive">Error en botones</div>;
+                      }
+                    })()}
                    </div>
                 </div>
                 
@@ -376,12 +387,18 @@ export function WhatsAppTemplates() {
                           {/* Variables detectadas */}
                           <div className="space-y-2 pt-2">
                             <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Variables Detectadas</h5>
-                            {(form.watch("body").match(/\{\{\d+\}\}/g) || []).map((v, i) => (
-                              <div key={i} className="flex items-center gap-2 bg-slate-50 p-2 rounded border text-sm">
-                                <Badge variant="outline" className="bg-indigo-50 font-mono text-indigo-600 border-indigo-200">{v}</Badge>
-                                <span className="text-xs text-muted-foreground">Ejemplo: [Valor real]</span>
-                              </div>
-                            ))}
+                            {(() => {
+                              try {
+                                return (form.watch("body")?.match(/\{\{\d+\}\}/g) || []).map((v, i) => (
+                                  <div key={i} className="flex items-center gap-2 bg-slate-50 p-2 rounded border text-sm">
+                                    <Badge variant="outline" className="bg-indigo-50 font-mono text-indigo-600 border-indigo-200">{v}</Badge>
+                                    <span className="text-xs text-muted-foreground">Ejemplo: [Valor real]</span>
+                                  </div>
+                                ));
+                              } catch (e) {
+                                return null;
+                              }
+                            })()}
                           </div>
                         </div>
                       )}
@@ -415,55 +432,58 @@ export function WhatsAppTemplates() {
                             </Button>
                           </div>
                           <div className="space-y-3">
-                            {form.watch("buttons")?.map((button, index) => (
-                              <div key={index} className="p-3 bg-slate-50 rounded-lg border space-y-3 relative group">
-                                <Button 
-                                  type="button"
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  onClick={() => {
-                                    const current = form.getValues("buttons") || [];
-                                    form.setValue("buttons", current.filter((_, i) => i !== index));
-                                  }}
-                                >
-                                  <Trash2 className="h-3 w-3 text-destructive" />
-                                </Button>
-                                <FormField control={form.control} name={`buttons.${index}.type`} render={({ field }) => (
-                                  <FormItem>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                      <FormControl>
-                                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="QUICK_REPLY">Respuesta rápida</SelectItem>
-                                        <SelectItem value="URL">Enlace (URL)</SelectItem>
-                                        <SelectItem value="PHONE">Teléfono</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </FormItem>
-                                )} />
-                                <FormField control={form.control} name={`buttons.${index}.text`} render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl><Input {...field} placeholder="Texto del botón" className="h-8 text-xs" /></FormControl>
-                                  </FormItem>
-                                )} />
-                                {button.type === "URL" && (
-                                  <FormField control={form.control} name={`buttons.${index}.url`} render={({ field }) => (
+                            {form.watch("buttons")?.map((button, index) => {
+                              if (!button) return null;
+                              return (
+                                <div key={index} className="p-3 bg-slate-50 rounded-lg border space-y-3 relative group">
+                                  <Button 
+                                    type="button"
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => {
+                                      const current = form.getValues("buttons") || [];
+                                      form.setValue("buttons", current.filter((_, i) => i !== index));
+                                    }}
+                                  >
+                                    <Trash2 className="h-3 w-3 text-destructive" />
+                                  </Button>
+                                  <FormField control={form.control} name={`buttons.${index}.type`} render={({ field }) => (
                                     <FormItem>
-                                      <FormControl><Input {...field} placeholder="https://..." className="h-8 text-xs" /></FormControl>
+                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="QUICK_REPLY">Respuesta rápida</SelectItem>
+                                          <SelectItem value="URL">Enlace (URL)</SelectItem>
+                                          <SelectItem value="PHONE">Teléfono</SelectItem>
+                                        </SelectContent>
+                                      </Select>
                                     </FormItem>
                                   )} />
-                                )}
-                                {button.type === "PHONE" && (
-                                  <FormField control={form.control} name={`buttons.${index}.phoneNumber`} render={({ field }) => (
+                                  <FormField control={form.control} name={`buttons.${index}.text`} render={({ field }) => (
                                     <FormItem>
-                                      <FormControl><Input {...field} placeholder="+54 11..." className="h-8 text-xs" /></FormControl>
+                                      <FormControl><Input {...field} placeholder="Texto del botón" className="h-8 text-xs" /></FormControl>
                                     </FormItem>
                                   )} />
-                                )}
-                              </div>
-                            ))}
+                                  {button.type === "URL" && (
+                                    <FormField control={form.control} name={`buttons.${index}.url`} render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl><Input {...field} placeholder="https://..." className="h-8 text-xs" /></FormControl>
+                                      </FormItem>
+                                    )} />
+                                  )}
+                                  {button.type === "PHONE" && (
+                                    <FormField control={form.control} name={`buttons.${index}.phoneNumber`} render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl><Input {...field} placeholder="+54 11..." className="h-8 text-xs" /></FormControl>
+                                      </FormItem>
+                                    )} />
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
