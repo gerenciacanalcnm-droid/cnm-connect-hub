@@ -390,6 +390,7 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
       to: z.string().min(8),
       body: z.string().min(1),
       accountId: z.string().uuid(),
+      conversationId: z.string().uuid().optional(),
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
@@ -402,6 +403,8 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
         body: data.body,
         direction: "outbound" as never,
         status: "sending" as never,
+        account_id: data.accountId as never,
+        conversation_id: data.conversationId as never,
       })
       .select("id")
       .single();
@@ -444,6 +447,17 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
       .from("whatsapp_messages")
       .update({ status: "sent" as never } as never)
       .eq("id", msg.id);
+
+    // 4. Actualizar previsualización en la conversación
+    if (data.conversationId) {
+      await context.supabase
+        .from("whatsapp_conversations")
+        .update({
+          last_message_preview: data.body,
+          last_message_at: new Date().toISOString(),
+        } as never)
+        .eq("id", data.conversationId);
+    }
 
     return { ok: true, messageId: msg.id };
   });
