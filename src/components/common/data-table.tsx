@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, Download, Search, Settings2 } from "lucide-react";
+import { ChevronDown, Download, Search, Settings2, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,23 +29,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+
+// Export ColumnDef to fix the TS2459 error in consumers
+export type { ColumnDef };
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey?: string;
+  searchPlaceholder?: string; // Added to fix TS2322 in consumers
   onRowClick?: (row: TData) => void;
   exportFilename?: string;
   isLoading?: boolean;
+  enableSelection?: boolean; // Added for consumers
+  emptyTitle?: string; // Added for consumers
+  emptyDescription?: string; // Added for consumers
+  toolbar?: React.ReactNode; // Added for consumers
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
+  searchPlaceholder = "Buscar...",
   onRowClick,
   exportFilename,
   isLoading,
+  toolbar,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -74,7 +86,6 @@ export function DataTable<TData, TValue>({
   const handleExport = () => {
     if (!data.length) return;
     
-    // Simple CSV export for enterprise use
     const headers = table.getAllColumns()
       .filter(col => col.getIsVisible() && col.id !== "select" && col.id !== "actions")
       .map(col => col.id);
@@ -106,7 +117,7 @@ export function DataTable<TData, TValue>({
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar..."
+                placeholder={searchPlaceholder}
                 value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
                 onChange={(event) =>
                   table.getColumn(searchKey)?.setFilterValue(event.target.value)
@@ -115,6 +126,7 @@ export function DataTable<TData, TValue>({
               />
             </div>
           )}
+          {toolbar}
         </div>
         <div className="flex items-center space-x-2">
           {exportFilename && (
@@ -255,8 +267,3 @@ export function DataTable<TData, TValue>({
     </div>
   );
 }
-
-// Missing imports to ensure stability
-import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
