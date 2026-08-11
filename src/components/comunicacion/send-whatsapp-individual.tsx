@@ -400,7 +400,7 @@ export function SendWhatsAppIndividual() {
                           </SelectItem>
                         ))}
                         {templates.length === 0 && (
-                          <div className="p-2 text-xs text-muted-foreground italic">No hay plantillas aprobadas.</div>
+                          <div className="p-2 text-xs text-muted-foreground italic">Saldo insuficiente</div>
                         )}
                       </SelectContent>
                     </Select>
