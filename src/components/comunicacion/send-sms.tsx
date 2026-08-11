@@ -360,9 +360,8 @@ export function SendSms() {
             </div>
           </CardContent>
         </Card>
-
       </div>
     </div>
   );
-
 }
+
