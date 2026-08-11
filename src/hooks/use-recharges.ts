@@ -34,11 +34,12 @@ export function useCreateRecharge() {
 // Estos hooks son legacy y se mantienen vacíos para evitar errores de importación
 // hasta que se limpien los componentes que los usan.
 export function useRechargePackages() {
-  return { data: [], isLoading: false };
+  return { data: [], isLoading: false, error: null, refetch: () => {} };
 }
 export function useBalance() {
-  return { data: { amount: 0, currency: "COP", smsCredits: 0 }, isLoading: false };
+  return { data: { amount: 0, currency: "COP", smsCredits: 0 }, isLoading: false, error: null, refetch: () => {} };
 }
 export function useRecharges() {
-  return { data: [], isLoading: false };
+  return { data: [], isLoading: false, error: null, refetch: () => {} };
 }
+
