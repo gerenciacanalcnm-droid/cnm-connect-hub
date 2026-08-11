@@ -5,7 +5,6 @@ import { generateNovaResponse } from '@/lib/nova-engine.server';
 import { Database } from '@/integrations/supabase/types';
 
 type MessageStatus = Database['public']['Enums']['message_status'];
-type ConversationStatus = Database['public']['Enums']['conversation_status'];
 
 export const Route = createFileRoute('/api/public/whatsapp-webhook')({
   server: {
@@ -313,63 +312,3 @@ async function internalSendNovaResponse(
       .eq('id', msg.id);
   }
 }
-
-    });
-
-    // 3. Obtener credenciales de cuenta
-    const { data: account } = await supabaseAdmin
-      .from('whatsapp_accounts')
-      .select('phone_number_id, access_token')
-      .eq('id', accountId)
-      .single();
-
-    if (!account) throw new Error("Cuenta no encontrada");
-
-    // 4. Envío real a Meta
-    const metaResponse = await fetch(
-      `https://graph.facebook.com/v20.0/${account.phone_number_id}/messages`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${account.access_token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          recipient_type: "individual",
-          to: recipient,
-          type: "text",
-          text: { body: body },
-        }),
-      }
-    );
-
-    const metaResult = await metaResponse.json();
-
-    if (!metaResponse.ok) {
-      throw new Error(metaResult.error?.message || "Error Meta");
-    }
-
-    // 5. Actualizar a SENT
-    await supabaseAdmin
-      .from('whatsapp_messages')
-      .update({ 
-        status: 'sent',
-        external_id: metaResult.messages?.[0]?.id,
-        cost: usage.amount,
-        metadata: { source: 'NOVA', ...metaResult } 
-      })
-      .eq('id', msg.id);
-
-  } catch (err: any) {
-    console.error('[Internal Nova Send Error]:', err.message);
-    await supabaseAdmin
-      .from('whatsapp_messages')
-      .update({ 
-        status: 'failed',
-        metadata: { source: 'NOVA', error: err.message, failure_reason: err.message.includes('Saldo') ? 'insufficient_balance' : 'api_error' }
-      })
-      .eq('id', msg.id);
-  }
-}
-
