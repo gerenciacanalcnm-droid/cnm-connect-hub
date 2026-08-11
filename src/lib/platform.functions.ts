@@ -958,3 +958,99 @@ export const listAutomationLogs = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { rows: (rows ?? []) as any, total: count ?? 0 } as any;
   });
+
+// ═══════════════════ CNM NOVA (IA Assistant) ═══════════════════
+
+const NovaSettingsSchema = z.object({
+  status: z.enum(["ACTIVO", "PAUSADO"]),
+  name: z.string().min(1),
+  personality: z.string().optional().nullable(),
+  instructions: z.string().optional().nullable(),
+  language: z.string().default("es"),
+  model_id: z.string().default("gpt-4o"),
+  temperature: z.number().min(0).max(2).default(0.7),
+  initial_message: z.string().optional().nullable(),
+  not_found_message: z.string().optional().nullable(),
+});
+
+const NovaKnowledgeSchema = z.object({
+  company_name: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  products: z.string().optional().nullable(),
+  services: z.string().optional().nullable(),
+  business_hours: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  faq: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
+});
+
+export const getNovaSettings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("nova_settings")
+      .select("*")
+      .eq("company_id", CNM_COMPANY_ID)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+export const saveNovaSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => NovaSettingsSchema.parse(v))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("nova_settings")
+      .upsert({ ...data, company_id: CNM_COMPANY_ID }, { onConflict: "company_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const getNovaKnowledge = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("nova_knowledge")
+      .select("*")
+      .eq("company_id", CNM_COMPANY_ID)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+export const saveNovaKnowledge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => NovaKnowledgeSchema.parse(v))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("nova_knowledge")
+      .upsert({ ...data, company_id: CNM_COMPANY_ID }, { onConflict: "company_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Contexto del Cliente para IA (Solo lectura admin)
+export const getNovaClientContext = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ contact_id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { data: contact, error: cErr } = await context.supabase
+      .from("contacts")
+      .select("*, tags")
+      .eq("id", data.contact_id)
+      .single();
+    if (cErr) throw new Error(cErr.message);
+
+    const { data: convs, error: convErr } = await context.supabase
+      .from("whatsapp_conversations")
+      .select("*, whatsapp_messages(*)")
+      .eq("contact_id", data.contact_id)
+      .order("updated_at", { ascending: false })
+      .limit(1);
+      
+    return {
+      contact,
+      conversations: convs ?? [],
+    };
+  });
