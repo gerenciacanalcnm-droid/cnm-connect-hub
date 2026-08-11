@@ -78,6 +78,17 @@ export function useCommercialHistory() {
 
 export const commercialKeys = key;
 
+import { getMyCompanyWallet } from "@/lib/wallet-bridge.functions";
+
+export function useMyWallet(channel: string = "whatsapp") {
+  return useQuery({
+    queryKey: key("my-wallet", channel),
+    queryFn: () => getMyCompanyWallet({ data: { channel } }),
+    staleTime: 1000 * 30, // 30 segundos de frescura
+  });
+}
+
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { commercialWriteRepository as w } from "@/repositories/commercial.repository";
 
