@@ -98,7 +98,11 @@ export function SendWhatsAppIndividual() {
   useEffect(() => {
     if (selectedTemplate) {
       const vars: Record<string, string> = {};
-      selectedTemplate.variables.forEach((v: string) => {
+      const uniqueVars = Array.isArray(selectedTemplate.variables) 
+        ? [...new Set(selectedTemplate.variables)] 
+        : [];
+      
+      uniqueVars.forEach((v: string) => {
         const num = v.replace(/{{|}}/g, "");
         vars[num] = "";
       });
@@ -488,7 +492,7 @@ export function SendWhatsAppIndividual() {
                       {selectedTemplate.variables.length > 0 && (
                         <div className="space-y-3 pt-2">
                           <Label className="text-xs uppercase font-bold text-emerald-700">Variables de la Plantilla</Label>
-                          {selectedTemplate.variables.map((v: string) => {
+                          {([...new Set(selectedTemplate.variables)] as string[]).map((v: string) => {
                             const num = v.replace(/{{|}}/g, "");
                             return (
                               <div key={num} className="space-y-1">
@@ -570,8 +574,8 @@ export function SendWhatsAppIndividual() {
               </Alert>
             )}
 
-            {messageType === 'template' && selectedTemplateId && (selectedTemplate?.variables?.length ?? 0) > 0 && 
-             Object.values(templateVariables).some(v => !v.trim()) && (
+            {messageType === 'template' && selectedTemplateId && (selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0) && 
+             Object.keys(templateVariables).some(k => !templateVariables[k]?.trim()) && (
               <Alert variant="destructive" className="py-2 px-3 bg-blue-50 border-blue-200">
                 <Info className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-xs text-blue-800 font-bold">
@@ -608,8 +612,8 @@ export function SendWhatsAppIndividual() {
               <div className="flex justify-between">
                 <span>Variables:</span>
                 {selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0 ? (
-                  <span className={!Object.values(templateVariables).some(v => !v?.trim()) ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
-                    {!Object.values(templateVariables).some(v => !v?.trim()) ? "OK" : "FALTANTES"}
+                  <span className={Object.keys(templateVariables).length > 0 && !Object.keys(templateVariables).some(k => !templateVariables[k]?.trim()) ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
+                    {Object.keys(templateVariables).length > 0 && !Object.keys(templateVariables).some(k => !templateVariables[k]?.trim()) ? "OK" : "FALTANTES"}
                   </span>
                 ) : (
                   <span className="text-emerald-600 font-bold">OK</span>
@@ -642,7 +646,7 @@ export function SendWhatsAppIndividual() {
                 stats.valid === 0 || 
                 (messageType === 'text' ? !msg.trim() : !selectedTemplateId) || 
                 !connectedAccount ||
-                (messageType === 'template' && selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0 && Object.values(templateVariables).some(v => !v?.trim()))
+                (messageType === 'template' && selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0 && Object.keys(templateVariables).some(k => !templateVariables[k]?.trim()))
               }
               className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4"
             >
