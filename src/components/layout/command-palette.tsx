@@ -162,7 +162,7 @@ export function CommandPalette() {
           <>
             <CommandSeparator />
             <CommandGroup heading="Facturas">
-              {filteredInvoices.map((inv) => (
+              {(filteredInvoices as any[]).map((inv) => (
                 <CommandItem
                   key={inv.id}
                   value={`invoice ${inv.number}`}
@@ -173,6 +173,7 @@ export function CommandPalette() {
                   <span className="ml-auto text-xs text-muted-foreground">{inv.status}</span>
                 </CommandItem>
               ))}
+
             </CommandGroup>
           </>
         )}

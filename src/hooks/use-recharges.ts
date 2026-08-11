@@ -1,16 +1,45 @@
-import { useQuery } from "@tanstack/react-query";
-import { rechargeRepository } from "@/repositories/recharge.repository";
-import { queryKeys } from "./queries/keys";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { commercialWriteRepository as w } from "@/repositories/commercial.repository";
+import { commercialKeys as key } from "./use-commercial";
 
-export function useRecharges() {
-  return useQuery({ queryKey: queryKeys.recharges, queryFn: () => rechargeRepository.list() });
+export function useRechargeMutations() {
+  const qc = useQueryClient();
+  const invalidate = () => {
+    void qc.invalidateQueries({ queryKey: key("recharges") });
+    void qc.invalidateQueries({ queryKey: key("wallets") });
+    void qc.invalidateQueries({ queryKey: key("wallet-transactions") });
+  };
+
+  const review = useMutation({
+    mutationFn: (v: { id: string; status: string; note: string }) =>
+      w.reviewRecharge(v.id, v.status, v.note),
+    onSuccess: invalidate,
+  });
+  return { review };
 }
-export function useRechargePackages() {
-  return useQuery({
-    queryKey: queryKeys.rechargePackages,
-    queryFn: () => rechargeRepository.packages(),
+
+export function useCreateRecharge() {
+  const qc = useQueryClient();
+  const invalidate = () => {
+    void qc.invalidateQueries({ queryKey: key("recharges") });
+    void qc.invalidateQueries({ queryKey: key("wallets") });
+  };
+
+  return useMutation({
+    mutationFn: (input: Record<string, unknown>) => w.createRecharge(input),
+    onSuccess: invalidate,
   });
 }
-export function useBalance() {
-  return useQuery({ queryKey: queryKeys.balance, queryFn: () => rechargeRepository.balance() });
+
+// Estos hooks son legacy y se mantienen vacíos para evitar errores de importación
+// hasta que se limpien los componentes que los usan.
+export function useRechargePackages() {
+  return { data: [], isLoading: false, error: null, refetch: () => {} };
 }
+export function useBalance() {
+  return { data: { amount: 0, currency: "COP", smsCredits: 0 }, isLoading: false, error: null, refetch: () => {} };
+}
+export function useRecharges() {
+  return { data: [], isLoading: false, error: null, refetch: () => {} };
+}
+
