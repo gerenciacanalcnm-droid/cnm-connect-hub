@@ -305,27 +305,87 @@ export function WhatsAppTemplates() {
 
         {selectedComponent === 'BUTTONS' && (
           <div className="space-y-4">
-            <Button onClick={() => addButton('QUICK_REPLY')} variant="outline" className="w-full text-xs">
-              + Agregar Respuesta Rápida
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Botones</label>
+              <Badge variant="outline" className="text-[10px]">{buttons.length} / 10</Badge>
+            </div>
+            
+            <Button onClick={() => addButton('QUICK_REPLY')} variant="outline" className="w-full text-xs" disabled={buttons.length >= 10}>
+              <Plus className="h-3 w-3 mr-2" /> Agregar botón
             </Button>
-            <div className="space-y-3 mt-4">
+            
+            <div className="space-y-3 mt-4 overflow-y-auto max-h-[400px] pr-2">
               {buttons.map((b, i) => (
-                <div key={i} className="p-3 bg-slate-50 rounded-lg border text-sm space-y-2">
+                <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{b.type}</span>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 text-red-400" onClick={() => setButtons(buttons.filter((_, idx) => idx !== i))}>
-                      <Trash2 className="h-3 w-3" />
+                    <Select value={b.type} onValueChange={(val: any) => {
+                      const newButtons = [...buttons];
+                      newButtons[i].type = val;
+                      setButtons(newButtons);
+                    }}>
+                      <SelectTrigger className="h-7 text-[10px] font-bold w-36 uppercase tracking-tighter bg-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="QUICK_REPLY">Respuesta rápida</SelectItem>
+                        <SelectItem value="URL">Visitar sitio web</SelectItem>
+                        <SelectItem value="PHONE">Llamar por teléfono</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors" onClick={() => setButtons(buttons.filter((_, idx) => idx !== i))}>
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <Input 
-                    value={b.text} 
-                    onChange={(e) => {
-                      const newButtons = [...buttons];
-                      newButtons[i].text = e.target.value;
-                      setButtons(newButtons);
-                    }} 
-                    className="h-8 text-xs"
-                  />
+
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase">Texto del botón</label>
+                      <Input 
+                        value={b.text} 
+                        onChange={(e) => {
+                          const newButtons = [...buttons];
+                          newButtons[i].text = e.target.value;
+                          setButtons(newButtons);
+                        }} 
+                        className="h-9 text-sm text-slate-900 bg-white"
+                        placeholder="Escribe el texto..."
+                        maxLength={25}
+                      />
+                    </div>
+
+                    {b.type === 'URL' && (
+                      <div className="space-y-1 animate-in slide-in-from-top-1 duration-200">
+                        <label className="text-[10px] font-semibold text-slate-400 uppercase">URL del sitio web</label>
+                        <Input 
+                          value={b.url} 
+                          onChange={(e) => {
+                            const newButtons = [...buttons];
+                            newButtons[i].url = e.target.value;
+                            setButtons(newButtons);
+                          }} 
+                          className="h-9 text-sm text-slate-900 bg-white"
+                          placeholder="https://example.com"
+                        />
+                      </div>
+                    )}
+
+                    {b.type === 'PHONE' && (
+                      <div className="space-y-1 animate-in slide-in-from-top-1 duration-200">
+                        <label className="text-[10px] font-semibold text-slate-400 uppercase">Número de teléfono</label>
+                        <Input 
+                          value={b.phoneNumber} 
+                          onChange={(e) => {
+                            const newButtons = [...buttons];
+                            newButtons[i].phoneNumber = e.target.value;
+                            setButtons(newButtons);
+                          }} 
+                          className="h-9 text-sm text-slate-900 bg-white"
+                          placeholder="+573000000000"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
