@@ -33,8 +33,30 @@ const ICONS: Record<string, typeof MessageSquare> = {
 export function CommunicationSettings() {
   const { data: settings, isLoading } = useCommunicationSettings();
   const providers = useCommunicationProviders();
+  const [diagnostic, setDiagnostic] = useState<any>(null);
+  const [testing, setTesting] = useState(false);
+  const runDiagnostic = useServerFn(testMetaConnection);
+
+  const handleDiagnostic = async () => {
+    setTesting(true);
+    setDiagnostic(null);
+    try {
+      const res = await runDiagnostic();
+      setDiagnostic(res);
+      if (res.PHONE_NUMBER === "OK" && res.WABA === "OK" && res.TEMPLATES === "OK") {
+        toast.success("Conexión con Meta verificada");
+      } else {
+        toast.warning("La conexión con Meta tiene errores");
+      }
+    } catch (e) {
+      toast.error("Error al ejecutar diagnóstico");
+    } finally {
+      setTesting(false);
+    }
+  };
 
   if (isLoading || !settings) return <Loader />;
+
 
   return (
     <div className="space-y-4">
