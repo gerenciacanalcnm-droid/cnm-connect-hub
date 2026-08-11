@@ -312,19 +312,35 @@ export function WhatsAppSurveys() {
                         {headerText || "TEXTO DE CABECERA"}
                       </div>
                     ) : headerType === 'IMAGE' ? (
-                      <div className="flex flex-col items-center text-slate-400">
-                        <ImageIcon className="h-8 w-8 mb-2 opacity-50" />
-                        <span className="text-[10px] font-medium">[IMAGEN]</span>
+                      <div className="flex flex-col items-center text-slate-400 w-full aspect-video justify-center bg-slate-100">
+                        {headerUrl ? (
+                          <img src={headerUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }} />
+                        ) : (
+                          <>
+                            <ImageIcon className="h-8 w-8 mb-2 opacity-50" />
+                            <span className="text-[10px] font-medium">[IMAGEN]</span>
+                          </>
+                        )}
                       </div>
                     ) : headerType === 'VIDEO' ? (
-                      <div className="flex flex-col items-center text-slate-400">
-                        <Video className="h-8 w-8 mb-2 opacity-50" />
-                        <span className="text-[10px] font-medium">[VIDEO]</span>
+                      <div className="flex flex-col items-center text-slate-400 w-full aspect-video justify-center bg-slate-800">
+                        {headerUrl ? (
+                          <video src={headerUrl} className="w-full h-full object-cover" muted />
+                        ) : (
+                          <>
+                            <Video className="h-8 w-8 mb-2 opacity-50" />
+                            <span className="text-[10px] font-medium">[VIDEO]</span>
+                          </>
+                        )}
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center text-slate-400">
+                      <div className="flex flex-col items-center text-slate-400 p-4 border-2 border-dashed border-slate-200 m-2 rounded w-full">
                         <FileText className="h-8 w-8 mb-2 opacity-50" />
-                        <span className="text-[10px] font-medium">[DOCUMENTO]</span>
+                        <span className="text-[10px] font-medium truncate w-full text-center">
+                          {headerUrl ? headerUrl.split('/').pop() : "[DOCUMENTO]"}
+                        </span>
                       </div>
                     )}
                   </div>
