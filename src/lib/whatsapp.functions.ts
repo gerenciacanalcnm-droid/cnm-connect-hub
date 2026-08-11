@@ -293,6 +293,7 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { recipients, body, templateId, variables, accountId } = data;
     const total = recipients.length;
+    const batchId = data.batchId || crypto.randomUUID();
 
     if (total === 0) throw new Error("No hay destinatarios.");
     if (!body && !templateId) throw new Error("Se requiere mensaje o plantilla.");
