@@ -581,9 +581,45 @@ export const walletOperation = createServerFn({ method: "POST" })
       .parse(v),
   )
   .handler(async ({ data, context }) => {
+    let walletId = data.wallet_id;
+
+    // Si la wallet es virtual (no existe en DB), crearla bajo demanda
+    if (walletId.startsWith("no-wallet-")) {
+      const companyId = walletId.replace("no-wallet-", "");
+      
+      // Verificar si ya se creó (carrera de ratas)
+      const { data: existing } = await context.supabase
+        .from("wallets")
+        .select("id")
+        .eq("company_id", companyId)
+        .eq("channel", "sms")
+        .maybeSingle();
+
+      if (existing) {
+        walletId = (existing as { id: string }).id;
+      } else {
+        const { data: created, error: createErr } = await context.supabase
+          .from("wallets")
+          .insert({
+            company_id: companyId,
+            channel: "sms",
+            balance: 0,
+            consumed: 0,
+            credits: 0,
+            currency: "COP",
+            status: "active"
+          } as never)
+          .select("id")
+          .single();
+        
+        if (createErr) throw new Error(`Error creando wallet: ${createErr.message}`);
+        walletId = (created as { id: string }).id;
+      }
+    }
+
     const signed = data.type === "AJUSTE_DEBITO" ? -Math.abs(data.amount) : data.amount;
     const res = await applyWalletMovement(context.supabase as unknown as Sb, {
-      walletId: data.wallet_id,
+      walletId,
       amount: signed,
       units: data.units,
       type: data.type,
