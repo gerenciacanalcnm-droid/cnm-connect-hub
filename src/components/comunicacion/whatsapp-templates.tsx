@@ -221,7 +221,7 @@ export function WhatsAppTemplates() {
                 <div className="w-64 border-r p-4 space-y-4">
                   <h4 className="font-semibold text-sm">COMPONENTES</h4>
                   <div className="grid gap-2">
-                    <Button variant="outline" className="justify-start gap-2" onClick={() => form.setValue("headerType", "TEXT")}>
+                    <Button variant="outline" className="justify-start gap-2" onClick={() => setSelectedComponent("HEADER")}>
                       <Type className="h-4 w-4" /> + Encabezado
                     </Button>
                     <Button variant="outline" className="justify-start gap-2" onClick={() => setSelectedComponent("BODY")}>
