@@ -118,7 +118,7 @@ export function SendWhatsAppIndividual() {
     }
     const raw = toManual.split(/[\s,;]+/).filter(Boolean);
     const valid = allRecipients.length;
-    const invalid = raw.length - validManualPhones.length;
+    const invalid = Math.max(0, raw.length - validManualPhones.length);
     return { total: raw.length + selectedContacts.size, valid, invalid };
   }, [mode, toManual, allRecipients, validManualPhones, selectedContacts]);
 
