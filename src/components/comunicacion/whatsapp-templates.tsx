@@ -387,12 +387,18 @@ export function WhatsAppTemplates() {
                           {/* Variables detectadas */}
                           <div className="space-y-2 pt-2">
                             <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Variables Detectadas</h5>
-                            {(form.watch("body").match(/\{\{\d+\}\}/g) || []).map((v, i) => (
-                              <div key={i} className="flex items-center gap-2 bg-slate-50 p-2 rounded border text-sm">
-                                <Badge variant="outline" className="bg-indigo-50 font-mono text-indigo-600 border-indigo-200">{v}</Badge>
-                                <span className="text-xs text-muted-foreground">Ejemplo: [Valor real]</span>
-                              </div>
-                            ))}
+                            {(() => {
+                              try {
+                                return (form.watch("body")?.match(/\{\{\d+\}\}/g) || []).map((v, i) => (
+                                  <div key={i} className="flex items-center gap-2 bg-slate-50 p-2 rounded border text-sm">
+                                    <Badge variant="outline" className="bg-indigo-50 font-mono text-indigo-600 border-indigo-200">{v}</Badge>
+                                    <span className="text-xs text-muted-foreground">Ejemplo: [Valor real]</span>
+                                  </div>
+                                ));
+                              } catch (e) {
+                                return null;
+                              }
+                            })()}
                           </div>
                         </div>
                       )}
