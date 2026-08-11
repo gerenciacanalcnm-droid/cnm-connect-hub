@@ -474,25 +474,33 @@ export function WhatsAppTemplates() {
                 <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
                 <Button onClick={form.handleSubmit(onSubmit)}>Guardar borrador</Button>
                 <Button className="bg-emerald-600" onClick={async () => {
-                  const val = form.getValues();
-                  const variables = val.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
-                  const payload: any = {
-                    name: val.name,
-                    category: val.category,
-                    language: val.language,
-                    body: val.body,
-                    footer: val.footer,
-                    buttons: val.buttons,
-                    variables,
-                    metadata: {
-                      header_type: val.headerType,
-                      header_text: val.headerText,
-                      header_handle: val.headerHandle
-                    }
-                  };
-                  const saved = await saveMutation.mutateAsync(payload) as any;
-                  if (saved?.id) await handleSubmitToMeta(saved.id);
-                  setIsCreateOpen(false);
+                  try {
+                    const isValid = await form.trigger();
+                    if (!isValid) return;
+
+                    const val = form.getValues();
+                    const variables = val.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
+                    const payload: any = {
+                      name: val.name,
+                      category: val.category,
+                      language: val.language,
+                      body: val.body,
+                      footer: val.footer,
+                      buttons: val.buttons,
+                      variables,
+                      metadata: {
+                        header_type: val.headerType,
+                        header_text: val.headerText,
+                        header_handle: val.headerHandle
+                      }
+                    };
+                    const saved = await saveMutation.mutateAsync(payload) as any;
+                    if (saved?.id) await handleSubmitToMeta(saved.id);
+                    setIsCreateOpen(false);
+                    form.reset();
+                  } catch (err) {
+                    // Handled by mutation toast
+                  }
                 }}>Enviar a Meta</Button>
               </DialogFooter>
             </DialogContent>
