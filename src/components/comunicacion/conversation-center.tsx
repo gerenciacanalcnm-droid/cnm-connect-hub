@@ -219,7 +219,7 @@ export function ConversationCenter() {
                   <p className="text-xs text-muted-foreground">{active.contactPhone}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              </div>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2 border-r border-border pr-3">
                   <div className="flex items-center gap-2 text-xs">
