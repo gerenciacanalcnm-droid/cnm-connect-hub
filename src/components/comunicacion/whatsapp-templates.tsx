@@ -514,7 +514,7 @@ export function WhatsAppTemplates() {
             </div>
           </div>
           <DialogFooter>
-            {currentTemplate?.status === "DRAFT" && (
+            {currentTemplate?.status === "draft" && (
               <Button 
                 onClick={() => {
                   handleSubmitToMeta(currentTemplate.id);
