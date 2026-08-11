@@ -257,6 +257,49 @@ export function SendWhatsAppIndividual() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {mode === "schedule" && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-emerald-50/30 rounded-lg border border-emerald-100">
+                <div className="space-y-2">
+                  <Label className="text-xs flex items-center gap-1.5">
+                    <Calendar className="h-3 w-3 text-emerald-600" /> Fecha de Envío
+                  </Label>
+                  <Input 
+                    type="date" 
+                    value={scheduledDate}
+                    onChange={(e) => setScheduledDate(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs flex items-center gap-1.5">
+                    <Clock className="h-3 w-3 text-emerald-600" /> Hora (24h)
+                  </Label>
+                  <Input 
+                    type="time" 
+                    value={scheduledTime}
+                    onChange={(e) => setScheduledTime(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs flex items-center gap-1.5">
+                    <Globe className="h-3 w-3 text-emerald-600" /> Zona Horaria
+                  </Label>
+                  <Select value={timezone} onValueChange={setTimezone}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="America/Bogota">Bogotá (GMT-5)</SelectItem>
+                      <SelectItem value="America/Mexico_City">Ciudad de México (GMT-6)</SelectItem>
+                      <SelectItem value="America/New_York">New York (GMT-5)</SelectItem>
+                      <SelectItem value="UTC">UTC</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
             {!connectedAccount && (
               <Alert variant="destructive" className="bg-destructive/10 border-none">
                 <AlertCircle className="h-4 w-4" />
