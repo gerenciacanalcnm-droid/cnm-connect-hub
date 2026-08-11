@@ -252,23 +252,73 @@ export function SendSms() {
             <CardTitle>Resumen</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>Válidos</span>
-              <span className="font-bold text-green-600">{stats.valid}</span>
+              <span className="font-medium text-foreground">{stats.valid.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>Inválidos</span>
-              <span className="font-bold text-red-600">{stats.invalid}</span>
+              <span className="font-medium text-destructive">{stats.invalid.toLocaleString()}</span>
             </div>
+            
             <Separator />
-            <div className="flex justify-between font-bold text-lg">
-              <span>Costo</span>
-              <span>{formatCurrency(cost)} COP</span>
+            
+            <div className="space-y-2.5">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>SMS totales</span>
+                <span className="font-medium text-foreground">{stats.valid.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-base font-bold">
+                <span>Costo estimado</span>
+                <span>{formatCurrency(cost)}</span>
+              </div>
             </div>
-            <Button className="w-full" onClick={() => handleSend(false)} disabled={balance < cost}>Enviar</Button>
-            <Button variant="outline" className="w-full" onClick={() => handleSend(true)} disabled={balance < cost}>⚡ SMS Flash</Button>
+
+            <div className="rounded-lg bg-muted p-3 space-y-1.5 mt-2">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Saldo disponible</span>
+                <span>{formatCurrency(balance)}</span>
+              </div>
+              <div className="flex justify-between text-xs font-medium">
+                <span>Saldo proyectado</span>
+                <span className={balance < cost ? "text-destructive" : "text-green-600"}>
+                  {formatCurrency(balance - cost)}
+                </span>
+              </div>
+            </div>
+
+            {balance < cost && (
+              <Alert variant="destructive" className="py-2 px-3 border-none bg-destructive/10">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-[11px] font-medium uppercase tracking-wider">
+                  Saldo insuficiente
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="grid gap-2 pt-2">
+              <Button 
+                onClick={() => handleSend(false)} 
+                disabled={sending || balance < cost || stats.valid === 0}
+                className="w-full gap-2"
+              >
+                <Send className="h-4 w-4" />
+                {mode === "schedule" ? "Programar Envío" : "Enviar ahora"}
+              </Button>
+              
+              <Button 
+                variant="outline"
+                onClick={() => handleSend(true)}
+                disabled={sending || balance < cost || stats.valid === 0}
+                className="w-full gap-2 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
+              >
+                <Zap className="h-4 w-4 text-amber-500" />
+                ⚡ Enviar SMS Flash
+              </Button>
+            </div>
           </CardContent>
         </Card>
+
       </div>
     </div>
   );
