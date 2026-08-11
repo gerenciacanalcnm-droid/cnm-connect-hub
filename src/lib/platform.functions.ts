@@ -245,6 +245,22 @@ export const createContact = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
+
+    // Disparar automatización "Nuevo contacto"
+    if (row) {
+      await processAutomationTrigger(
+        CNM_COMPANY_ID,
+        "new_contact",
+        {
+          contact_id: row.id,
+          first_name: row.first_name,
+          phone: row.phone,
+          tags: row.tags
+        },
+        `new_contact_${row.id}`
+      );
+    }
+
     return row;
   });
 
