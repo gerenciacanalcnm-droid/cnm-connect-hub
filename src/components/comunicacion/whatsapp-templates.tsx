@@ -405,12 +405,15 @@ export function WhatsAppTemplates() {
           </div>
         )}
 
-        <div className="mt-auto pt-6 border-t">
-          <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+        <div className="mt-auto pt-6 border-t space-y-3">
+          <Button className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" onClick={() => {
             console.log("Saving...", { name, category, language, headerType, headerText, body, footer, buttons });
             setIsEditorOpen(false);
           }}>
-            Guardar Borrador
+            Enviar a Meta
+          </Button>
+          <Button variant="ghost" className="w-full text-xs text-slate-400" onClick={() => setIsEditorOpen(false)}>
+            Cancelar
           </Button>
         </div>
       </div>
