@@ -116,7 +116,7 @@ export function WhatsAppTemplates() {
 
   const handleSync = async () => {
     if (!connectedAccount) {
-      return toast.error("No hay una cuenta de WhatsApp conectada para sincronizar.");
+      return toast.error("Conecta primero una cuenta de WhatsApp Business para enviar esta plantilla a Meta.");
     }
     try {
       await syncMutation.mutateAsync(connectedAccount.id);
@@ -146,6 +146,9 @@ export function WhatsAppTemplates() {
 
   const handleSubmitToMeta = async (id: string) => {
     try {
+      if (!connectedAccount) {
+        return toast.error("Conecta primero una cuenta de WhatsApp Business para enviar esta plantilla a Meta.");
+      }
       await submitMutation.mutateAsync(id);
       toast.success("Plantilla enviada a Meta para aprobación.");
     } catch (err: any) {
@@ -332,8 +335,35 @@ export function WhatsAppTemplates() {
                     <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
                       Cancelar
                     </Button>
-                    <Button type="submit" disabled={saveMutation.isPending}>
-                      Guardar Plantilla
+                    <Button 
+                      type="submit" 
+                      disabled={saveMutation.isPending}
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                    >
+                      Guardar borrador
+                    </Button>
+                    <Button 
+                      type="button" 
+                      disabled={saveMutation.isPending || submitMutation.isPending}
+                      onClick={async () => {
+                        const isValid = await form.trigger();
+                        if (isValid) {
+                          if (!connectedAccount) {
+                            return toast.error("Conecta primero una cuenta de WhatsApp Business para enviar esta plantilla a Meta.");
+                          }
+                          // Primero guardamos y luego enviamos
+                          const values = form.getValues();
+                          const variables = values.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
+                          const saved = await saveMutation.mutateAsync({ ...values, variables });
+                          if (saved?.id) {
+                            await handleSubmitToMeta(saved.id);
+                            setIsCreateOpen(false);
+                            form.reset();
+                          }
+                        }
+                      }}
+                    >
+                      Enviar a Meta
                     </Button>
                   </DialogFooter>
                 </form>
