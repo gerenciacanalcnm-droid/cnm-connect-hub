@@ -119,58 +119,57 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
-    // 0. Obtener company_id del usuario (de company_members)
-    const { data: membership } = await context.supabase
-      .from("company_members")
-      .select("company_id")
-      .eq("user_id", context.userId)
-      .eq("is_active", true)
-      .maybeSingle();
-    
-    const companyId = membership?.company_id || CNM_COMPANY_ID;
-
-    // 1. Obtener credenciales y validar plantilla si aplica
-    const { data: account, error: accErr } = await context.supabase
-      .from("whatsapp_accounts")
-      .select("phone_number_id, access_token")
-      .eq("id", data.accountId)
-      .single();
-
-    if (accErr || !account) throw new Error("Cuenta de WhatsApp no encontrada o sin acceso");
-
-    let templateData: any = null;
-    if (data.templateId) {
-      const { data: tpl, error: tplErr } = await context.supabase
-        .from("whatsapp_templates")
-        .select("*")
-        .eq("id", data.templateId)
-        .eq("company_id", companyId)
-        .eq("account_id", data.accountId)
-        .single();
+    try {
+      // 0. Autenticación y Empresa
+      const { data: membership, error: memErr } = await context.supabase
+        .from("company_members")
+        .select("company_id")
+        .eq("user_id", context.userId)
+        .eq("is_active", true)
+        .maybeSingle();
       
-      if (tplErr || !tpl) throw new Error("Plantilla no encontrada o no pertenece a esta cuenta.");
-      if (tpl.status !== "APPROVED") throw new Error("La plantilla no está aprobada en Meta.");
-      templateData = tpl;
-    }
+      if (memErr) {
+        console.error("[whatsapp.auth] Error buscando membresía:", memErr.message);
+        throw new Error(`AUTH_USER_ERROR: Error al validar membresía: ${memErr.message}`);
+      }
 
-    // 2. Cobro atómico consolidado (1 unidad)
-    // El cobro se realiza ANTES de contactar a Meta.
-    try {
-      await trackServiceUsage({
-        data: {
-          company_id: companyId,
-          channel: "whatsapp",
-          units: 1,
-          description: `WA ${data.templateId ? 'Template' : 'Individual'} a ${data.recipient}`,
-          reference: crypto.randomUUID(), // Referencia única para idempotencia comercial
+      const companyId = membership?.company_id || CNM_COMPANY_ID;
+      if (!companyId) throw new Error("AUTH_USER_ERROR: No se pudo determinar el company_id");
+
+      // 1. Obtener credenciales de la cuenta
+      const { data: account, error: accErr } = await context.supabase
+        .from("whatsapp_accounts")
+        .select("phone_number_id, access_token, company_id, business_account_id")
+        .eq("id", data.accountId)
+        .single();
+
+      if (accErr) {
+        console.error("[whatsapp.db] Error buscando cuenta:", accErr.message);
+        throw new Error(`DB_AUTH_ERROR: Cuenta no encontrada o sin acceso: ${accErr.message}`);
+      }
+
+      if (account.company_id !== companyId) {
+        throw new Error("DB_AUTH_ERROR: La cuenta seleccionada no pertenece a tu empresa");
+      }
+
+      // Validar plantilla si aplica
+      let templateData: any = null;
+      if (data.templateId) {
+        const { data: tpl, error: tplErr } = await context.supabase
+          .from("whatsapp_templates")
+          .select("*")
+          .eq("id", data.templateId)
+          .eq("company_id", companyId)
+          .single();
+        
+        if (tplErr || !tpl) {
+          throw new Error(`DB_AUTH_ERROR: Plantilla no encontrada o sin acceso: ${tplErr?.message || 'NULL'}`);
         }
-      });
-    } catch (err: any) {
-      throw err; // Saldo insuficiente
-    }
+        if (tpl.status !== "APPROVED") throw new Error(`META_API_ERROR: La plantilla no está aprobada (Estado: ${tpl.status})`);
+        templateData = tpl;
+      }
 
-    // 3. Envío a Meta Cloud API
-    try {
+      // 2. Preparar payload para Meta
       const toFormatted = data.recipient.startsWith("57") ? data.recipient : `57${data.recipient}`;
       let metaPayload: any = {
         messaging_product: "whatsapp",
@@ -204,6 +203,9 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
         };
       }
 
+      // 3. Envío a Meta Cloud API
+      console.log(`[whatsapp.meta_call] Enviando a Meta: account=${data.accountId}, phone_id=${account.phone_number_id}`);
+      
       const metaResponse = await fetch(
         `https://graph.facebook.com/v20.0/${account.phone_number_id}/messages`,
         {
@@ -219,42 +221,54 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
       const metaResult = await metaResponse.json();
 
       if (!metaResponse.ok) {
-        throw new Error(metaResult.error?.message || "Error al enviar mensaje vía Meta");
+        const metaErrorCode = metaResult.error?.code;
+        const metaErrorMessage = metaResult.error?.message;
+        
+        if (metaResponse.status === 401 || metaResponse.status === 403) {
+          throw new Error(`META_AUTH_ERROR: Meta rechazó las credenciales. Status: ${metaResponse.status}, Code: ${metaErrorCode}, Msg: ${metaErrorMessage}`);
+        }
+        throw new Error(`META_API_ERROR: Error de Meta API. Status: ${metaResponse.status}, Code: ${metaErrorCode}, Msg: ${metaErrorMessage}`);
       }
 
       const wamid = metaResult.messages?.[0]?.id;
 
-      // 4. Registrar el mensaje exitoso en la base de datos
-      const { data: msg, error: msgErr } = await context.supabase
-        .from("whatsapp_messages")
-        .insert({
-          company_id: companyId,
-          account_id: data.accountId,
-          to_phone: data.recipient,
-          body: data.templateId ? templateData.body : data.body,
-          template_id: data.templateId,
-          direction: "outbound" as const,
-          status: "sent" as const,
-          external_id: wamid,
-          metadata: { ...metaResult, variables: data.variables },
-          cost: 250 // Costo estándar configurado
-        } as never)
-        .select("id")
-        .single();
+      // 4. Cobro y Registro solo tras ÉXITO en Meta
+      try {
+        await trackServiceUsage({
+          data: {
+            company_id: companyId,
+            channel: "whatsapp",
+            units: 1,
+            description: `WA ${data.templateId ? 'Template' : 'Individual'} a ${data.recipient}`,
+            reference: wamid || crypto.randomUUID(),
+          }
+        });
 
-      if (msgErr) {
-        console.error("[whatsapp.db_record] Error al registrar mensaje exitoso:", msgErr.message);
-        // El mensaje ya se envió a Meta, no lanzamos error fatal pero logueamos
+        // Registrar el mensaje
+        await context.supabase
+          .from("whatsapp_messages")
+          .insert({
+            company_id: companyId,
+            account_id: data.accountId,
+            to_phone: data.recipient,
+            body: data.templateId ? templateData.body : data.body,
+            template_id: data.templateId,
+            direction: "outbound",
+            status: "sent",
+            external_id: wamid,
+            metadata: { ...metaResult, variables: data.variables },
+            cost: 250
+          } as never);
+
+      } catch (postErr: any) {
+        console.error("[whatsapp.post_process] Error en cobro/registro:", postErr.message);
+        // No lanzamos error para el usuario porque el mensaje YA se envió a Meta
       }
 
-      return { ok: true, messageId: msg?.id, waId: wamid };
+      return { ok: true, messageId: wamid, waId: wamid };
 
     } catch (err: any) {
-      console.error("[whatsapp.send] Error:", err.message);
-      // Nota: Si falló el envío a Meta, el cobro ya se realizó. 
-      // En un flujo ideal, deberíamos revertir el cobro o marcar para reembolso.
-      // Pero según el requerimiento, el cobro se confirma ante éxito de Meta.
-      // Re-implementando lógica de cobro condicional si es posible con trackServiceUsage.
+      console.error("[whatsapp.individual_send] Error fatal:", err.message);
       throw err;
     }
   });
