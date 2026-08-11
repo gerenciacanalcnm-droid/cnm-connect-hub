@@ -22,17 +22,16 @@ function AppLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // if (!loading && !user) navigate({ to: "/login", replace: true });
+    if (!loading && !user) navigate({ to: "/login", replace: true });
   }, [loading, user, navigate]);
 
-  // Bypass loading check for diagnostic
-  // if (loading || !user) {
-  //   return (
-  //     <div className="flex min-h-screen items-center justify-center bg-background">
-  //       <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-  //     </div>
-  //   );
-  // }
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <CompanyProvider>
