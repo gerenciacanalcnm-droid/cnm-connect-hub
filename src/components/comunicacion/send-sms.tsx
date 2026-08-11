@@ -410,7 +410,7 @@ export function SendSms() {
           </CardContent>
         </Card>
       </div>
-      </div>
+
 
       {/* Listado de Programaciones */}
       <div className="lg:col-span-2">
