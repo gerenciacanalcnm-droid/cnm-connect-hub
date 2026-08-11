@@ -43,7 +43,7 @@ export function CommunicationSettings() {
     try {
       const res = await runDiagnostic();
       setDiagnostic(res);
-      if (res.PHONE_NUMBER === "OK" && res.WABA === "OK" && res.TEMPLATES === "OK") {
+      if (res && 'PHONE_NUMBER' in res && res.PHONE_NUMBER === "OK" && res.WABA === "OK" && res.TEMPLATES === "OK") {
         toast.success("Conexión con Meta verificada");
       } else {
         toast.warning("La conexión con Meta tiene errores");
@@ -54,6 +54,7 @@ export function CommunicationSettings() {
       setTesting(false);
     }
   };
+
 
   if (isLoading || !settings) return <Loader />;
 
