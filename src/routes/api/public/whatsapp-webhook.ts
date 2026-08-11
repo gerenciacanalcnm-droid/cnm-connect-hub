@@ -56,14 +56,13 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               // 1. Identificar mensaje por external_id (wamid)
               const { data: msg } = await supabaseAdmin
                 .from('whatsapp_messages')
-                .select('id, status, metadata')
+                .select('id, status')
                 .eq('external_id', remoteId)
                 .maybeSingle();
 
               if (!msg) continue;
 
               // 2. Mapeo de estados y validación de precedencia para evitar retrocesos
-              // read > delivered > sent > sending
               const statusPriority: Record<string, number> = {
                 'sending': 0,
                 'sent': 1,
@@ -85,12 +84,8 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                 if (newStatus === 'failed') {
                   const error = statusUpdate.errors?.[0];
                   updateData.error_code = error?.code?.toString();
-                  updateData.metadata = {
-                    ...((msg.metadata as any) || {}),
-                    error_message: error?.message,
-                    error_details: error?.error_data?.details,
-                    failed_at: timestamp ? new Date(parseInt(timestamp) * 1000).toISOString() : new Date().toISOString()
-                  };
+                  // No hay columna metadata en whatsapp_messages, así que ignoramos el guardado de mensaje de error por ahora
+                  // o podríamos concatenar al error_code si fuera necesario.
                 }
 
                 if (newStatus === 'delivered') updateData.delivered_at = new Date(parseInt(timestamp) * 1000).toISOString();
