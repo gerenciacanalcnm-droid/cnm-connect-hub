@@ -210,11 +210,12 @@ async function transferToAgent(companyId: string, conversationId: string, agentI
     .eq("company_id", companyId);
 
   // 2. Registrar auditoría
-  await sb.from("automation_logs").insert({
+  await (sb.from as any)("automation_logs").insert({
     company_id: companyId,
     trigger_type: "nova_transfer",
     result: "SUCCESS",
     execution_data: { conversation_id: conversationId, agent_id: agentId }
-  } as any);
+  });
+
 }
 
