@@ -92,3 +92,19 @@ export function useSendWhatsAppBulk() {
       whatsappRepository.sendBulk({ data }),
   });
 }
+
+export function useSyncWhatsAppTemplates() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (accountId: string) => 
+      whatsappRepository.syncTemplates({ data: { accountId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.whatsapp.templates }),
+  });
+}
+
+export function useSendWhatsAppTemplate() {
+  return useMutation({
+    mutationFn: (data: { recipient: string; templateId: string; variables?: Record<string, string>; accountId: string }) => 
+      whatsappRepository.sendTemplate({ data }),
+  });
+}

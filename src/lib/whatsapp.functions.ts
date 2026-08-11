@@ -338,3 +338,188 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
     };
   });
 
+/**
+ * Sincroniza plantillas desde Meta Cloud API y las guarda localmente.
+ */
+export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ accountId: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    // 1. Obtener credenciales
+    const { data: account, error: accErr } = await context.supabase
+      .from("whatsapp_accounts")
+      .select("business_account_id, access_token")
+      .eq("id", data.accountId)
+      .single();
+
+    if (accErr || !account || !account.business_account_id) {
+      throw new Error("Cuenta de WhatsApp no válida para sincronización.");
+    }
+
+    // 2. Llamada a Meta (Message Templates)
+    const response = await fetch(
+      `https://graph.facebook.com/v20.0/${account.business_account_id}/message_templates?limit=100`,
+      {
+        headers: {
+          Authorization: `Bearer ${account.access_token}`,
+        },
+      }
+    );
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error?.message || "Error al sincronizar con Meta");
+    }
+
+    const templates = result.data || [];
+    
+    // 3. Procesar y guardar en la base de datos
+    for (const t of templates) {
+      const bodyComponent = t.components?.find((c: any) => c.type === "BODY");
+      const headerComponent = t.components?.find((c: any) => c.type === "HEADER");
+      const footerComponent = t.components?.find((c: any) => c.type === "FOOTER");
+      const buttonsComponent = t.components?.find((c: any) => c.type === "BUTTONS");
+
+      const bodyText = bodyComponent?.text || "";
+      const variables = bodyText.match(/{{(\d+)}}/g) || [];
+      
+      const row = {
+        company_id: CNM_COMPANY_ID,
+        account_id: data.accountId,
+        external_id: t.id,
+        name: t.name,
+        category: t.category,
+        language: t.language,
+        status: t.status,
+        body: bodyText,
+        header: headerComponent?.text || null,
+        footer: footerComponent?.text || null,
+        buttons: buttonsComponent || null,
+        variables: variables as any,
+        updated_at: new Date().toISOString()
+      };
+
+      await context.supabase
+        .from("whatsapp_templates")
+        .upsert(row, { onConflict: "company_id, name, language" });
+    }
+
+    return { ok: true, count: templates.length };
+  });
+
+/**
+ * Envío de WhatsApp utilizando una PLANTILLA.
+ */
+export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({
+      recipient: z.string().min(10),
+      templateId: z.string().uuid(),
+      variables: z.record(z.string()).optional(),
+      accountId: z.string().uuid(),
+      batchId: z.string().optional(),
+    }).parse(v)
+  )
+  .handler(async ({ data, context }) => {
+    const [tplRes, accRes] = await Promise.all([
+      context.supabase.from("whatsapp_templates").select("*").eq("id", data.templateId).single(),
+      context.supabase.from("whatsapp_accounts").select("phone_number_id, access_token").eq("id", data.accountId).single()
+    ]);
+
+    if (tplRes.error || !tplRes.data) throw new Error("Plantilla no encontrada");
+    if (accRes.error || !accRes.data) throw new Error("Cuenta de WhatsApp no válida");
+
+    const template = tplRes.data;
+    const account = accRes.data;
+
+    if (template.status !== "APPROVED") {
+      throw new Error(`La plantilla no puede usarse porque su estado es: ${template.status}`);
+    }
+
+    let usageAmount = 0;
+    if (!data.batchId) {
+      try {
+        const usage = await trackServiceUsage({
+          data: {
+            company_id: CNM_COMPANY_ID,
+            channel: "whatsapp",
+            units: 1,
+            description: `WA Template (${template.name}) a ${data.recipient}`,
+            reference: crypto.randomUUID(),
+          }
+        });
+        usageAmount = usage.amount;
+      } catch (err: any) {
+        throw err;
+      }
+    }
+
+    const { data: msg, error: msgErr } = await context.supabase
+      .from("whatsapp_messages")
+      .insert({
+        company_id: CNM_COMPANY_ID,
+        account_id: data.accountId,
+        to_phone: data.recipient,
+        template_id: data.templateId as any,
+        body: template.body,
+        direction: "outbound",
+        status: "sending",
+        cost: usageAmount,
+        metadata: { batch_id: data.batchId, template_name: template.name, variables: data.variables }
+      } as never)
+      .select("id")
+      .single();
+
+    if (msgErr) throw new Error(msgErr.message);
+
+    try {
+      const parameters = Object.keys(data.variables || {}).sort((a, b) => parseInt(a) - parseInt(b)).map(key => ({
+        type: "text",
+        text: data.variables![key]
+      }));
+
+      const toFormatted = data.recipient.startsWith("57") ? data.recipient : `57${data.recipient}`;
+
+      const metaResponse = await fetch(
+        `https://graph.facebook.com/v20.0/${account.phone_number_id}/messages`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${account.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            recipient_type: "individual",
+            to: toFormatted,
+            type: "template",
+            template: {
+              name: template.name,
+              language: { code: template.language },
+              components: parameters.length > 0 ? [{
+                type: "body",
+                parameters: parameters
+              }] : []
+            }
+          }),
+        }
+      );
+
+      const metaResult = await metaResponse.json();
+      if (!metaResponse.ok) throw new Error(metaResult.error?.message || "Error de Meta API");
+
+      await context.supabase
+        .from("whatsapp_messages")
+        .update({ status: "sent", external_id: metaResult.messages?.[0]?.id } as never)
+        .eq("id", msg.id);
+
+      return { ok: true, messageId: msg.id };
+    } catch (err: any) {
+      await context.supabase
+        .from("whatsapp_messages")
+        .update({ status: "failed", error_code: "META_API_ERROR", metadata: { error: err.message } } as never)
+        .eq("id", msg.id);
+      throw err;
+    }
+  });
