@@ -161,17 +161,17 @@ function AutomationsPage() {
       <PageHeader 
         title="Automatizaciones" 
         description="Gestiona tus flujos de comunicación inteligente."
-        icon={Zap}
-      >
-        <Button onClick={() => {
-          setSelectedAutomation(null);
-          form.reset();
-          setIsDialogOpen(true);
-        }}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nueva automatización
-        </Button>
-      </PageHeader>
+        actions={
+          <Button onClick={() => {
+            setSelectedAutomation(null);
+            form.reset();
+            setIsDialogOpen(true);
+          }}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nueva automatización
+          </Button>
+        }
+      />
 
       <Card>
         <CardContent className="p-0">
@@ -213,8 +213,8 @@ function AutomationsPage() {
                     </TableCell>
                     <TableCell>
                       <Badge variant={
-                        automation.status === 'ACTIVA' ? 'success' : 
-                        automation.status === 'PAUSADA' ? 'warning' : 'outline'
+                        automation.status === 'ACTIVA' ? 'default' : 
+                        automation.status === 'PAUSADA' ? 'secondary' : 'outline'
                       }>
                         {automation.status}
                       </Badge>
@@ -442,7 +442,7 @@ function AutomationsPage() {
                       </TableCell>
                       <TableCell>{log.trigger_type}</TableCell>
                       <TableCell>
-                        <Badge variant={log.result === 'success' ? 'success' : 'destructive'}>
+                        <Badge variant={log.result === 'success' ? 'default' : 'destructive'}>
                           {log.result}
                         </Badge>
                       </TableCell>
