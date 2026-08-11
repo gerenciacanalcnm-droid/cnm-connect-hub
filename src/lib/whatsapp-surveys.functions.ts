@@ -1,0 +1,190 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
+import { trackServiceUsage } from "./commercial.functions";
+
+const uuid = z.string().uuid();
+
+export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({
+    recipient: z.string().min(8),
+    surveyId: uuid,
+    companyId: uuid,
+    whatsappAccountId: uuid
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+
+    // 1. Validar Empresa y Cuenta WhatsApp
+    const { data: account, error: accErr } = await supabase
+      .from("whatsapp_accounts")
+      .select("phone_number_id, access_token")
+      .eq("id", data.whatsappAccountId)
+      .eq("company_id", data.companyId)
+      .single();
+
+    if (accErr || !account) throw new Error("Cuenta de WhatsApp no válida para esta empresa.");
+
+    // 2. Validar Encuesta y Opciones
+    const { data: survey, error: survErr } = await supabase
+      .from("whatsapp_surveys")
+      .select("*, whatsapp_survey_options(*)")
+      .eq("id", data.surveyId)
+      .eq("company_id", data.companyId)
+      .single();
+
+    if (survErr || !survey) throw new Error("Encuesta no encontrada.");
+    const options = survey.whatsapp_survey_options || [];
+    if (options.length < 2) throw new Error("La encuesta debe tener al menos 2 opciones.");
+
+    // 3. Preparar mensaje interactivo Meta
+    const interactivePayload = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: data.recipient,
+      type: "interactive",
+      interactive: {
+        type: "list",
+        header: { type: "text", text: survey.title || "Encuesta" },
+        body: { text: survey.question },
+        footer: { text: "Selecciona una opción" },
+        action: {
+          button: "Ver opciones",
+          sections: [
+            {
+              title: "Opciones disponibles",
+              rows: options.map((opt: any) => ({
+                id: opt.option_key,
+                title: opt.label.substring(0, 24),
+              }))
+            }
+          ]
+        }
+      }
+    };
+
+    // 4. Registrar mensaje en estado 'sending'
+    const { data: msgRow, error: msgErr } = await supabase
+      .from("whatsapp_messages")
+      .insert({
+        company_id: data.companyId,
+        to_phone: data.recipient,
+        body: `[ENCUESTA] ${survey.question}`,
+        direction: "outbound",
+        status: "sending",
+        metadata: { survey_id: data.surveyId }
+      } as any)
+      .select("id")
+      .single();
+
+    if (msgErr) throw new Error("Error registrando mensaje.");
+    const messageId = msgRow.id;
+
+    try {
+      // 5. Motor Comercial: Cobro e Idempotencia
+      // trackServiceUsage maneja validación de Wallet y WalletMovement
+      await trackServiceUsage({
+        data: {
+          company_id: data.companyId,
+          channel: "whatsapp",
+          units: 1,
+          description: `Envío de Encuesta: ${survey.title}`,
+          reference: `survey_${data.surveyId}_${data.recipient}_${messageId}`
+        }
+      });
+
+      // 6. Envío real a Meta Cloud API
+      const metaResponse = await fetch(
+        `https://graph.facebook.com/v20.0/${account.phone_number_id}/messages`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${account.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(interactivePayload),
+        }
+      );
+
+      const metaResult = await metaResponse.json();
+      if (!metaResponse.ok) {
+        throw new Error(metaResult.error?.message || "Error al enviar mensaje interactivo a Meta.");
+      }
+
+      // 7. Actualizar mensaje con ID de Meta
+      await supabase
+        .from("whatsapp_messages")
+        .update({
+          status: "sent",
+          external_id: metaResult.messages?.[0]?.id,
+          updated_at: new Date().toISOString()
+        } as any)
+        .eq("id", messageId);
+
+      return { ok: true, messageId, metaId: metaResult.messages?.[0]?.id };
+
+    } catch (err: any) {
+      // Revertir estado si falla
+      await supabase
+        .from("whatsapp_messages")
+        .update({ status: "failed", error_code: "send_error" } as any)
+        .eq("id", messageId);
+      throw err;
+    }
+  });
+
+export const saveSurvey = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({
+    id: uuid.optional(),
+    title: z.string().min(1),
+    question: z.string().min(1),
+    options: z.array(z.object({
+      label: z.string().min(1),
+      option_key: z.string()
+    })).min(2).max(10)
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    
+    // Obtener company_id del usuario
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("company_id")
+      .eq("id", userId)
+      .single();
+    
+    if (!profile?.company_id) throw new Error("Empresa no identificada.");
+
+    const { data: survey, error } = await supabase
+      .from("whatsapp_surveys")
+      .upsert({
+        id: data.id,
+        company_id: profile.company_id,
+        title: data.title,
+        question: data.question,
+        status: "ACTIVE"
+      } as any)
+      .select("id")
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    // Borrar opciones viejas si es update
+    if (data.id) {
+      await supabase.from("whatsapp_survey_options").delete().eq("survey_id", survey.id);
+    }
+
+    // Insertar nuevas opciones
+    const optionsToInsert = data.options.map((opt, index) => ({
+      survey_id: survey.id,
+      label: opt.label,
+      option_key: opt.option_key,
+      sort_order: index
+    }));
+
+    await supabase.from("whatsapp_survey_options").insert(optionsToInsert as any);
+
+    return { id: survey.id };
+  });
