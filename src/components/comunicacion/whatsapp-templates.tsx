@@ -455,7 +455,22 @@ export function WhatsAppTemplates() {
                 <Button onClick={form.handleSubmit(onSubmit)}>Guardar borrador</Button>
                 <Button className="bg-emerald-600" onClick={async () => {
                   const val = form.getValues();
-                  const saved = await saveMutation.mutateAsync(val) as any;
+                  const variables = val.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
+                  const payload: any = {
+                    name: val.name,
+                    category: val.category,
+                    language: val.language,
+                    body: val.body,
+                    footer: val.footer,
+                    buttons: val.buttons,
+                    variables,
+                    metadata: {
+                      header_type: val.headerType,
+                      header_text: val.headerText,
+                      header_handle: val.headerHandle
+                    }
+                  };
+                  const saved = await saveMutation.mutateAsync(payload) as any;
                   if (saved?.id) await handleSubmitToMeta(saved.id);
                   setIsCreateOpen(false);
                 }}>Enviar a Meta</Button>
