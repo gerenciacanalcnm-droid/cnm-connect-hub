@@ -230,7 +230,7 @@ export const listConversationMessages = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("whatsapp_messages")
-      .select("id, body, status, direction, created_at, media_url, to_phone")
+      .select("id, body, status, direction, created_at, media_url, to_phone, from_phone")
       .eq("conversation_id", data.conversationId)
       .order("created_at", { ascending: true })
       .limit(500);

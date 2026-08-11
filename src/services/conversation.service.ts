@@ -13,6 +13,7 @@ type ConvRow = {
   channel: string;
   contact_phone: string;
   contact_name: string | null;
+  contact: { name: string; whatsapp_phone: string } | null;
   status: string;
   assigned_to: string | null;
   tags: string[] | null;
@@ -30,7 +31,7 @@ function mapConv(r: ConvRow): Conversation {
     contactId: r.contact_id ?? undefined,
     channel: r.channel as Conversation["channel"],
     contactPhone: r.contact_phone,
-    contactName: r.contact_name ?? undefined,
+    contactName: r.contact?.name ?? r.contact_name ?? undefined,
     status: r.status as Conversation["status"],
     assignedTo: r.assigned_to ?? undefined,
     tags: r.tags ?? [],
