@@ -5,6 +5,7 @@ import { ContactsTable } from "@/components/crm/contacts-table";
 import { Segments } from "@/components/crm/segments";
 import { Pipeline } from "@/components/crm/pipeline";
 import { UnifiedTimeline } from "@/components/crm/unified-timeline";
+import { ConversationCenter } from "@/components/comunicacion/conversation-center";
 
 export const Route = createFileRoute("/_app/crm")({
   head: () => ({
@@ -26,12 +27,16 @@ function CrmPage() {
       <Tabs defaultValue="contactos" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="contactos">Contactos</TabsTrigger>
+          <TabsTrigger value="conversaciones">Conversaciones</TabsTrigger>
           <TabsTrigger value="segmentos">Segmentos</TabsTrigger>
           <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
         </TabsList>
         <TabsContent value="contactos">
           <ContactsTable />
+        </TabsContent>
+        <TabsContent value="conversaciones">
+          <ConversationCenter />
         </TabsContent>
         <TabsContent value="segmentos">
           <Segments />
