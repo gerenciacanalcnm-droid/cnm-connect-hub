@@ -11,6 +11,11 @@ import {
   Send,
   Search,
   MoreVertical,
+  User,
+  UserPlus,
+  ArrowRightLeft,
+  XCircle,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +40,7 @@ import {
   useSendWhatsApp,
   useCommunicationSettings,
 } from "@/hooks/use-communication";
+import { useUsers, useCurrentUser } from "@/hooks/use-users";
 import type { CommunicationChannel, Conversation, ConversationStatus } from "@/types/communication";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +55,10 @@ const STATUS_LABEL: Record<ConversationStatus, string> = {
   pending: "Pendiente",
   closed: "Cerrada",
   archived: "Archivada",
+  SIN_ASIGNAR: "Sin asignar",
+  ASIGNADA: "Asignada",
+  EN_ATENCION: "En atención",
+  CERRADA: "Cerrada (Finalizada)",
 };
 
 const ATTACH = [
@@ -60,21 +70,34 @@ const ATTACH = [
 
 export function ConversationCenter() {
   const [channel, setChannel] = useState<"all" | CommunicationChannel>("all");
-  const [status, setStatus] = useState<"all" | ConversationStatus>("all");
+  const [status, setStatus] = useState<"all" | ConversationStatus | "mis_conversaciones" | "sin_asignar_filter">("all");
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState("");
 
+  const { data: currentUser } = useCurrentUser();
+  const { data: users = [] } = useUsers();
+
   const filters = useMemo(
     () => ({
       ...(channel !== "all" ? { channel } : {}),
-      ...(status !== "all" ? { status } : {}),
+      ...(status !== "all" && status !== "mis_conversaciones" && status !== "sin_asignar_filter" ? { status: status as ConversationStatus } : {}),
       ...(search ? { search } : {}),
     }),
     [channel, status, search],
   );
 
   const { data: conversations = [], isLoading } = useConversations(filters);
+
+  const filteredConversations = useMemo(() => {
+    let list = conversations;
+    if (status === "mis_conversaciones" && currentUser) {
+      list = list.filter(c => c.assignedTo === currentUser.id);
+    } else if (status === "sin_asignar_filter") {
+      list = list.filter(c => !c.assignedTo || c.status === "SIN_ASIGNAR");
+    }
+    return list;
+  }, [conversations, status, currentUser]);
   const { data: messages = [] } = useConversationMessages(activeId);
   const updateConv = useUpdateConversation();
   const sendWhatsApp = useSendWhatsApp();
@@ -103,7 +126,8 @@ export function ConversationCenter() {
     }
   };
 
-  const active = conversations.find((c) => c.id === activeId) ?? null;
+  const active = conversations.find((c: Conversation) => c.id === activeId) ?? null;
+  const assignedUser = active?.assignedTo ? users.find(u => u.id === active.assignedTo) : null;
 
   return (
     <div className="grid gap-4 lg:grid-cols-[340px_1fr]">
@@ -135,11 +159,11 @@ export function ConversationCenter() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="open">Abiertas</SelectItem>
-                <SelectItem value="pending">Pendientes</SelectItem>
-                <SelectItem value="closed">Cerradas</SelectItem>
-                <SelectItem value="archived">Archivadas</SelectItem>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="sin_asignar_filter">Sin asignar</SelectItem>
+                <SelectItem value="mis_conversaciones">Mis conversaciones</SelectItem>
+                <SelectItem value="EN_ATENCION">En atención</SelectItem>
+                <SelectItem value="CERRADA">Cerradas</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -149,17 +173,17 @@ export function ConversationCenter() {
             <div className="p-6">
               <Loader />
             </div>
-          ) : conversations.length === 0 ? (
+          ) : filteredConversations.length === 0 ? (
             <div className="p-6">
               <EmptyState
                 icon={MessageCircle}
                 title="Sin conversaciones"
-                description="Las conversaciones entrantes aparecerán aquí cuando los canales estén conectados."
+                description="No hay conversaciones que coincidan con los filtros seleccionados."
               />
             </div>
           ) : (
             <ul className="divide-y divide-border">
-              {conversations.map((c) => (
+              {filteredConversations.map((c) => (
                 <ConversationRow
                   key={c.id}
                   conversation={c}
@@ -195,25 +219,78 @@ export function ConversationCenter() {
                   <p className="text-xs text-muted-foreground">{active.contactPhone}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {active.tags.map((t) => (
-                  <Badge key={t} variant="secondary" className="text-[10px]">
-                    {t}
-                  </Badge>
-                ))}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 border-r border-border pr-3">
+                  <div className="flex items-center gap-2 text-xs">
+                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="font-medium text-muted-foreground">Asesor:</span>
+                    <span className={cn("font-medium", !assignedUser && "italic text-muted-foreground")}>
+                      {assignedUser?.name ?? "Sin asignar"}
+                    </span>
+                  </div>
+
+                  <Select
+                    value={active.assignedTo ?? "unassigned"}
+                    onValueChange={(v) => {
+                      const newAssignedTo = v === "unassigned" ? null : v;
+                      const newStatus = v === "unassigned" ? "SIN_ASIGNAR" : (active.assignedTo ? active.status : "ASIGNADA");
+                      updateConv.mutate({ 
+                        id: active.id, 
+                        assignedTo: newAssignedTo,
+                        status: newStatus as ConversationStatus
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="ml-2 h-7 w-[130px] border-none bg-muted/50 text-[10px] hover:bg-muted">
+                      <div className="flex items-center gap-1.5">
+                        {active.assignedTo ? <ArrowRightLeft className="h-3 w-3" /> : <UserPlus className="h-3 w-3" />}
+                        <SelectValue placeholder={active.assignedTo ? "Transferir" : "Asignar asesor"} />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unassigned">Sin asignar</SelectItem>
+                      {users.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {active.status === "CERRADA" ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 gap-1.5 border-green-200 bg-green-50 text-[10px] text-green-700 hover:bg-green-100 dark:border-green-900/30 dark:bg-green-900/10"
+                    onClick={() => updateConv.mutate({ id: active.id, status: "EN_ATENCION" })}
+                  >
+                    <RotateCcw className="h-3 w-3" /> Reabrir conversación
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 gap-1.5 border-red-200 bg-red-50 text-[10px] text-red-700 hover:bg-red-100 dark:border-red-900/30 dark:bg-red-900/10"
+                    onClick={() => updateConv.mutate({ id: active.id, status: "CERRADA" })}
+                  >
+                    <XCircle className="h-3 w-3" /> Cerrar conversación
+                  </Button>
+                )}
+
                 <Select
                   value={active.status}
                   onValueChange={(v) =>
                     updateConv.mutate({ id: active.id, status: v as ConversationStatus })
                   }
                 >
-                  <SelectTrigger className="h-8 w-[140px] text-xs">
+                  <SelectTrigger className="h-7 w-[120px] text-[10px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.keys(STATUS_LABEL) as ConversationStatus[]).map((s) => (
+                    {["SIN_ASIGNAR", "ASIGNADA", "EN_ATENCION", "CERRADA"].map((s) => (
                       <SelectItem key={s} value={s}>
-                        {STATUS_LABEL[s]}
+                        {STATUS_LABEL[s as ConversationStatus]}
                       </SelectItem>
                     ))}
                   </SelectContent>

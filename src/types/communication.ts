@@ -81,7 +81,7 @@ export interface CommunicationTemplate {
   createdAt: string;
 }
 
-export type ConversationStatus = "open" | "pending" | "closed" | "archived";
+export type ConversationStatus = "open" | "pending" | "closed" | "archived" | "SIN_ASIGNAR" | "ASIGNADA" | "EN_ATENCION" | "CERRADA";
 
 export interface Conversation {
   id: ID;
