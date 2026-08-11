@@ -234,12 +234,15 @@ export function SendWhatsAppIndividual() {
         <Card>
           <CardContent className="pt-6">
             <Tabs value={mode} onValueChange={(v) => setMode(v as SendMode)}>
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="individual" className="gap-2 text-xs sm:text-sm">
                   <Send className="h-4 w-4" /> Individual
                 </TabsTrigger>
                 <TabsTrigger value="bulk" className="gap-2 text-xs sm:text-sm">
                   <Users className="h-4 w-4" /> Masivo
+                </TabsTrigger>
+                <TabsTrigger value="schedule" className="gap-2 text-xs sm:text-sm">
+                  <Calendar className="h-4 w-4" /> Programar
                 </TabsTrigger>
               </TabsList>
             </Tabs>
