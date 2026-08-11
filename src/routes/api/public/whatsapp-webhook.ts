@@ -151,15 +151,75 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               if (!conversationId) continue;
 
               // Registrar mensaje entrante
-              await supabaseAdmin.from('whatsapp_messages').insert({
+              const { data: inboundMsgRow, error: inboundErr } = await (supabaseAdmin.from('whatsapp_messages') as any).insert({
                 company_id: account.company_id,
                 conversation_id: conversationId,
                 to_phone: from,
-                body: text,
+                body: text || (message.interactive?.list_reply?.title || '[Interactivo]'),
                 direction: 'inbound',
                 status: 'delivered',
-                external_id: wamid
-              } as any);
+                external_id: wamid,
+                metadata: message.interactive ? { interactive: message.interactive } : {}
+              }).select('id').single();
+
+              const inboundMsgId = (inboundMsgRow as any)?.id;
+
+              // --- PROCESAR RESPUESTA A ENCUESTA ---
+              if (message.type === 'interactive' && message.interactive?.list_reply) {
+                const reply = message.interactive.list_reply;
+                const optionKey = reply.id; // Ejemplo: option_1
+
+                // 1. Buscar encuesta asociada al último mensaje saliente de esta conversación
+                const { data: lastOutbound } = await (supabaseAdmin
+                  .from('whatsapp_messages') as any)
+                  .select('*')
+                  .eq('conversation_id', conversationId)
+                  .eq('direction', 'outbound')
+                  .order('created_at', { ascending: false })
+                  .limit(1)
+                  .maybeSingle();
+                
+                const surveyId = (lastOutbound as any)?.metadata?.survey_id;
+
+                if (surveyId) {
+                  // 2. Buscar la opción por key
+                  const { data: optionRow } = await (supabaseAdmin
+                    .from('whatsapp_survey_options' as any) as any)
+                    .select('id')
+                    .eq('survey_id', surveyId)
+                    .eq('option_key', optionKey)
+                    .maybeSingle();
+                  
+                  const optionId = (optionRow as any)?.id;
+                  
+                  if (optionId) {
+                    // 3. Registrar respuesta
+                    await (supabaseAdmin.from('whatsapp_survey_responses' as any) as any).insert({
+                      company_id: account.company_id,
+                      survey_id: surveyId,
+                      option_id: optionId,
+                      contact_id: contact.id,
+                      conversation_id: conversationId,
+                      whatsapp_message_id: inboundMsgId
+                    });
+
+                    // 4. Disparar automatización de respuesta
+                    await processAutomationTrigger(
+                      account.company_id,
+                      'SURVEY_RESPONSE',
+                      { 
+                        phone: from, 
+                        survey_id: surveyId, 
+                        option_key: optionKey,
+                        option_label: reply.title,
+                        conversation_id: conversationId, 
+                        contact_id: contact.id 
+                      },
+                      wamid
+                    );
+                  }
+                }
+              }
 
               // Disparar automatizaciones estándar
               await processAutomationTrigger(
