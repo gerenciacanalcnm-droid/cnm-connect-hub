@@ -102,6 +102,8 @@ export function WhatsAppTemplates() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<any>(null);
+  const [selectedComponent, setSelectedComponent] = useState<'HEADER' | 'BODY' | 'FOOTER' | 'BUTTONS' | null>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: templates = [], isLoading } = useWhatsAppTemplates();
   const { data: accounts = [] } = useWhatsAppAccounts();
