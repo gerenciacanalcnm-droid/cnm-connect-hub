@@ -52,61 +52,41 @@ const ICONS: Record<string, typeof MessageSquare> = {
 
 export function CommunicationSettings() {
   const { data: settings, isLoading } = useCommunicationSettings();
+  const { data: accounts = [], isLoading: accountsLoading } = useWhatsAppAccounts();
   const providers = useCommunicationProviders();
   const [diagnostic, setDiagnostic] = useState<any>(null);
-  const [testing, setTesting] = useState(false);
+  const [testingAccountId, setTestingAccountId] = useState<string | null>(null);
   const [detail, setDetail] = useState<any>(null);
-  const runDiagnostic = useServerFn(testMetaConnection);
-  const runDetail = useServerFn(getMetaTemplatesDetail);
-  const syncTemplates = useServerFn(syncWhatsAppTemplates);
-  const [syncing, setSyncing] = useState(false);
+  
+  const testSpecificConnection = useTestSpecificWhatsAppConnection();
+  const deleteAccount = useDeleteWhatsAppAccount();
+  const syncTemplates = useSyncWhatsAppTemplates();
+  const [syncingAccountId, setSyncingAccountId] = useState<string | null>(null);
 
-  const handleDiagnostic = async () => {
-    setTesting(true);
+  const handleDiagnostic = async (accountId: string) => {
+    setTestingAccountId(accountId);
     setDiagnostic(null);
     setDetail(null);
     try {
-      const res = await runDiagnostic();
-      setDiagnostic(res);
-      
-      // Si falla cnm_prueba, lanzamos el detalle automáticamente
-      if (res && 'CNM_PRUEBA' in res && res.CNM_PRUEBA === "NO ENCONTRADA") {
-        const detailRes = await runDetail();
-        setDetail(detailRes);
-      }
-
-      if (res && 'PHONE_NUMBER' in res && res.PHONE_NUMBER === "OK" && res.WABA === "OK" && res.TEMPLATES === "OK") {
-        toast.success("Conexión con Meta verificada");
-      } else {
-        toast.warning("La conexión con Meta tiene errores");
-      }
-    } catch (e) {
-      toast.error("Error al ejecutar diagnóstico");
+      const res = await testSpecificConnection.mutateAsync(accountId);
+      setDiagnostic(res.basic);
+      setDetail(res.detailed);
+    } catch (e: any) {
+      toast.error(e.message || "Error al ejecutar diagnóstico");
     } finally {
-      setTesting(false);
+      setTestingAccountId(null);
     }
   };
 
-  const handleSyncTemplates = async () => {
-    setSyncing(true);
+  const handleSyncTemplates = async (accountId: string) => {
+    setSyncingAccountId(accountId);
     try {
-      // 1. Get the current active WhatsApp account ID for this company
-      const { data: accounts } = await supabase
-        .from("whatsapp_accounts")
-        .select("id")
-        .eq("status", "connected")
-        .limit(1);
-
-      if (accounts && accounts.length > 0) {
-        await syncTemplates({ data: { accountId: accounts[0].id } });
-        toast.success("Plantillas sincronizadas exitosamente");
-      } else {
-        toast.error("No hay una cuenta de WhatsApp conectada para sincronizar");
-      }
+      await syncTemplates.mutateAsync(accountId);
+      toast.success("Plantillas sincronizadas exitosamente");
     } catch (e) {
       toast.error("Error al sincronizar plantillas");
     } finally {
-      setSyncing(false);
+      setSyncingAccountId(null);
     }
   };
 
