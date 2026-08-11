@@ -418,7 +418,7 @@ export function WhatsAppTemplates() {
                           {template.language}
                         </span>
                       </TableCell>
-                      <TableCell>{getStatusBadge(template.status || "DRAFT")}</TableCell>
+                      <TableCell>{getStatusBadge(template.status || "draft")}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {template.updatedAt ? format(new Date(template.updatedAt), "dd MMM yyyy, HH:mm", { locale: es }) : '-'}
                       </TableCell>
