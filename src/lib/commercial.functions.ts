@@ -493,6 +493,12 @@ async function applyWalletMovement(
 
   const balanceBefore = Number(wallet.balance);
   const balanceAfter = balanceBefore + input.amount;
+
+  // Validación de saldo (No permitir saldo negativo si es un débito)
+  if (balanceAfter < 0 && input.amount < 0) {
+    throw new Error("Saldo insuficiente para realizar esta operación.");
+  }
+
   const creditsAfter = Number(wallet.credits) + input.units;
 
   // 4. Actualización Atómica con protección de concurrencia
