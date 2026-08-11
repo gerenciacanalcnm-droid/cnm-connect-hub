@@ -69,9 +69,8 @@ export const conversationService: ConversationService = {
   },
   async messages(conversationId) {
     try {
-      const rows = (await listConversationMessages({ data: { conversationId } })) as Array<
-        Record<string, unknown>
-      >;
+      const rows = (await listConversationMessages({ data: { conversationId } })) as any[];
+
       return rows.map((r) => ({
         id: String(r["id"]),
         conversationId,
