@@ -47,19 +47,12 @@ type SendMode = "direct" | "bulk" | "schedule";
 
 export function SendSms() {
   const [mode, setMode] = useState<SendMode>("direct");
-  const [destMode, setDestMode] = useState<"manual" | "crm">("manual");
-  const [to, setTo] = useState("");
   const [msg, setMsg] = useState("");
-  const [isFlash, setIsFlash] = useState(false);
-  const [sending, setSending] = useState(false);
   
   // Programación
   const [date, setDate] = useState("");
   const [time, setTime] = useState("09:00");
-  
-  const doSend = useServerFn(sendSmsMessage);
 
-  // Estimaciones (Mock - deberían venir del motor comercial)
   const [toManual, setToManual] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
