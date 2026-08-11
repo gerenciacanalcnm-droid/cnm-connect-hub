@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   FileText, 
   Plus, 
@@ -6,7 +6,10 @@ import {
   MousePointer2, 
   Variable,
   Trash2,
-  ChevronLeft
+  ChevronLeft,
+  RefreshCw,
+  Save,
+  Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,24 +17,102 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { saveWhatsAppTemplateDraft, getWhatsAppTemplates } from "@/lib/whatsapp-templates.functions";
+import { submitWhatsAppTemplateToMeta } from "@/lib/whatsapp-meta.functions";
+import { syncWhatsAppTemplates } from "@/lib/whatsapp.functions";
 
 export function WhatsAppTemplates() {
-  // Estados para FASE 3 (Mínimo)
-  const [name, setName] = useState(`template_${Date.now()}`);
+  const queryClient = useQueryClient();
+  const [editingTemplate, setEditingTemplate] = useState<any>(null);
+  
+  // Estados del editor
+  const [name, setName] = useState("");
   const [category, setCategory] = useState("MARKETING");
   const [language, setLanguage] = useState("es");
   const [body, setBody] = useState("");
-  
-  // Estados para FASE 5 & 6 (Header & Footer)
   const [headerType, setHeaderType] = useState("NONE");
   const [headerText, setHeaderText] = useState("");
   const [footer, setFooter] = useState("");
-
-  // Estados para FASE 7 (Botones)
   const [buttons, setButtons] = useState<any[]>([]);
 
   const [selectedComponent, setSelectedComponent] = useState<'HEADER' | 'BODY' | 'FOOTER' | 'BUTTONS' | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+
+  // Cargar plantillas
+  const { data: templates = [], isLoading } = useQuery({
+    queryKey: ['whatsapp_templates'],
+    queryFn: () => getWhatsAppTemplates()
+  });
+
+  // Buscar cuenta conectada
+  const { data: account } = useQuery({
+    queryKey: ['whatsapp_account_connected'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('whatsapp_accounts')
+        .select('*')
+        .eq('status', 'connected')
+        .maybeSingle();
+      return data;
+    }
+  });
+
+  // Mutaciones
+  const saveMutation = useMutation({
+    mutationFn: saveWhatsAppTemplateDraft,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['whatsapp_templates'] });
+      toast.success("Borrador guardado localmente");
+    },
+    onError: (err: any) => toast.error(err.message)
+  });
+
+  const sendToMetaMutation = useMutation({
+    mutationFn: submitWhatsAppTemplateToMeta,
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['whatsapp_templates'] });
+      toast.success(`Plantilla enviada a Meta. Estado: ${res.status}`);
+      setIsEditorOpen(false);
+    },
+    onError: (err: any) => toast.error(err.message)
+  });
+
+  const syncMutation = useMutation({
+    mutationFn: syncWhatsAppTemplates,
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['whatsapp_templates'] });
+      toast.success(`Sincronización completada: ${res.count} plantillas.`);
+    },
+    onError: (err: any) => toast.error(err.message)
+  });
+
+  useEffect(() => {
+    if (editingTemplate) {
+      setName(editingTemplate.name);
+      setCategory(editingTemplate.category);
+      setLanguage(editingTemplate.language);
+      setBody(editingTemplate.body);
+      setHeaderText(editingTemplate.header || "");
+      setFooter(editingTemplate.footer || "");
+      setButtons(editingTemplate.buttons || []);
+      // Simplificación para header type
+      if (editingTemplate.header) setHeaderType("TEXT");
+      else setHeaderType("NONE");
+    } else {
+      setName(`template_${Date.now()}`);
+      setCategory("MARKETING");
+      setLanguage("es");
+      setBody("");
+      setHeaderType("NONE");
+      setHeaderText("");
+      setFooter("");
+      setButtons([]);
+    }
+  }, [editingTemplate]);
+
 
   // Lógica de Previsualización (FASE 3 & 4)
   const renderPreviewBody = () => {
@@ -55,27 +136,65 @@ export function WhatsAppTemplates() {
 
   if (!isEditorOpen) {
     return (
-      <div className="p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Plantillas de WhatsApp</h1>
-          <Button onClick={() => setIsEditorOpen(true)} className="bg-emerald-600 hover:bg-emerald-700">
-            <Plus className="h-4 w-4 mr-2" /> Crear plantilla
-          </Button>
+      <div className="p-8 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Plantillas de WhatsApp</h1>
+            <p className="text-sm text-slate-500">Gestiona y sincroniza tus plantillas oficiales con Meta Cloud API</p>
+          </div>
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => account && syncMutation.mutate({ data: { accountId: account.id } })}
+              disabled={syncMutation.isPending || !account}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
+              Sincronizar con Meta
+            </Button>
+            <Button onClick={() => { setEditingTemplate(null); setIsEditorOpen(true); }} className="bg-emerald-600 hover:bg-emerald-700">
+              <Plus className="h-4 w-4 mr-2" /> Crear plantilla
+            </Button>
+          </div>
         </div>
-        <Card>
-          <CardContent className="p-12 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-              <Plus className="h-6 w-6 text-slate-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Sin plantillas configuradas</h3>
-            <p className="text-sm text-slate-500 max-w-xs mx-auto">
-              Conecta una cuenta de WhatsApp Business para sincronizar y enviar plantillas
-            </p>
-          </CardContent>
-        </Card>
+
+        {templates.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                <Plus className="h-6 w-6 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Sin plantillas configuradas</h3>
+              <p className="text-sm text-slate-500 max-w-xs mx-auto">
+                {account ? "Aún no has creado plantillas. Crea una nueva o sincroniza con Meta." : "Conecta una cuenta de WhatsApp Business para sincronizar y enviar plantillas"}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {templates.map((tpl: any) => (
+              <Card key={tpl.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => { setEditingTemplate(tpl); setIsEditorOpen(true); }}>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <Badge variant={tpl.status === 'APPROVED' ? 'default' : tpl.status === 'REJECTED' ? 'destructive' : 'secondary'}>
+                      {tpl.status}
+                    </Badge>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold">{tpl.category}</span>
+                  </div>
+                  <h4 className="font-bold text-slate-900 truncate mb-2">{tpl.name}</h4>
+                  <p className="text-xs text-slate-500 line-clamp-2 mb-4">{tpl.body}</p>
+                  <div className="flex justify-between items-center text-[10px] text-slate-400">
+                    <span>{tpl.language.toUpperCase()}</span>
+                    <span>{new Date(tpl.updated_at).toLocaleDateString()}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
+
 
   return (
     <div className="flex h-screen bg-slate-100 overflow-hidden">
@@ -413,15 +532,45 @@ export function WhatsAppTemplates() {
 
         <div className="mt-auto pt-6 border-t space-y-3">
           <Button 
-            className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" 
-            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text)}
+            variant="outline"
+            className="w-full text-slate-600"
+            disabled={saveMutation.isPending}
             onClick={() => {
-              console.log("Saving...", { name, category, language, headerType, headerText, body, footer, buttons });
-              setIsEditorOpen(false);
+              saveMutation.mutate({ 
+                data: { 
+                  id: editingTemplate?.id,
+                  name, category, language, body, footer, buttons,
+                  header: headerType === 'TEXT' ? headerText : null
+                } 
+              });
             }}
           >
+            <Save className="h-4 w-4 mr-2" />
+            Guardar Borrador
+          </Button>
+          
+          <Button 
+            className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" 
+            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending}
+            onClick={async () => {
+              // Primero guardamos
+              const saved: any = await saveMutation.mutateAsync({ 
+                data: { 
+                  id: editingTemplate?.id,
+                  name, category, language, body, footer, buttons,
+                  header: headerType === 'TEXT' ? headerText : null
+                } 
+              });
+              
+              if (saved && saved.id) {
+                sendToMetaMutation.mutate({ data: { id: saved.id } });
+              }
+            }}
+          >
+            <Send className="h-4 w-4 mr-2" />
             Enviar a Meta
           </Button>
+          
           <Button variant="ghost" className="w-full text-xs text-slate-400" onClick={() => setIsEditorOpen(false)}>
             Cancelar
           </Button>
