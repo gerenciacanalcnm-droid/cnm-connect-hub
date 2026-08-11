@@ -1,4 +1,4 @@
-import { Settings2, MessageSquare, MessageCircle, Mail, Activity, RefreshCw } from "lucide-react";
+import { Settings2, MessageSquare, MessageCircle, Mail, Activity, RefreshCw, Plus, Trash2, Smartphone, CheckCircle2, XCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,22 @@ import { testMetaConnection } from "@/lib/whatsapp-diagnostic.functions";
 import { getMetaTemplatesDetail } from "@/lib/whatsapp-diagnostic-detail.functions";
 import { syncWhatsAppTemplates } from "@/lib/whatsapp.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { useWhatsAppAccounts, useDeleteWhatsAppAccount, useSaveWhatsAppAccount, useTestSpecificWhatsAppConnection, useSyncWhatsAppTemplates } from "@/hooks/use-whatsapp";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -36,61 +52,41 @@ const ICONS: Record<string, typeof MessageSquare> = {
 
 export function CommunicationSettings() {
   const { data: settings, isLoading } = useCommunicationSettings();
+  const { data: accounts = [], isLoading: accountsLoading } = useWhatsAppAccounts();
   const providers = useCommunicationProviders();
   const [diagnostic, setDiagnostic] = useState<any>(null);
-  const [testing, setTesting] = useState(false);
+  const [testingAccountId, setTestingAccountId] = useState<string | null>(null);
   const [detail, setDetail] = useState<any>(null);
-  const runDiagnostic = useServerFn(testMetaConnection);
-  const runDetail = useServerFn(getMetaTemplatesDetail);
-  const syncTemplates = useServerFn(syncWhatsAppTemplates);
-  const [syncing, setSyncing] = useState(false);
+  
+  const testSpecificConnection = useTestSpecificWhatsAppConnection();
+  const deleteAccount = useDeleteWhatsAppAccount();
+  const syncTemplates = useSyncWhatsAppTemplates();
+  const [syncingAccountId, setSyncingAccountId] = useState<string | null>(null);
 
-  const handleDiagnostic = async () => {
-    setTesting(true);
+  const handleDiagnostic = async (accountId: string) => {
+    setTestingAccountId(accountId);
     setDiagnostic(null);
     setDetail(null);
     try {
-      const res = await runDiagnostic();
-      setDiagnostic(res);
-      
-      // Si falla cnm_prueba, lanzamos el detalle automáticamente
-      if (res && 'CNM_PRUEBA' in res && res.CNM_PRUEBA === "NO ENCONTRADA") {
-        const detailRes = await runDetail();
-        setDetail(detailRes);
-      }
-
-      if (res && 'PHONE_NUMBER' in res && res.PHONE_NUMBER === "OK" && res.WABA === "OK" && res.TEMPLATES === "OK") {
-        toast.success("Conexión con Meta verificada");
-      } else {
-        toast.warning("La conexión con Meta tiene errores");
-      }
-    } catch (e) {
-      toast.error("Error al ejecutar diagnóstico");
+      const res = await testSpecificConnection.mutateAsync(accountId);
+      setDiagnostic(res.basic);
+      setDetail(res.detailed);
+    } catch (e: any) {
+      toast.error(e.message || "Error al ejecutar diagnóstico");
     } finally {
-      setTesting(false);
+      setTestingAccountId(null);
     }
   };
 
-  const handleSyncTemplates = async () => {
-    setSyncing(true);
+  const handleSyncTemplates = async (accountId: string) => {
+    setSyncingAccountId(accountId);
     try {
-      // 1. Get the current active WhatsApp account ID for this company
-      const { data: accounts } = await supabase
-        .from("whatsapp_accounts")
-        .select("id")
-        .eq("status", "connected")
-        .limit(1);
-
-      if (accounts && accounts.length > 0) {
-        await syncTemplates({ data: { accountId: accounts[0].id } });
-        toast.success("Plantillas sincronizadas exitosamente");
-      } else {
-        toast.error("No hay una cuenta de WhatsApp conectada para sincronizar");
-      }
+      await syncTemplates.mutateAsync(accountId);
+      toast.success("Plantillas sincronizadas exitosamente");
     } catch (e) {
       toast.error("Error al sincronizar plantillas");
     } finally {
-      setSyncing(false);
+      setSyncingAccountId(null);
     }
   };
 
@@ -166,145 +162,178 @@ export function CommunicationSettings() {
         </CardContent>
       </Card>
 
-      <Card className="border-blue-500/20">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Activity className="h-4 w-4 text-blue-500" /> Diagnóstico Meta Cloud
+              <MessageCircle className="h-4 w-4 text-emerald-500" /> WhatsApp Business
             </CardTitle>
             <CardDescription>
-              Verifica la conexión real con los Secrets configurados en Lovable Cloud.
+              Gestiona tus números y cuentas de WhatsApp Business conectadas.
             </CardDescription>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleDiagnostic}
-            disabled={testing}
-            className="gap-2"
-          >
-            {testing ? "Probando..." : "Ejecutar Prueba"}
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-2">
+                <Plus className="h-4 w-4" /> Nueva Cuenta
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Conectar Cuenta de WhatsApp</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="alias">Nombre / Alias</Label>
+                  <Input id="alias" placeholder="Ej: Ventas Principal" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="token">Access Token (Meta Cloud)</Label>
+                  <Input id="token" type="password" placeholder="EAAB..." />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="waba_id">WhatsApp Business Account ID</Label>
+                  <Input id="waba_id" placeholder="1098..." />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="phone_id">Phone Number ID</Label>
+                  <Input id="phone_id" placeholder="1018..." />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" className="mr-auto text-slate-400">Próximamente Integración Meta Embedded</Button>
+                <Button disabled>Guardar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </CardHeader>
         <CardContent>
-          {diagnostic && (
+          {accountsLoading ? (
+            <div className="flex justify-center p-8"><Loader /></div>
+          ) : accounts.length === 0 ? (
+            <div className="text-center p-8 border-2 border-dashed rounded-lg">
+              <p className="text-sm text-muted-foreground">No hay cuentas de WhatsApp conectadas.</p>
+            </div>
+          ) : (
             <div className="space-y-4">
-              {'success' in diagnostic && diagnostic.success === false ? (
-                <Alert variant="destructive">
-                  <AlertTitle>Error de Configuración</AlertTitle>
-                  <AlertDescription>{diagnostic.error}</AlertDescription>
-                </Alert>
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="p-3 rounded-lg border bg-muted/30">
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Phone Number</p>
-                    <div className="flex flex-col gap-1">
-                      <Badge variant={diagnostic.PHONE_NUMBER === "OK" ? "default" : "destructive"}>
-                        {diagnostic.PHONE_NUMBER === "OK" ? "✅ Encontrado en Meta" : diagnostic.PHONE_NUMBER}
-                      </Badge>
+              {accounts.map(account => (
+                <div key={account.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                      <Smartphone className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{account.alias}</span>
+                        {account.isPrimary && <Badge variant="secondary" className="text-[10px]">Principal</Badge>}
+                        <Badge variant={account.status === 'connected' ? "default" : "destructive"} className="text-[10px] capitalize">
+                          {account.status}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                        {account.displayPhone || account.phoneNumberId}
+                      </p>
                     </div>
                   </div>
-                  <div className="p-3 rounded-lg border bg-muted/30">
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">WABA Account</p>
-                    <Badge variant={diagnostic.WABA === "OK" ? "default" : "destructive"}>
-                      {diagnostic.WABA === "OK" ? "✅ Encontrado" : diagnostic.WABA}
-                    </Badge>
-                  </div>
-                  <div className="p-3 rounded-lg border bg-muted/30">
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">PHONE → WABA</p>
-                    <Badge variant={detail?.waba_phone_numbers?.some((p: any) => p.id === detail.config?.phoneNumberId) ? "default" : "destructive"}>
-                      {detail?.waba_phone_numbers?.some((p: any) => p.id === detail.config?.phoneNumberId) ? "✅ Pertenece" : "ERROR"}
-                    </Badge>
-                  </div>
-                  <div className="p-3 rounded-lg border bg-muted/30">
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Templates</p>
-                    <Badge variant={diagnostic.TEMPLATES === "OK" ? "default" : "destructive"}>
-                      {diagnostic.TEMPLATES === "OK" ? `✅ ${detail?.templates?.length || 0} encontradas` : diagnostic.TEMPLATES}
-                    </Badge>
-                  </div>
-                </div>
-              )}
-
-              {diagnostic.raw_errors && diagnostic.raw_errors.length > 0 && (
-                <div className="mt-4 p-3 rounded-lg border border-destructive/20 bg-destructive/5">
-                  <p className="text-xs font-bold text-destructive mb-2">Detalles de errores:</p>
-                  <ul className="text-[11px] list-disc pl-4 space-y-1 text-destructive/80 font-mono">
-                    {diagnostic.raw_errors.map((err: string, i: number) => (
-                      <li key={i}>{err}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {detail && (
-                <div className="mt-6 space-y-4 border-t pt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-bold flex items-center gap-2">
-                      <Activity className="h-3 w-3" /> Reporte Técnico de Meta
-                    </h4>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleDiagnostic(account.id)}
+                      disabled={testingAccountId === account.id}
+                      className="h-8 text-xs gap-2"
+                    >
+                      {testingAccountId === account.id ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Activity className="h-3 w-3" />}
+                      Diagnóstico
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-7 text-[10px] gap-1 text-slate-400 hover:text-white"
-                      onClick={handleSyncTemplates}
-                      disabled={syncing}
+                      onClick={() => handleSyncTemplates(account.id)}
+                      disabled={syncingAccountId === account.id}
+                      className="h-8 w-8 p-0"
+                      title="Sincronizar Plantillas"
                     >
-                      <RefreshCw className={`h-3 w-3 ${syncing ? 'animate-spin' : ''}`} />
-                      Sincronizar plantillas
+                      <RefreshCw className={`h-3.5 w-3.5 ${syncingAccountId === account.id ? 'animate-spin' : ''}`} />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => deleteAccount.mutate(account.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
-                  
-                  <div className="grid gap-2 text-[11px] font-mono bg-slate-950 text-slate-300 p-3 rounded-md overflow-x-auto">
-                    <p className="text-blue-400">// Configuración</p>
-                    <p>WABA configurado: {detail.config?.businessAccountId}</p>
-                    <p>Phone Number ID: {detail.config?.phoneNumberId}</p>
-                    
-                    <p className="text-blue-400 mt-2">// Propiedad WABA</p>
-                    <p>WABA real del Phone Number: {detail.phone_details?.whatsapp_business_account?.id || 'NO ENCONTRADO'}</p>
-                    <p>Número: {detail.phone_details?.display_phone_number || 'N/A'}</p>
-                    <p>Verified Name: {detail.phone_details?.verified_name || 'N/A'}</p>
-                    <p>Estado: {detail.phone_details?.status || 'N/A'}</p>
-                    <p>Quality Rating: {detail.phone_details?.quality_rating || 'N/A'}</p>
-                    <p>Code Verification: {detail.phone_details?.code_verification_status || 'N/A'}</p>
-                    <p>¿Phone pertenece al WABA?: {
-                      detail.waba_phone_numbers?.some((p: any) => p.id === detail.config?.phoneNumberId) ? 'SÍ' : 'NO (ERROR CRÍTICO)'
-                    }</p>
-
-                    <p className="text-blue-400 mt-2">// Plantillas ({detail.templates?.length || 0})</p>
-                    {detail.cnm_prueba_match ? (
-                      <div className="bg-green-500/10 p-1 rounded border border-green-500/20 text-green-400">
-                        Plantilla encontrada:
-                        <br/>Name: {detail.cnm_prueba_match.name}
-                        <br/>Lang: {detail.cnm_prueba_match.language}
-                        <br/>Status: {detail.cnm_prueba_match.status}
-                        <br/>Category: {detail.cnm_prueba_match.category}
-                      </div>
-                    ) : (
-                      <p className="text-red-400">
-                        {detail.phone_details?.whatsapp_business_account?.id === detail.config?.businessAccountId 
-                          ? "La conexión es correcta. La plantilla cnm_prueba no existe en este WABA o no está disponible para este token."
-                          : "La plantilla no pertenece al WABA consultado o el token no tiene acceso a ese WABA."}
-                      </p>
-                    )}
-
-                    <div className="mt-2 text-[10px] text-slate-500">
-                      Total de plantillas: {detail.templates?.length || 0}
-                      <br/>Lista de nombres: {detail.templates?.map((t: any) => `${t.name} (ID: ${t.id}, ${t.status})`).join(', ')}
-                    </div>
-
-                  </div>
                 </div>
-              )}
+              ))}
             </div>
-          )}
-
-          {!diagnostic && !testing && (
-            <p className="text-sm text-muted-foreground italic">
-              Haz clic en "Ejecutar Prueba" para validar la conectividad con Meta.
-            </p>
           )}
         </CardContent>
       </Card>
+
+      {(diagnostic || detail) && (
+        <Card className="border-blue-500/20 bg-slate-50/50">
+          <CardHeader>
+            <CardTitle className="text-sm font-bold flex items-center gap-2">
+              <Activity className="h-4 w-4 text-blue-500" /> Reporte Técnico de Meta
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {diagnostic && (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="p-3 rounded-lg border bg-white shadow-sm">
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Phone Status</p>
+                  <div className="flex items-center gap-2">
+                    {diagnostic.PHONE_NUMBER === "OK" ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <XCircle className="h-4 w-4 text-red-500" />}
+                    <span className="text-xs font-medium">{diagnostic.PHONE_NUMBER === "OK" ? "Encontrado" : "Error"}</span>
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg border bg-white shadow-sm">
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">WABA Access</p>
+                  <div className="flex items-center gap-2">
+                    {diagnostic.WABA === "OK" ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <XCircle className="h-4 w-4 text-red-500" />}
+                    <span className="text-xs font-medium">{diagnostic.WABA === "OK" ? "Conectado" : "Error"}</span>
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg border bg-white shadow-sm">
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Relationship</p>
+                  <div className="flex items-center gap-2">
+                    {detail?.waba_phone_numbers?.some((p: any) => p.id === detail.config?.phoneNumberId) ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <XCircle className="h-4 w-4 text-red-500" />}
+                    <span className="text-xs font-medium">{detail?.waba_phone_numbers?.some((p: any) => p.id === detail.config?.phoneNumberId) ? "Vínculo OK" : "Desvinculado"}</span>
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg border bg-white shadow-sm">
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Templates</p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">{detail?.templates?.length || 0} cargadas</Badge>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {detail && (
+              <div className="grid gap-2 text-[11px] font-mono bg-slate-950 text-slate-300 p-4 rounded-md overflow-x-auto border border-slate-800">
+                <p className="text-blue-400">// Detalles Meta Cloud</p>
+                <p>Display Name: {detail.phone_details?.verified_name || 'N/A'}</p>
+                <p>Number ID: {detail.config?.phoneNumberId}</p>
+                <p>Number Quality: {detail.phone_details?.quality_rating || 'N/A'}</p>
+                <p>Status: {detail.phone_details?.status || 'N/A'}</p>
+                
+                <p className="text-blue-400 mt-2">// Posesión</p>
+                <p>WABA Actual: {detail.phone_details?.whatsapp_business_account?.id || 'NO ENCONTRADO'}</p>
+                
+                <p className="text-blue-400 mt-2">// Auditoría Plantilla Prueba</p>
+                {detail.cnm_prueba_match ? (
+                  <p className="text-green-400">Plantilla cnm_prueba: OK (Lang: {detail.cnm_prueba_match.language}, Status: {detail.cnm_prueba_match.status})</p>
+                ) : (
+                  <p className="text-amber-400">cnm_prueba: No encontrada en este WABA.</p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

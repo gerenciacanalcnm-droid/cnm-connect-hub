@@ -46,10 +46,19 @@ export function useConnectWhatsAppMeta() {
 
 export function useTestWhatsAppConnection() {
   return useMutation({
-    mutationFn: (data: any) => 
-      whatsappRepository.testConnection({ data }),
+    mutationFn: (data: any) => whatsappRepository.testConnection({ data }),
   });
 }
+
+export function useTestSpecificWhatsAppConnection() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (accountId: string) => 
+      import("@/lib/whatsapp-accounts.functions").then(m => m.testSpecificAccountConnection({ data: { accountId } })),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.whatsapp.accounts }),
+  });
+}
+
 
 export function useWhatsAppTemplates() {
   return useQuery({
