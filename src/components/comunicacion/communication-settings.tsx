@@ -71,6 +71,29 @@ export function CommunicationSettings() {
     }
   };
 
+  const handleSyncTemplates = async () => {
+    setSyncing(true);
+    try {
+      // 1. Get the current active WhatsApp account ID for this company
+      const { data: accounts } = await supabase
+        .from("whatsapp_accounts")
+        .select("id")
+        .eq("status", "connected")
+        .limit(1);
+
+      if (accounts && accounts.length > 0) {
+        await syncTemplates({ data: { accountId: accounts[0].id } });
+        toast.success("Plantillas sincronizadas exitosamente");
+      } else {
+        toast.error("No hay una cuenta de WhatsApp conectada para sincronizar");
+      }
+    } catch (e) {
+      toast.error("Error al sincronizar plantillas");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
 
 
   if (isLoading || !settings) return <Loader />;
@@ -213,9 +236,21 @@ export function CommunicationSettings() {
 
               {detail && (
                 <div className="mt-6 space-y-4 border-t pt-4">
-                  <h4 className="text-sm font-bold flex items-center gap-2">
-                    <Activity className="h-3 w-3" /> Reporte Técnico de Meta
-                  </h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-bold flex items-center gap-2">
+                      <Activity className="h-3 w-3" /> Reporte Técnico de Meta
+                    </h4>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 text-[10px] gap-1 text-slate-400 hover:text-white"
+                      onClick={handleSyncTemplates}
+                      disabled={syncing}
+                    >
+                      <RefreshCw className={`h-3 w-3 ${syncing ? 'animate-spin' : ''}`} />
+                      Sincronizar plantillas
+                    </Button>
+                  </div>
                   
                   <div className="grid gap-2 text-[11px] font-mono bg-slate-950 text-slate-300 p-3 rounded-md overflow-x-auto">
                     <p className="text-blue-400">// Configuración</p>
@@ -224,7 +259,9 @@ export function CommunicationSettings() {
                     
                     <p className="text-blue-400 mt-2">// Propiedad WABA</p>
                     <p>WABA real del Phone Number: {detail.phone_details?.whatsapp_business_account?.id || 'NO ENCONTRADO'}</p>
-                    <p>Número: {detail.phone_details?.display_phone_number || 'N/A'} ({detail.phone_details?.verified_name || 'N/A'})</p>
+                    <p>Número: {detail.phone_details?.display_phone_number || 'N/A'}</p>
+                    <p>Estado: {detail.phone_details?.status || 'N/A'}</p>
+                    <p>Calificación: {detail.phone_details?.quality_rating || 'N/A'}</p>
                     <p>¿Phone pertenece al WABA?: {
                       detail.waba_phone_numbers?.some((p: any) => p.id === detail.config?.phoneNumberId) ? 'SÍ' : 'NO (ERROR CRÍTICO)'
                     }</p>
@@ -248,7 +285,7 @@ export function CommunicationSettings() {
 
                     <div className="mt-2 text-[10px] text-slate-500">
                       Total de plantillas: {detail.templates?.length || 0}
-                      <br/>Lista de nombres: {detail.templates?.map((t: any) => `${t.name} (${t.status})`).join(', ')}
+                      <br/>Lista de nombres: {detail.templates?.map((t: any) => `${t.name} (ID: ${t.id}, ${t.status})`).join(', ')}
                     </div>
 
                   </div>
