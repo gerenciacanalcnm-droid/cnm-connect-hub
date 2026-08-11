@@ -2,10 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { trackServiceUsage } from "./commercial.functions";
+import { admin } from "@/integrations/supabase/client.server";
 
 const CNM_COMPANY_ID = "00000000-0000-4000-8000-000000000001";
-
-const scheduleStatus = z.enum(['PROGRAMADO', 'PROCESANDO', 'ENVIANDO', 'COMPLETADO', 'FALLIDO', 'CANCELADO']);
 
 export const createSmsSchedule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -14,7 +13,7 @@ export const createSmsSchedule = createServerFn({ method: "POST" })
       recipients: z.array(z.string().min(10)),
       body: z.string().min(1),
       isFlash: z.boolean().default(false),
-      scheduledAt: z.string(), // ISO string
+      scheduledAt: z.string(),
       timezone: z.string().default('America/Bogota'),
       estimatedCost: z.number().nonnegative(),
     }).parse(v)
@@ -26,7 +25,7 @@ export const createSmsSchedule = createServerFn({ method: "POST" })
     // Para America/Bogota es -05:00.
     let finalScheduledAt = scheduledAt;
     if (!scheduledAt.includes('Z') && !scheduledAt.includes('+') && !scheduledAt.includes('-')) {
-      const offset = timezone === 'America/Bogota' ? '-05:00' : '-05:00'; // Simplificado para Colombia
+      const offset = timezone === 'America/Bogota' ? '-05:00' : '-05:00'; 
       finalScheduledAt = `${scheduledAt}${offset}`;
     }
 
@@ -51,7 +50,6 @@ export const createSmsSchedule = createServerFn({ method: "POST" })
     return row;
   });
 
-
 export const listSmsSchedules = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -59,7 +57,6 @@ export const listSmsSchedules = createServerFn({ method: "GET" })
       .from("sms_schedules")
       .select("*")
       .order("scheduled_at", { ascending: false });
-
     if (error) throw new Error(error.message);
     return JSON.stringify(data ?? []);
   });
@@ -68,97 +65,70 @@ export const cancelSmsSchedule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
-    const { data: current, error: fetchErr } = await context.supabase
-      .from("sms_schedules")
-      .select("status")
-      .eq("id", data.id)
-      .single();
-
-    if (fetchErr) throw new Error(fetchErr.message);
-    if (current.status !== 'PROGRAMADO') throw new Error("Solo se pueden cancelar envíos en estado PROGRAMADO");
-
     const { error } = await context.supabase
       .from("sms_schedules")
       .update({ status: 'CANCELADO' } as any)
-      .eq("id", data.id);
-
+      .eq("id", data.id)
+      .eq("status", "PROGRAMADO");
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
 /**
- * Función que simula la ejecución de las programaciones.
- * En un entorno real, esta sería llamada por un CRON cada minuto.
+ * Motor de procesamiento de programaciones pendientes.
+ * Se puede invocar vía cron o endpoint de mantenimiento.
  */
 export const processPendingSmsSchedules = createServerFn({ method: "POST" })
   .handler(async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    
-    // 1. Buscar programaciones pendientes
-    const { data: pending, error: fetchErr } = await supabaseAdmin
+    const sb = await admin();
+    const now = new Date().toISOString();
+
+    // 1. Obtener programaciones que deben ejecutarse ya
+    const { data: pending, error } = await sb
       .from("sms_schedules")
       .select("*")
-      .eq("status", 'PROGRAMADO')
-      .lte("scheduled_at", new Date().toISOString());
+      .eq("status", "PROGRAMADO")
+      .lte("scheduled_at", now);
 
-    if (fetchErr) {
-      console.error("Error fetching pending schedules:", fetchErr);
-      return { processed: 0 };
-    }
-
+    if (error) throw new Error(error.message);
     if (!pending || pending.length === 0) return { processed: 0 };
 
+    let processedCount = 0;
     for (const schedule of pending) {
-      // 2. Marcar como procesando
-      await supabaseAdmin.from("sms_schedules").update({ status: 'PROCESANDO' } as any).eq("id", schedule.id);
+      // 2. Marcar como PROCESANDO para evitar duplicidad si el proceso es lento
+      await sb.from("sms_schedules").update({ status: 'PROCESANDO' } as any).eq("id", schedule.id);
 
       try {
-        // 3. Re-validar saldo y cobrar
-        await trackServiceUsage({
+        // 3. Validar saldo y cobrar atómicamente a través del motor comercial
+        const usageResult = await trackServiceUsage({
           data: {
             company_id: schedule.company_id,
-            channel: "sms",
+            channel: 'sms', // Base channel
             units: schedule.recipients.length,
-            description: `Ejecución Programada SMS${schedule.is_flash ? ' FLASH' : ''}`,
             reference: schedule.reference,
             isFlash: schedule.is_flash,
+            description: `Ejecución programada: ${schedule.id}`
           },
+          context: { userId: schedule.user_id, supabase: sb } as any
         });
 
-        // 4. Marcar como enviando
-        await supabaseAdmin.from("sms_schedules").update({ status: 'ENVIANDO' } as any).eq("id", schedule.id);
-
-        // 5. Insertar en sms_messages (Ejecución real simulada)
-        const recipients = schedule.recipients as string[];
-        const chunks = [];
-        for (let i = 0; i < recipients.length; i += 100) {
-          chunks.push(recipients.slice(i, i + 100));
+        if (usageResult.ok) {
+          // 4. Marcar como COMPLETADO (Aquí se dispararía el envío real a través de proveedor)
+          await sb.from("sms_schedules").update({ 
+            status: 'COMPLETADO',
+            executed_at: new Date().toISOString()
+          } as any).eq("id", schedule.id);
+          processedCount++;
         }
-
-        for (const chunk of chunks) {
-          await supabaseAdmin.from("sms_messages").insert(
-            chunk.map(to => ({
-              company_id: schedule.company_id,
-              to_phone: to,
-              body: schedule.body,
-              status: "sent",
-              sent_at: new Date().toISOString(),
-            } as any))
-          );
-        }
-
-        // 6. Completado
-        await supabaseAdmin.from("sms_schedules").update({ status: 'COMPLETADO' } as any).eq("id", schedule.id);
-
-      } catch (err: any) {
-        // 7. Fallido
-        const reason = err.message === "Saldo insuficiente" ? "SALDO_INSUFICIENTE" : err.message;
-        await supabaseAdmin.from("sms_schedules").update({ 
+      } catch (e: any) {
+        console.error(`Error processing schedule ${schedule.id}:`, e.message);
+        // 5. Registrar fallo si no hay saldo o error técnico
+        await sb.from("sms_schedules").update({ 
           status: 'FALLIDO',
-          error_reason: reason
+          error_log: e.message 
         } as any).eq("id", schedule.id);
       }
     }
 
-    return { processed: pending.length };
+    return { processed: processedCount };
   });
