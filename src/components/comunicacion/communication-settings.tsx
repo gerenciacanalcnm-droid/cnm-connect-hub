@@ -1,4 +1,4 @@
-import { Settings2, MessageSquare, MessageCircle, Mail, Activity } from "lucide-react";
+import { Settings2, MessageSquare, MessageCircle, Mail, Activity, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,8 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { testMetaConnection } from "@/lib/whatsapp-diagnostic.functions";
 import { getMetaTemplatesDetail } from "@/lib/whatsapp-diagnostic-detail.functions";
+import { syncWhatsAppTemplates } from "@/lib/whatsapp.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -40,6 +42,8 @@ export function CommunicationSettings() {
   const [detail, setDetail] = useState<any>(null);
   const runDiagnostic = useServerFn(testMetaConnection);
   const runDetail = useServerFn(getMetaTemplatesDetail);
+  const syncTemplates = useServerFn(syncWhatsAppTemplates);
+  const [syncing, setSyncing] = useState(false);
 
   const handleDiagnostic = async () => {
     setTesting(true);
