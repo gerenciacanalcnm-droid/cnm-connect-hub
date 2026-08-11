@@ -32,7 +32,7 @@ export function SendWhatsAppIndividual() {
 
   const whatsappTier = useMemo(() => {
     // Buscamos la tarifa de WhatsApp (tier 1 unidad)
-    return tiersData?.find(t => t.channel === 'whatsapp' && t.is_active);
+    return tiersData?.find(t => t.channel === 'whatsapp' && t.isActive);
   }, [tiersData]);
 
   const cost = whatsappTier?.unitPrice ?? 0;

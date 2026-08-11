@@ -101,3 +101,125 @@ export const saveWhatsAppCredentials = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+/**
+ * Envío individual de WhatsApp vía Meta Cloud API.
+ * Ejecuta el cobro atómico antes de contactar a Meta.
+ */
+export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) =>
+    z.object({
+      recipient: z.string().min(10),
+      body: z.string().min(1),
+      accountId: z.string().uuid(),
+    }).parse(v)
+  )
+  .handler(async ({ data, context }) => {
+    // 1. Obtener credenciales de la cuenta (usamos context.supabase con RLS)
+    const { data: account, error: accErr } = await context.supabase
+      .from("whatsapp_accounts")
+      .select("phone_number_id, access_token")
+      .eq("id", data.accountId)
+      .single();
+
+    if (accErr || !account) throw new Error("Cuenta de WhatsApp no encontrada o sin acceso");
+
+    // 2. Registrar el mensaje en la base de datos (estado: sending)
+    const { data: msg, error: msgErr } = await context.supabase
+      .from("whatsapp_messages")
+      .insert({
+        company_id: CNM_COMPANY_ID,
+        to_phone: data.recipient,
+        body: data.body,
+        direction: "outbound" as const,
+        status: "sending" as const,
+        metadata: { account_id: data.accountId }
+      } as never)
+      .select("id")
+      .single();
+
+    if (msgErr) throw new Error(msgErr.message);
+
+    // 3. Realizar cobro atómico
+    try {
+      const usage = await trackServiceUsage({
+        data: {
+          company_id: CNM_COMPANY_ID,
+          channel: "whatsapp",
+          units: 1,
+          description: `WA Individual a ${data.recipient}`,
+          reference: msg.id,
+        }
+      });
+
+      // Actualizar costo real
+      await context.supabase
+        .from("whatsapp_messages")
+        .update({ cost: usage.amount } as never)
+        .eq("id", msg.id);
+
+    } catch (err: any) {
+      // Fallo de saldo -> Marcar mensaje como fallido y abortar
+      await context.supabase
+        .from("whatsapp_messages")
+        .update({ 
+          status: "failed",
+          metadata: { failure_reason: "insufficient_balance", error: err.message }
+        } as never)
+        .eq("id", msg.id);
+      throw err;
+    }
+
+    // 4. Envío a Meta Cloud API
+    try {
+      const metaResponse = await fetch(
+        `https://graph.facebook.com/v20.0/${account.phone_number_id}/messages`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${account.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            recipient_type: "individual",
+            to: data.recipient.startsWith("57") ? data.recipient : `57${data.recipient}`,
+            type: "text",
+            text: { body: data.body },
+          }),
+        }
+      );
+
+      const metaResult = await metaResponse.json();
+
+      if (!metaResponse.ok) {
+        throw new Error(metaResult.error?.message || "Error al enviar mensaje vía Meta");
+      }
+
+      // 5. Actualizar a SENT
+      await context.supabase
+        .from("whatsapp_messages")
+        .update({ 
+          status: "sent",
+          metadata: { ...metaResult } 
+        } as never)
+        .eq("id", msg.id);
+
+      return { ok: true, messageId: msg.id, waId: metaResult.messages?.[0]?.id };
+
+    } catch (err: any) {
+      console.error("[whatsapp.send] Error:", err.message);
+      
+      // 6. Marcar como FAILED
+      await context.supabase
+        .from("whatsapp_messages")
+        .update({ 
+          status: "failed",
+          metadata: { error: err.message }
+        } as never)
+        .eq("id", msg.id);
+      
+      throw err;
+    }
+  });
