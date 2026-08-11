@@ -31,6 +31,7 @@ import { Route as AppComunicacionRouteImport } from './routes/_app.comunicacion'
 import { Route as AppAutomatizacionesRouteImport } from './routes/_app.automatizaciones'
 import { Route as AppApiRouteImport } from './routes/_app.api'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
+import { Route as ApiPublicSmsSchedulerRouteImport } from './routes/api/public/sms-scheduler'
 import { Route as AdminAdminWalletRouteImport } from './routes/_admin.admin.wallet'
 import { Route as AdminAdminUsuariosRouteImport } from './routes/_admin.admin.usuarios'
 import { Route as AdminAdminTarifasRouteImport } from './routes/_admin.admin.tarifas'
@@ -165,6 +166,11 @@ const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
   getParentRoute: () => AppRoute,
+} as any)
+const ApiPublicSmsSchedulerRoute = ApiPublicSmsSchedulerRouteImport.update({
+  id: '/api/public/sms-scheduler',
+  path: '/api/public/sms-scheduler',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAdminWalletRoute = AdminAdminWalletRouteImport.update({
   id: '/admin/wallet',
@@ -351,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
+  '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
 }
 export interface FileRoutesByTo {
@@ -399,6 +406,7 @@ export interface FileRoutesByTo {
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
+  '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
 }
 export interface FileRoutesById {
@@ -451,6 +459,7 @@ export interface FileRoutesById {
   '/_admin/admin/tarifas': typeof AdminAdminTarifasRoute
   '/_admin/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/_admin/admin/wallet': typeof AdminAdminWalletRoute
+  '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
 }
 export interface FileRouteTypes {
@@ -501,6 +510,7 @@ export interface FileRouteTypes {
     | '/admin/tarifas'
     | '/admin/usuarios'
     | '/admin/wallet'
+    | '/api/public/sms-scheduler'
     | '/api/public/webhooks/wompi'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -549,6 +559,7 @@ export interface FileRouteTypes {
     | '/admin/tarifas'
     | '/admin/usuarios'
     | '/admin/wallet'
+    | '/api/public/sms-scheduler'
     | '/api/public/webhooks/wompi'
   id:
     | '__root__'
@@ -600,6 +611,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/tarifas'
     | '/_admin/admin/usuarios'
     | '/_admin/admin/wallet'
+    | '/api/public/sms-scheduler'
     | '/api/public/webhooks/wompi'
   fileRoutesById: FileRoutesById
 }
@@ -608,6 +620,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  ApiPublicSmsSchedulerRoute: typeof ApiPublicSmsSchedulerRoute
   ApiPublicWebhooksWompiRoute: typeof ApiPublicWebhooksWompiRoute
 }
 
@@ -766,6 +779,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/analytics'
       preLoaderRoute: typeof AppAnalyticsRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/api/public/sms-scheduler': {
+      id: '/api/public/sms-scheduler'
+      path: '/api/public/sms-scheduler'
+      fullPath: '/api/public/sms-scheduler'
+      preLoaderRoute: typeof ApiPublicSmsSchedulerRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_admin/admin/wallet': {
       id: '/_admin/admin/wallet'
@@ -1076,6 +1096,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  ApiPublicSmsSchedulerRoute: ApiPublicSmsSchedulerRoute,
   ApiPublicWebhooksWompiRoute: ApiPublicWebhooksWompiRoute,
 }
 export const routeTree = rootRouteImport
