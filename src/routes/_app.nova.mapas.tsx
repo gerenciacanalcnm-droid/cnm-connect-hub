@@ -39,8 +39,9 @@ function NovaMapsPage() {
 
   const handleToggleStatus = (map: any) => {
     const newStatus = map.status === 'ACTIVO' ? 'PAUSADO' : 'ACTIVO';
-    upsertMutation.mutate({ ...map, status: newStatus });
+    upsertMutation.mutate({ data: { ...map, status: newStatus } } as any);
   };
+
 
   const handleCreate = () => {
     upsertMutation.mutate({
