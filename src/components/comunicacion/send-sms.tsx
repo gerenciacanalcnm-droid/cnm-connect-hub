@@ -139,35 +139,105 @@ export function SendSms() {
                 value={toManual} 
                 onChange={(e) => setToManual(e.target.value)}
                 placeholder="3001234567, 3109876543"
-                className="font-mono"
+                className="min-h-[100px] font-mono"
               />
+              <p className="text-[11px] text-muted-foreground">
+                Separa los números por comas o espacios. Los duplicados se eliminan automáticamente.
+              </p>
             </div>
             
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="w-full">Seleccionar Contactos ({selectedContacts.size})</Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-xl">
-                <DialogHeader><DialogTitle>Seleccionar contactos</DialogTitle></DialogHeader>
-                <ScrollArea className="h-[400px]">
-                  {contacts.map(c => (
-                    <div key={c.id} className="flex items-center gap-3 p-2 border-b">
-                      <Checkbox 
-                        checked={selectedContacts.has(c.id)}
-                        onCheckedChange={checked => {
-                          const next = new Set(selectedContacts);
-                          if (checked) next.add(c.id); else next.delete(c.id);
-                          setSelectedContacts(next);
-                        }}
-                      />
-                      <span>{c.firstName} {c.lastName} ({c.phone})</span>
-                    </div>
-                  ))}
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="flex-1 gap-2">
+                    <Users className="h-4 w-4" /> CRM ({selectedContacts.size})
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-xl">
+                  <DialogHeader>
+                    <DialogTitle>Seleccionar contactos</DialogTitle>
+                  </DialogHeader>
+                  <div className="relative mb-2">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Buscar contactos..." className="pl-9" />
+                  </div>
+                  <ScrollArea className="h-[400px] pr-4">
+                    {contacts.map(c => (
+                      <div key={c.id} className="flex items-center gap-3 p-3 border-b hover:bg-muted/50 transition-colors">
+                        <Checkbox 
+                          checked={selectedContacts.has(c.id)}
+                          onCheckedChange={checked => {
+                            const next = new Set(selectedContacts);
+                            if (checked) next.add(c.id); else next.delete(c.id);
+                            setSelectedContacts(next);
+                          }}
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">{c.firstName} {c.lastName}</span>
+                          <span className="text-xs text-muted-foreground font-mono">{c.phone}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </ScrollArea>
+                  <DialogFooter>
+                    <Button variant="ghost" onClick={() => setSelectedContacts(new Set())}>Limpiar</Button>
+                    <DialogTrigger asChild>
+                      <Button>Confirmar ({selectedContacts.size})</Button>
+                    </DialogTrigger>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="flex-1 gap-2">
+                    <Filter className="h-4 w-4" /> Grupos ({selectedGroups.size})
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Seleccionar Grupos</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    {groups.length === 0 ? (
+                      <p className="text-sm text-center text-muted-foreground py-8 font-mono">NO_GROUPS_DEFINED</p>
+                    ) : (
+                      groups.map(g => (
+                        <div key={g.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50">
+                          <Checkbox 
+                            checked={selectedGroups.has(g.id)}
+                            onCheckedChange={checked => {
+                              const next = new Set(selectedGroups);
+                              if (checked) next.add(g.id); else next.delete(g.id);
+                              setSelectedGroups(next);
+                            }}
+                          />
+                          <div className="flex flex-col">
+                            <span className="font-medium">{g.name}</span>
+                            {g.description && <span className="text-xs text-muted-foreground">{g.description}</span>}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Button variant="outline" className="flex-1 gap-2">
+                <FileUp className="h-4 w-4" /> Importar
+              </Button>
+            </div>
+            
+            <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground gap-2" onClick={() => {
+              setToManual("");
+              setSelectedContacts(new Set());
+              setSelectedGroups(new Set());
+            }}>
+              <Trash2 className="h-3.5 w-3.5" /> Limpiar toda la lista
+            </Button>
           </CardContent>
         </Card>
+
 
         <Card>
           <CardContent className="pt-6">
