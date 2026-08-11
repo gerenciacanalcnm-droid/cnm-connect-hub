@@ -295,8 +295,7 @@ export function WhatsAppTemplates() {
                   {!selectedComponent && (
                     <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 opacity-70">
                       <MousePointer2 className="h-12 w-12 mb-4 text-emerald-500 animate-pulse" />
-                      <p className="text-sm font-medium">Selecciona un componente para configurar</p>
-                      <p className="text-xs mt-1">Encabezado, Cuerpo, Pie o Botones</p>
+                      <p className="text-sm font-medium">Editor completado</p>
                     </div>
                   )}
 
