@@ -134,13 +134,39 @@ export function WhatsAppTemplates() {
                 {headerText}
               </div>
             )}
+
+            {headerType === "IMAGE" && (
+              <div className="w-full aspect-video bg-slate-200 rounded-md flex items-center justify-center overflow-hidden border border-slate-300">
+                <span className="text-[10px] text-slate-500 font-bold uppercase">Vista previa de imagen</span>
+              </div>
+            )}
+
+            {headerType === "VIDEO" && (
+              <div className="w-full aspect-video bg-slate-800 rounded-md flex items-center justify-center overflow-hidden border border-slate-900">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-1" />
+                </div>
+              </div>
+            )}
+
+            {headerType === "DOCUMENT" && (
+              <div className="w-full p-3 bg-white rounded-md border border-slate-200 flex items-center gap-3">
+                <div className="w-8 h-10 bg-blue-100 rounded flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <div className="h-2 w-2/3 bg-slate-200 rounded" />
+                  <div className="h-2 w-1/3 bg-slate-100 rounded" />
+                </div>
+              </div>
+            )}
             
             <div className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">
               {renderPreviewBody()}
             </div>
             
             {footer && (
-              <div className="text-[11px] text-slate-500 pt-1 border-t border-slate-900/10">
+              <div className="text-[11px] text-slate-500 pt-1 border-t border-slate-900/10 font-medium">
                 {footer}
               </div>
             )}
