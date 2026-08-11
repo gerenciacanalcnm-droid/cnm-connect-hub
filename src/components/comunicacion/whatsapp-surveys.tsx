@@ -413,7 +413,7 @@ export function WhatsAppSurveys() {
               <Percent className="h-4 w-4" />
             </div>
             <div className="text-3xl font-bold text-white mb-1">
-              {stats?.total > 0 ? `${Math.round((stats.stats.reduce((acc: number, curr: any) => acc + curr.count, 0) / stats.total) * 100)}%` : "0%"}
+              {(stats?.total ?? 0) > 0 ? `${Math.round(((stats?.stats ?? []).reduce((acc: number, curr: any) => acc + curr.count, 0) / (stats?.total ?? 1)) * 100)}%` : "0%"}
             </div>
             <div className="text-white/60 text-xs">Basado en envíos totales</div>
           </CardContent>
