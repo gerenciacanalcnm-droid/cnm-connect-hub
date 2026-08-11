@@ -84,7 +84,7 @@ const templateSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").regex(/^[a-z0-9_]+$/, "Solo minúsculas, números y guiones bajos"),
   category: z.string().min(1, "La categoría es requerida"),
   language: z.string().min(1, "El idioma es requerido"),
-  headerType: z.enum(["NONE", "TEXT", "IMAGE", "VIDEO", "DOCUMENT"]).default("NONE"),
+  headerType: z.enum(["NONE", "TEXT", "IMAGE", "VIDEO", "DOCUMENT"]),
   headerText: z.string().optional(),
   headerHandle: z.string().optional(),
   body: z.string().min(1, "El cuerpo del mensaje es requerido"),
