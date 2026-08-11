@@ -569,67 +569,53 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
-    const [tplRes, accRes] = await Promise.all([
-      context.supabase.from("whatsapp_templates").select("*").eq("id", data.templateId).single(),
-      context.supabase.from("whatsapp_accounts").select("phone_number_id, access_token").eq("id", data.accountId).single()
-    ]);
-
-    if (tplRes.error || !tplRes.data) throw new Error("Plantilla no encontrada");
-    if (accRes.error || !accRes.data) throw new Error("Cuenta de WhatsApp no válida");
-
-    const template = tplRes.data;
-    const account = accRes.data;
-
-    if (template.status !== "APPROVED") {
-      throw new Error(`La plantilla no puede usarse porque su estado es: ${template.status}`);
-    }
-
-    let usageAmount = 0;
-    // 0. Obtener company_id real
-    const { data: membership } = await context.supabase
-      .from("company_members")
-      .select("company_id")
-      .eq("user_id", context.userId)
-      .eq("is_active", true)
-      .maybeSingle();
-    const realCompanyId = membership?.company_id || CNM_COMPANY_ID;
-
-    if (!data.batchId) {
-      try {
-        const usage = await trackServiceUsage({
-          data: {
-            company_id: realCompanyId,
-            channel: "whatsapp",
-            units: 1,
-            description: `WA Template (${template.name}) a ${data.recipient}`,
-            reference: crypto.randomUUID(),
-          }
-        });
-        usageAmount = usage.amount;
-      } catch (err: any) {
-        throw err;
-      }
-    }
-
-    const { data: msg, error: msgErr } = await context.supabase
-      .from("whatsapp_messages")
-      .insert({
-        company_id: realCompanyId,
-        account_id: data.accountId,
-        to_phone: data.recipient,
-        template_id: data.templateId as any,
-        body: template.body,
-        direction: "outbound",
-        status: "sending",
-        cost: usageAmount,
-        metadata: { batch_id: data.batchId, template_name: template.name, variables: data.variables }
-      } as never)
-      .select("id")
-      .single();
-
-    if (msgErr) throw new Error(msgErr.message);
-
     try {
+      // 0. Autenticación y Empresa
+      const { data: membership, error: memErr } = await context.supabase
+        .from("company_members")
+        .select("company_id")
+        .eq("user_id", context.userId)
+        .eq("is_active", true)
+        .maybeSingle();
+      
+      if (memErr) throw new Error(`AUTH_USER_ERROR: Error al validar membresía: ${memErr.message}`);
+      const companyId = membership?.company_id || CNM_COMPANY_ID;
+      if (!companyId) throw new Error("AUTH_USER_ERROR: No se pudo determinar el company_id");
+
+      // 1. Cargar plantilla y cuenta
+      const [tplRes, accRes] = await Promise.all([
+        context.supabase.from("whatsapp_templates").select("*").eq("id", data.templateId).eq("company_id", companyId).single(),
+        context.supabase.from("whatsapp_accounts").select("phone_number_id, access_token, company_id").eq("id", data.accountId).single()
+      ]);
+
+      if (tplRes.error || !tplRes.data) throw new Error(`DB_AUTH_ERROR: Plantilla no encontrada: ${tplRes.error?.message || 'NULL'}`);
+      if (accRes.error || !accRes.data) throw new Error(`DB_AUTH_ERROR: Cuenta no encontrada: ${accRes.error?.message || 'NULL'}`);
+
+      if (accRes.data.company_id !== companyId) throw new Error("DB_AUTH_ERROR: Cuenta no pertenece a la empresa");
+
+      const template = tplRes.data;
+      const account = accRes.data;
+
+      if (template.status !== "APPROVED") throw new Error(`META_API_ERROR: La plantilla no está aprobada (Estado: ${template.status})`);
+
+      // 2. Cobro (solo si no es batch, el batch cobra por adelantado el total)
+      if (!data.batchId) {
+        try {
+          await trackServiceUsage({
+            data: {
+              company_id: companyId,
+              channel: "whatsapp",
+              units: 1,
+              description: `WA Template (${template.name}) a ${data.recipient}`,
+              reference: crypto.randomUUID(),
+            }
+          });
+        } catch (err: any) {
+          throw err;
+        }
+      }
+
+      // 3. Envío a Meta
       const parameters = Object.keys(data.variables || {}).sort((a, b) => parseInt(a) - parseInt(b)).map(key => ({
         type: "text",
         text: data.variables![key]
@@ -663,19 +649,35 @@ export const sendWhatsAppTemplate = createServerFn({ method: "POST" })
       );
 
       const metaResult = await metaResponse.json();
-      if (!metaResponse.ok) throw new Error(metaResult.error?.message || "Error de Meta API");
+      if (!metaResponse.ok) {
+        if (metaResponse.status === 401 || metaResponse.status === 403) {
+          throw new Error(`META_AUTH_ERROR: Meta rechazó credenciales. Code: ${metaResult.error?.code}, Msg: ${metaResult.error?.message}`);
+        }
+        throw new Error(`META_API_ERROR: Meta Error. Code: ${metaResult.error?.code}, Msg: ${metaResult.error?.message}`);
+      }
 
+      const wamid = metaResult.messages?.[0]?.id;
+
+      // 4. Registro
       await context.supabase
         .from("whatsapp_messages")
-        .update({ status: "sent", external_id: metaResult.messages?.[0]?.id } as never)
-        .eq("id", msg.id);
+        .insert({
+          company_id: companyId,
+          account_id: data.accountId,
+          to_phone: data.recipient,
+          template_id: data.templateId,
+          body: template.body,
+          direction: "outbound",
+          status: "sent",
+          external_id: wamid,
+          metadata: { ...metaResult, variables: data.variables },
+          cost: 250
+        } as never);
 
-      return { ok: true, messageId: msg.id };
+      return { ok: true, messageId: wamid };
+
     } catch (err: any) {
-      await context.supabase
-        .from("whatsapp_messages")
-        .update({ status: "failed", error_code: "META_API_ERROR", metadata: { error: err.message } } as never)
-        .eq("id", msg.id);
+      console.error("[whatsapp.template_send] Error:", err.message);
       throw err;
     }
   });
