@@ -652,7 +652,7 @@ export function SendWhatsAppIndividual() {
             >
               <Send className="h-4 w-4 mr-2" />
               {isInsufficient ? `Saldo insuficiente. Necesitas ${formatCurrency(totalCost)} para realizar este envío.` : 
-               mode === 'individual' ? 'Enviar Ahora' : 
+               mode === 'individual' ? 'Authentication Error' : 
                mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'}
             </Button>
             
