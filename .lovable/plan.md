@@ -1,46 +1,36 @@
-# Plan: Pulido Final UI/UX WhatsApp Surveys 2.0
+# Plan: Pulido Final UI/UX WhatsApp Surveys 2.0 (Refinado)
 
-Este plan se enfoca exclusivamente en la auditoría y pulido final de la interfaz de usuario y experiencia de usuario del módulo de Encuestas de WhatsApp, sin alterar la lógica de negocio ni la arquitectura backend existente.
+Este plan se enfoca en la auditoría y pulido visual/funcional del módulo de Encuestas de WhatsApp mediante ajustes incrementales, preservando la arquitectura y lógica actual.
 
-## Auditoría Visual y UX
+## Objetivos de Pulido UI/UX
 
-### 1. Estructura de Tres Columnas (Desktop)
-*   **Verificación de Alineación:** Asegurar que los paneles Izquierdo (Configuración), Centro (Preview) y Derecho (Configuración Contextual/Estadísticas en vista detalle) mantengan proporciones correctas.
-*   **Scroll Interno:** Implementar/verificar scroll independiente en el panel de configuración para evitar que el botón "Guardar" o elementos inferiores queden inaccesibles.
-*   **Contraste y Visibilidad:**
-    *   Revisar textos blancos sobre fondos claros (especialmente en botones y badges).
-    *   Mejorar la legibilidad de los `Select` y placeholders en modo oscuro/claro.
-    *   Asegurar que los iconos de Lucide tengan el contraste adecuado respecto a su fondo.
+### 1. Ajustes de Interfaz (3 Columnas)
+*   **Alineación y Espaciado:** Revisar la estructura de 3 paneles (Configuración | Preview | Detalle/Estadísticas) para asegurar consistencia visual en desktop.
+*   **Scroll e Interacción:** Verificar que los formularios largos tengan scroll interno y que los botones de acción (Guardar/Volver) permanezcan accesibles.
+*   **Contraste:** Corregir elementos con baja visibilidad, selectores ilegibles o textos claros sobre fondos claros.
 
-### 2. Módulos Interactivos (Meta Compliance)
+### 2. Componentes Interactivos
+*   **Lista Interactiva:**
+    *   Restaurar texto por defecto a "Ver opciones".
+    *   Validar visualmente el límite de 24 caracteres.
+    *   Verificar rango de 2 a 10 opciones.
+*   **Botones Interactivos:**
+    *   Verificar límite de 3 botones.
+    *   Asegurar que el preview muestre el texto real ingresado por el usuario.
+*   **Multimedia:**
+    *   Validar que solo se permita multimedia compatible en el tipo "Botones".
+    *   Reflejar cambios multimedia en el preview en tiempo real.
 
-#### Lista Interactiva
-*   **Límites:** Validar visualmente el límite de 24 caracteres por opción con indicadores de error claros.
-*   **Opciones:** Asegurar que el rango de 2 a 10 opciones sea funcional y el botón "Agregar Opción" sea visible.
-*   **Preview:** Verificar que el botón de apertura de lista (actualmente con texto por defecto "completado") refleje el estado y diseño real.
+### 3. Visualización y Estados
+*   **Preview Realista:** El simulador de WhatsApp debe actualizarse instantáneamente al modificar cualquier campo (título, cuerpo, botones, footer).
+*   **Estados de Carga y Vacío:** Pulir los placeholders de "Sin encuestas" y estados de carga para que sigan el diseño Enterprise Nova.
+*   **Estadísticas:** Verificar que los datos de Supabase (enviados, respuestas, tasa) se visualicen correctamente sin reconstruir la lógica de consulta.
 
-#### Botones Interactivos
-*   **Restricciones:** Validar el máximo de 3 botones.
-*   **Preview Realista:** El preview debe mostrar el texto exacto de las opciones configuradas, eliminando textos de placeholder como "Nuevo botón" una vez el usuario escriba.
+### 4. Estabilidad y Responsive
+*   **Responsive:** Validar usabilidad en Tablet (768px) y Mobile (375px).
+*   **Calidad:** Ejecutar `typecheck` y `build` para asegurar estabilidad.
 
-#### Multimedia
-*   **Compatibilidad:** Bloquear visualmente la carga de multimedia para tipos que no lo soportan según las reglas de Meta.
-*   **Visualización:** El preview debe mostrar un placeholder descriptivo (Icono + Tipo) si no hay URL, o el recurso real si es posible.
-
-### 3. Estados de Interfaz
-*   **Loading/Empty:** Mejorar los componentes de "Cargando" y "Sin encuestas" para que sigan el lenguaje visual Enterprise (glassmorphism/Nova style).
-*   **Feedback:** Asegurar que los mensajes de éxito/error al guardar sean claros y no intrusivos (usando Sonner).
-
-### 4. Responsividad
-*   **Mobile (375px):** Adaptar la vista de tres columnas a una navegación por pestañas o stack vertical para asegurar usabilidad total.
-*   **Tablet (768px):** Ajustar anchos de columnas.
-
-## Verificación Técnica
-*   **Typecheck:** Ejecutar `tsgo --noEmit`.
-*   **Build:** Ejecutar `bun run build` para asegurar que no hay regresiones.
-
-## Exclusiones (NO TOCAR)
-*   Motores de Wallet/Comercial.
-*   Webhooks de WhatsApp.
-*   Lógica de CRM o Automatizaciones.
-*   Arquitectura de persistencia existente.
+## Criterios de Ejecución
+*   **Ajustes Incrementales:** No se reconstruirá el componente `WhatsAppSurveys`. Se realizarán cambios puntuales sobre el código existente.
+*   **Integridad:** No se modificará el Wallet, Motor Comercial, Webhooks ni persistencia a menos que se detecte un error crítico.
+*   **Validación:** Se entregará un reporte detallado de los cambios realizados y el estado de las pruebas A-K.

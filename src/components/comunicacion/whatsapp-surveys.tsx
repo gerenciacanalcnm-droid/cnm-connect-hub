@@ -55,7 +55,7 @@ export function WhatsAppSurveys() {
   const [headerType, setHeaderType] = useState<HeaderType>('NONE');
   const [headerText, setHeaderText] = useState("");
   const [headerUrl, setHeaderUrl] = useState("");
-  const [listButtonText, setListButtonText] = useState("completado");
+  const [listButtonText, setListButtonText] = useState("Ver opciones");
   const [options, setOptions] = useState<SurveyOption[]>([
     { label: "", option_key: "option_1" },
     { label: "", option_key: "option_2" }
