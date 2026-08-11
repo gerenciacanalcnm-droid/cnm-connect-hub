@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SendSms } from "@/components/comunicacion/send-sms";
 import { SmsHistory } from "@/components/comunicacion/sms-history";
-import { ConversationCenter } from "@/components/comunicacion/conversation-center";
+import { SendWhatsAppIndividual } from "@/components/comunicacion/send-whatsapp-individual";
 import { EmailMarketing } from "@/components/comunicacion/email-marketing";
 import { CommunicationSettings } from "@/components/comunicacion/communication-settings";
 
@@ -58,13 +58,7 @@ function ComunicacionPage() {
           <SmsHistory />
         </TabsContent>
         <TabsContent value="whatsapp">
-          <div className="p-8 text-center border rounded-lg bg-muted/20">
-            <MessageCircle className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-medium">WhatsApp Business</h3>
-            <p className="text-muted-foreground max-w-md mx-auto mt-2">
-              Conecta tu cuenta de WhatsApp Business API para gestionar conversaciones y campañas omnicanal.
-            </p>
-          </div>
+          <SendWhatsAppIndividual />
         </TabsContent>
         <TabsContent value="email">
           <EmailMarketing />

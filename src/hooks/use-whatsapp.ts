@@ -78,3 +78,10 @@ export function useWhatsAppCampaigns() {
     queryFn: () => whatsappRepository.listCampaigns(),
   });
 }
+
+export function useSendWhatsAppIndividual() {
+  return useMutation({
+    mutationFn: (data: { recipient: string; body: string; accountId: string }) => 
+      whatsappRepository.sendIndividual({ data }),
+  });
+}
