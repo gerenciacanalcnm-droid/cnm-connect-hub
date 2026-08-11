@@ -459,15 +459,21 @@ async function applyWalletMovement(
   const balanceAfter = balanceBefore + input.amount;
   const creditsAfter = Number(wallet.credits) + input.units;
 
+  // 4. Actualización Atómica con protección de concurrencia
   const up = await supabase
     .from("wallets")
     .update({
       balance: balanceAfter,
       credits: creditsAfter,
+      consumed: Number(wallet.consumed || 0) + (input.type === "AJUSTE_DEBITO" && input.amount < 0 ? Math.abs(input.amount) : 0),
       status: balanceAfter > 0 ? "active" : "inactive",
+      updated_at: new Date().toISOString(),
     })
-    .eq("id", input.walletId);
-  if (up.error) throw new Error(up.error.message);
+    .eq("id", input.walletId)
+    .eq("balance", balanceBefore);
+
+  if (up.error) throw new Error("Error de concurrencia o de red al actualizar wallet.");
+
 
   const metadata = {
     balance_before: balanceBefore,
