@@ -248,9 +248,19 @@ export function SendWhatsAppIndividual() {
     } catch (err: any) {
       console.error("[whatsapp.handleSend] Error:", err.message);
       const technicalMsg = err.message || "Error desconocido";
-      toast.error(technicalMsg, {
+      
+      let errorTitle = "Error de Envío";
+      if (technicalMsg.includes("META_TEMPLATE_PARAMETER_ERROR")) {
+        errorTitle = "META_TEMPLATE_PARAMETER_ERROR";
+      } else if (technicalMsg.includes("META_AUTH_ERROR")) {
+        errorTitle = "Authentication Error";
+      }
+
+      toast.error(errorTitle, {
         duration: 10000,
-        description: "Revisa el panel de diagnóstico para más detalles."
+        description: technicalMsg.includes("132012") 
+          ? "Los parámetros enviados no coinciden con la estructura de la plantilla aprobada en Meta."
+          : technicalMsg
       });
     }
 
