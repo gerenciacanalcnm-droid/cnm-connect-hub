@@ -3,10 +3,7 @@ import { MessageSquare, MessageCircle, Mail, Inbox, Settings2, Send } from "luci
 import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SendSms } from "@/components/comunicacion/send-sms";
-// Removed redundant components as SMS is now unified in SendSms
-import { ChannelOverview } from "@/components/comunicacion/channel-overview";
-import { WhatsAppAccounts } from "@/components/comunicacion/whatsapp-accounts";
-import { UnifiedTemplates } from "@/components/comunicacion/unified-templates";
+import { SmsHistory } from "@/components/comunicacion/sms-history";
 import { ConversationCenter } from "@/components/comunicacion/conversation-center";
 import { EmailMarketing } from "@/components/comunicacion/email-marketing";
 import { CommunicationSettings } from "@/components/comunicacion/communication-settings";
