@@ -367,11 +367,17 @@ export function WhatsAppSurveys() {
                     </div>
                   ) : (
                     <div className="space-y-px bg-slate-100">
-                      {options.filter(o => o.label).map((opt, i) => (
-                        <div key={i} className="bg-white p-2.5 text-blue-500 text-[13px] text-center font-semibold hover:bg-slate-50 cursor-pointer">
-                          {opt.label}
+                      {options.filter(o => o.label).length > 0 ? (
+                        options.filter(o => o.label).map((opt, i) => (
+                          <div key={i} className="bg-white p-2.5 text-blue-500 text-[13px] text-center font-semibold hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-b-0">
+                            {opt.label}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="bg-white p-2.5 text-slate-400 text-[13px] text-center italic">
+                          Agrega botones...
                         </div>
-                      ))}
+                      )}
                     </div>
                   )}
                 </div>
