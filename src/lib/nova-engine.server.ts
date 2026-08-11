@@ -2,8 +2,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { OpenAI } from "openai";
 
 /**
- * Motor Nova AI - Fase 2
- * Generación de respuestas utilizando OpenAI y contexto real de cada empresa.
+ * Motor Nova AI - Cerebro de Respuestas Inteligentes
  */
 export async function generateNovaResponse(
   companyId: string,
@@ -41,7 +40,7 @@ export async function generateNovaResponse(
 
   const contact = contactData as any;
 
-  // 4. Obtener historial reciente de WhatsApp
+  // 4. Obtener historial reciente de WhatsApp (últimos 10 mensajes)
   const { data: historyData } = await sb
     .from("whatsapp_messages" as any)
     .select("*" as any)
@@ -98,7 +97,7 @@ Responde de forma natural y concisa.
   const responseText = completion.choices[0].message.content || "";
   const usage = completion.usage;
 
-  // 8. Registrar uso (Fase 2 - Sin cobro inmediato)
+  // 8. Registrar en auditoría de automatizaciones
   await sb.from("automation_logs" as any).insert({
     company_id: companyId,
     automation_id: null,
@@ -111,7 +110,7 @@ Responde de forma natural y concisa.
       tokens_completion: usage?.completion_tokens,
       total_tokens: usage?.total_tokens,
       response: responseText,
-      reference: `nova_resp_${Date.now()}`
+      reference: `nova_wa_${Date.now()}`
     }
   } as any);
 
