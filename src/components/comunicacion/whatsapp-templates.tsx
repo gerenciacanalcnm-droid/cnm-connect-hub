@@ -116,7 +116,7 @@ export function WhatsAppTemplates() {
   const form = useForm<z.infer<typeof templateSchema>>({
     resolver: zodResolver(templateSchema),
     defaultValues: {
-      name: "",
+      name: `template_${Date.now()}`,
       category: "MARKETING",
       language: "es",
       headerType: "NONE",
@@ -125,6 +125,7 @@ export function WhatsAppTemplates() {
       footer: "",
       buttons: [],
     },
+    mode: "onChange"
   });
 
   const filteredTemplates = templates.filter(t => 
@@ -252,18 +253,30 @@ export function WhatsAppTemplates() {
                    <div className="bg-[#E7FFDB] rounded-lg shadow-sm w-full max-w-sm p-3 relative space-y-2 border border-slate-200">
                     {form.watch("headerType") !== "NONE" && (
                       <div className="font-bold text-sm border-b pb-1">
-                        {form.watch("headerType") === "TEXT" ? form.watch("headerText") : "Archivo adjunto..."}
+                        {form.watch("headerType") === "TEXT" ? (form.watch("headerText") || "Texto del encabezado") : "Archivo adjunto..."}
                       </div>
                     )}
                     <div className="text-sm whitespace-pre-wrap">
-                      {form.watch("body") || "Cuerpo del mensaje..."}
+                      {(() => {
+                        const body = form.watch("body") || "Cuerpo del mensaje...";
+                        // Replace {{n}} with real examples if provided, otherwise default to "Ejemplo"
+                        return body.replace(/\{\{(\d+)\}\}/g, (match, number) => {
+                          const examples: Record<string, string> = {
+                            "1": "Juan",
+                            "2": "12345",
+                            "3": "Bogotá",
+                            "4": "Premium"
+                          };
+                          return examples[number] || `[Variable ${number}]`;
+                        });
+                      })()}
                     </div>
                     {form.watch("footer") && (
                       <div className="text-[11px] text-slate-500 pt-1 border-t border-black/10">{form.watch("footer")}</div>
                     )}
                     {form.watch("buttons")?.map((b, i) => (
                       <div key={i} className="bg-white text-blue-600 text-sm py-1 rounded border text-center shadow-sm font-medium">
-                        {b.text}
+                        {b.text || "Botón sin texto"}
                       </div>
                     ))}
                    </div>
@@ -280,9 +293,9 @@ export function WhatsAppTemplates() {
                     )}
                   </div>
                   {!selectedComponent && (
-                    <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 opacity-50">
-                      <MousePointer2 className="h-12 w-12 mb-4" />
-                      <p className="text-sm">Editor completado</p>
+                    <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 opacity-70">
+                      <MousePointer2 className="h-12 w-12 mb-4 text-emerald-500 animate-pulse" />
+                      <p className="text-sm font-medium">Editor completado</p>
                     </div>
                   )}
 
@@ -343,12 +356,13 @@ export function WhatsAppTemplates() {
                                   const text = form.getValues("body");
                                   const variables = (text.match(/\{\{\d+\}\}/g) || []);
                                   const nextIndex = variables.length + 1;
-                                  const newText = text.substring(0, start) + `{{${nextIndex}}}` + text.substring(end);
-                                  form.setValue("body", newText);
-                                  // Re-focus and set cursor position after {{n}}
+                                  const insertion = `{{${nextIndex}}}`;
+                                  const newText = text.substring(0, start) + insertion + text.substring(end);
+                                  form.setValue("body", newText, { shouldValidate: true });
+                                  
                                   setTimeout(() => {
                                     textarea.focus();
-                                    const newPos = start + nextIndex.toString().length + 4;
+                                    const newPos = start + insertion.length;
                                     textarea.setSelectionRange(newPos, newPos);
                                   }, 0);
                                 }}
@@ -461,25 +475,33 @@ export function WhatsAppTemplates() {
                 <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
                 <Button onClick={form.handleSubmit(onSubmit)}>Guardar borrador</Button>
                 <Button className="bg-emerald-600" onClick={async () => {
-                  const val = form.getValues();
-                  const variables = val.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
-                  const payload: any = {
-                    name: val.name,
-                    category: val.category,
-                    language: val.language,
-                    body: val.body,
-                    footer: val.footer,
-                    buttons: val.buttons,
-                    variables,
-                    metadata: {
-                      header_type: val.headerType,
-                      header_text: val.headerText,
-                      header_handle: val.headerHandle
-                    }
-                  };
-                  const saved = await saveMutation.mutateAsync(payload) as any;
-                  if (saved?.id) await handleSubmitToMeta(saved.id);
-                  setIsCreateOpen(false);
+                  try {
+                    const isValid = await form.trigger();
+                    if (!isValid) return;
+
+                    const val = form.getValues();
+                    const variables = val.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
+                    const payload: any = {
+                      name: val.name,
+                      category: val.category,
+                      language: val.language,
+                      body: val.body,
+                      footer: val.footer,
+                      buttons: val.buttons,
+                      variables,
+                      metadata: {
+                        header_type: val.headerType,
+                        header_text: val.headerText,
+                        header_handle: val.headerHandle
+                      }
+                    };
+                    const saved = await saveMutation.mutateAsync(payload) as any;
+                    if (saved?.id) await handleSubmitToMeta(saved.id);
+                    setIsCreateOpen(false);
+                    form.reset();
+                  } catch (err) {
+                    // Handled by mutation toast
+                  }
                 }}>Enviar a Meta</Button>
               </DialogFooter>
             </DialogContent>
