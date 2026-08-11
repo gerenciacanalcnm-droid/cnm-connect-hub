@@ -172,20 +172,70 @@ export function WhatsAppTemplates() {
 
         {selectedComponent === 'HEADER' && (
           <div className="space-y-4">
-            <Select value={headerType} onValueChange={setHeaderType}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="NONE">Sin encabezado</SelectItem>
-                <SelectItem value="TEXT">Texto</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-500 uppercase">Tipo de encabezado</label>
+              <Select value={headerType} onValueChange={setHeaderType}>
+                <SelectTrigger className="text-slate-900"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">Sin encabezado</SelectItem>
+                  <SelectItem value="TEXT">Texto</SelectItem>
+                  <SelectItem value="IMAGE">Imagen</SelectItem>
+                  <SelectItem value="VIDEO">Video</SelectItem>
+                  <SelectItem value="DOCUMENT">Documento</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {headerType === "TEXT" && (
-              <Input 
-                value={headerText} 
-                onChange={(e) => setHeaderText(e.target.value)} 
-                placeholder="Ej: ¡Oferta especial!" 
-                maxLength={60}
-              />
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <label className="text-xs font-semibold text-slate-500">Texto del encabezado</label>
+                  <span className="text-[10px] text-slate-400">{headerText.length} / 60</span>
+                </div>
+                <Input 
+                  value={headerText} 
+                  onChange={(e) => setHeaderText(e.target.value)} 
+                  placeholder="Ej: ¡Oferta especial!" 
+                  maxLength={60}
+                  className="text-slate-900"
+                />
+              </div>
+            )}
+
+            {headerType === "IMAGE" && (
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center bg-slate-50">
+                  <Button variant="outline" size="sm" className="w-full">Cargar imagen</Button>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-500">O ingresa URL</label>
+                  <Input placeholder="https://..." className="text-slate-900" />
+                </div>
+              </div>
+            )}
+
+            {headerType === "VIDEO" && (
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center bg-slate-50">
+                  <Button variant="outline" size="sm" className="w-full">Cargar video</Button>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-500">O ingresa URL</label>
+                  <Input placeholder="https://..." className="text-slate-900" />
+                </div>
+              </div>
+            )}
+
+            {headerType === "DOCUMENT" && (
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center bg-slate-50">
+                  <Button variant="outline" size="sm" className="w-full">Cargar documento</Button>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-500">O ingresa URL</label>
+                  <Input placeholder="https://..." className="text-slate-900" />
+                </div>
+              </div>
             )}
           </div>
         )}
