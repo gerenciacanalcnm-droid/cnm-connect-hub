@@ -280,8 +280,8 @@ export const updateConversation = createServerFn({ method: "POST" })
           company_id: current.company_id as string,
           user_id: context.userId,
           module: "communication",
-          action: action as any,
-          detail: detail as any,
+          action: action,
+          detail: detail,
           metadata: {
             conversation_id: data.id,
             previous_assigned_to: current.assigned_to,
@@ -289,8 +289,8 @@ export const updateConversation = createServerFn({ method: "POST" })
             previous_status: current.status,
             new_status: data.status,
             timestamp: new Date().toISOString()
-          } as any
-        });
+          }
+        } as any);
       }
     }
 
