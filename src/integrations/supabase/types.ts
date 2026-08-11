@@ -1792,15 +1792,20 @@ export type Database = {
       }
       sms_schedules: {
         Row: {
+          actual_cost: number | null
           body: string
           company_id: string
           created_at: string
+          error_log: string | null
           error_reason: string | null
           estimated_cost: number
+          executed_at: string | null
           id: string
           is_flash: boolean
           metadata: Json
           recipients: string[]
+          recipients_failed: number | null
+          recipients_sent: number | null
           reference: string
           scheduled_at: string
           status: Database["public"]["Enums"]["sms_schedule_status"]
@@ -1809,15 +1814,20 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          actual_cost?: number | null
           body: string
           company_id: string
           created_at?: string
+          error_log?: string | null
           error_reason?: string | null
           estimated_cost?: number
+          executed_at?: string | null
           id?: string
           is_flash?: boolean
           metadata?: Json
           recipients: string[]
+          recipients_failed?: number | null
+          recipients_sent?: number | null
           reference: string
           scheduled_at: string
           status?: Database["public"]["Enums"]["sms_schedule_status"]
@@ -1826,15 +1836,20 @@ export type Database = {
           user_id: string
         }
         Update: {
+          actual_cost?: number | null
           body?: string
           company_id?: string
           created_at?: string
+          error_log?: string | null
           error_reason?: string | null
           estimated_cost?: number
+          executed_at?: string | null
           id?: string
           is_flash?: boolean
           metadata?: Json
           recipients?: string[]
+          recipients_failed?: number | null
+          recipients_sent?: number | null
           reference?: string
           scheduled_at?: string
           status?: Database["public"]["Enums"]["sms_schedule_status"]

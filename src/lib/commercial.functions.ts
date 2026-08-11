@@ -438,7 +438,7 @@ type Sb = { from: (t: string) => any };
  * wallet → movimiento → historial comercial → auditoría.
  * Implementa protección básica contra doble ejecución mediante referencia.
  */
-async function applyWalletMovement(
+export async function applyWalletMovement(
   supabase: Sb,
   input: {
     walletId: string;
