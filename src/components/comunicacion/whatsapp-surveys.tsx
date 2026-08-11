@@ -185,6 +185,7 @@ export function WhatsAppSurveys() {
             <div className="bg-white rounded-lg shadow-sm p-3 max-w-[85%] relative border border-slate-100">
               <div className="font-bold text-emerald-600 text-[12px] mb-1">{title || "Encuesta"}</div>
               <div className="text-slate-900 text-sm mb-3">{question || "¿Cómo calificarías nuestro servicio?"}</div>
+              <div className="text-xs text-slate-400 mt-2">100% listo</div>
               
               <Button variant="outline" className="w-full h-9 text-blue-500 text-sm border-t border-slate-100 rounded-none bg-transparent hover:bg-slate-50 flex items-center justify-center gap-2">
                 <Send className="h-3 w-3" /> Ver opciones
