@@ -327,10 +327,11 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
         company_id: CNM_COMPANY_ID,
         to_phone: data.to,
         body: data.body,
-        status: "pending",
+        status: "sending",
         provider: data.provider,
-        cost: 0.19, // Tarifa base fija por ahora
+        cost: 0.19, 
       })
+
       .select("id")
       .single();
 
@@ -345,11 +346,11 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
           amount: 0.19,
           units: 1,
           description: `Envío SMS a ${data.to}`,
-          reference: sms.id, // Idempotencia vinculada al registro del mensaje
+          reference: sms.id,
         },
-        context
       });
     } catch (err: any) {
+
       // Si falla el cobro (ej. saldo insuficiente), marcamos como fallido
       await context.supabase
         .from("sms_messages")
@@ -394,9 +395,10 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
         to_phone: data.to,
         body: data.body,
         direction: "outbound",
-        status: "pending",
+        status: "sending",
         cost: WA_COST,
       })
+
       .select("id")
       .single();
 
@@ -413,9 +415,9 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
           description: `Salida WA a ${data.to}`,
           reference: msg.id,
         },
-        context
       });
     } catch (err: any) {
+
       await context.supabase
         .from("whatsapp_messages")
         .update({ status: "failed" } as never)
