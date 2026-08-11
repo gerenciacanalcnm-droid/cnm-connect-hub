@@ -68,6 +68,9 @@ function ComunicacionPage() {
         <TabsContent value="whatsapp">
           <SendWhatsAppIndividual />
         </TabsContent>
+        <TabsContent value="programacion-wa">
+          <WhatsAppSchedules />
+        </TabsContent>
         <TabsContent value="plantillas">
           <WhatsAppTemplates />
         </TabsContent>
