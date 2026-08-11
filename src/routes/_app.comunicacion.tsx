@@ -6,6 +6,7 @@ import { SendSms } from "@/components/comunicacion/send-sms";
 import { SmsHistory } from "@/components/comunicacion/sms-history";
 import { SendWhatsAppIndividual } from "@/components/comunicacion/send-whatsapp-individual";
 import { WhatsAppTemplates } from "@/components/comunicacion/whatsapp-templates";
+import { WhatsAppSchedules } from "@/components/comunicacion/whatsapp-schedules";
 import { EmailMarketing } from "@/components/comunicacion/email-marketing";
 import { CommunicationSettings } from "@/components/comunicacion/communication-settings";
 
