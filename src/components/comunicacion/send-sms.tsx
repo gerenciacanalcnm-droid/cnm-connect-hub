@@ -274,7 +274,7 @@ export function SendSms() {
                     {groups.length === 0 ? (
                       <p className="text-sm text-center text-muted-foreground py-8 font-mono">NO_GROUPS_DEFINED</p>
                     ) : (
-                      groups.map(g => (
+                      groups.map((g: any) => (
                         <div key={g.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50">
                           <Checkbox 
                             checked={selectedGroups.has(g.id)}
