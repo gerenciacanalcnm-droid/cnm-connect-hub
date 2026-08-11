@@ -131,7 +131,7 @@ export function WhatsAppSurveys() {
   // --- Render Editor ---
   if (isEditorOpen) {
     return (
-      <div className="flex h-screen bg-slate-50 overflow-hidden">
+      <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-900">
         {/* PANEL IZQUIERDO: Configuración */}
         <div className="w-80 bg-white border-r flex flex-col shadow-sm">
           <div className="p-4 border-b bg-slate-50/50 flex items-center justify-between">
