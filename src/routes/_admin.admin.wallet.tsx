@@ -207,7 +207,7 @@ function WalletPage() {
         cell: (c) => (
           <Button size="sm" variant="outline" onClick={() => setManaged(c.row.original)}>
             <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
-            completo
+            Gestionar saldo
           </Button>
         ),
       },
@@ -318,7 +318,7 @@ function WalletPage() {
       >
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>completo — {managed?.companyName}</DialogTitle>
+            <DialogTitle>Gestionar saldo — {managed?.companyName}</DialogTitle>
             <DialogDescription>
               Canal {managed?.channel.toUpperCase()} · Plan {managed?.planCode ?? "sin plan"}
             </DialogDescription>
@@ -359,6 +359,24 @@ function WalletPage() {
                 </Button>
                 <Button variant="outline" onClick={() => openForm("adjust")}>
                   <Minus className="mr-1.5 h-4 w-4" /> Ajustar saldo
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  const tabsTrigger = document.querySelector('[value="movimientos"]') as HTMLElement;
+                  tabsTrigger?.click();
+                }}>
+                  Ver movimientos
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  const tabsTrigger = document.querySelector('[value="recargas"]') as HTMLElement;
+                  tabsTrigger?.click();
+                }}>
+                  Ver recargas
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  const tabsTrigger = document.querySelector('[value="consumo"]') as HTMLElement;
+                  tabsTrigger?.click();
+                }}>
+                  Ver consumo
                 </Button>
               </div>
 
@@ -412,10 +430,40 @@ function WalletPage() {
                               {formatCurrency(r.amount, r.currency)}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {fmtDate(r.createdAt)} · {r.mode}
+                              {fmtDate(r.createdAt)} · {r.mode} · {r.gatewayCode ?? "manual"}
+                              {r.receiptPath && <span className="ml-2 text-primary underline cursor-pointer">Ver comprobante</span>}
                             </div>
                           </div>
-                          <Badge variant="outline">{r.reviewStatus}</Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{r.reviewStatus}</Badge>
+                            {r.reviewStatus === "pendiente" && (
+                              <div className="flex gap-1">
+                                <Button size="sm" variant="ghost" className="h-7 text-success px-2" onClick={async () => {
+                                  if(confirm("¿Aprobar esta recarga?")) {
+                                    const { reviewRecharge } = await import("@/lib/commercial.functions");
+                                    try {
+                                      await reviewRecharge({ data: { id: r.id, status: "aprobada", note: "Aprobada por Super Admin" } });
+                                      toast.success("Recarga aprobada");
+                                    } catch (e: any) {
+                                      toast.error(e.message);
+                                    }
+                                  }
+                                }}>Aprobar</Button>
+                                <Button size="sm" variant="ghost" className="h-7 text-destructive px-2" onClick={async () => {
+                                  const note = prompt("Motivo del rechazo:");
+                                  if(note) {
+                                    const { reviewRecharge } = await import("@/lib/commercial.functions");
+                                    try {
+                                      await reviewRecharge({ data: { id: r.id, status: "rechazada", note } });
+                                      toast.success("Recarga rechazada");
+                                    } catch (e: any) {
+                                      toast.error(e.message);
+                                    }
+                                  }
+                                }}>Rechazar</Button>
+                              </div>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -445,7 +493,7 @@ function WalletPage() {
             </div>
           )}
 
-          {managed && formMode && (
+          {managed && formMode === "add" && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -454,7 +502,7 @@ function WalletPage() {
                     type="number"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    placeholder={formMode === "add" ? "Monto a acreditar" : "Monto a ajustar"}
+                    placeholder="Monto a acreditar"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -470,7 +518,7 @@ function WalletPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {typeOptions.map((o) => (
+                      {CREDIT_TYPES.map((o) => (
                         <SelectItem key={o.value} value={o.value}>
                           {o.label}
                         </SelectItem>
@@ -521,16 +569,51 @@ function WalletPage() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Saldo actual {formatCurrency(managed.balance, managed.currency)} → nuevo saldo{" "}
-                {formatCurrency(
-                  managed.balance +
-                    (formMode === "add"
-                      ? Math.abs(Number(amount) || 0)
-                      : type === "AJUSTE_DEBITO"
-                        ? -Math.abs(Number(amount) || 0)
-                        : Number(amount) || 0),
-                  managed.currency,
-                )}
+                Saldo actual {formatCurrency(managed.balance, managed.currency)} + {amount || 0} ={" "}
+                {formatCurrency(managed.balance + (Number(amount) || 0), managed.currency)}
+              </p>
+            </div>
+          )}
+
+          {managed && formMode === "adjust" && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Valor a descontar</Label>
+                  <Input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="Monto a debitar"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Referencia</Label>
+                  <Input
+                    value={reference}
+                    onChange={(e) => setReference(e.target.value)}
+                    placeholder="Ref. del ajuste"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Motivo / Concepto</Label>
+                <Input
+                  value={concept}
+                  onChange={(e) => setConcept(e.target.value)}
+                  placeholder="Ej. Corrección por error en envío"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Observaciones</Label>
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Saldo actual {formatCurrency(managed.balance, managed.currency)} - {amount || 0} ={" "}
+                {formatCurrency(managed.balance - (Number(amount) || 0), managed.currency)}
               </p>
             </div>
           )}
