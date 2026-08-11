@@ -12,23 +12,25 @@ export const Route = createFileRoute('/api/public/webhooks/wompi')({
           const payload = JSON.parse(bodyText);
           
           // 1. Validar firma de Wompi (Idempotencia y Autenticidad)
-          // La firma de Wompi se genera con: evento + data.transaction.id + data.transaction.status + data.transaction.amount_in_cents + timestamp + secret
           const signature = request.headers.get('x-event-checksum');
           const secret = process.env['WOMPI_EVENT_SECRET'];
 
           if (secret && signature) {
             const data = payload.data.transaction;
+            // El orden de los campos para la firma de eventos en Wompi es: 
+            // evento + data.transaction.id + data.transaction.status + data.transaction.amount_in_cents + timestamp + secret
             const content = `${payload.event}${data.id}${data.status}${data.amount_in_cents}${payload.timestamp}${secret}`;
             const expectedSignature = createHmac('sha256', secret).update(content).digest('hex');
             
             if (!timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+              console.warn('Wompi Webhook: Invalid signature');
               return new Response('Invalid signature', { status: 401 });
             }
           }
 
           // 2. Extraer datos
           const transaction = payload.data.transaction;
-          const rechargeId = transaction.reference; // Usamos la referencia como el ID de nuestra recarga
+          const rechargeId = transaction.reference; 
           const status = transaction.status; // APPROVED, DECLINED, VOIDED, ERROR
 
           if (payload.event !== 'transaction.updated') {
@@ -36,7 +38,7 @@ export const Route = createFileRoute('/api/public/webhooks/wompi')({
           }
 
           // 3. Mapear estados y procesar
-          // Usamos reviewRecharge que ya tiene la lógica atómica de Wallet y Auditoría
+          // Usamos reviewRecharge que tiene lógica atómica e idempotente (por referencia)
           if (status === 'APPROVED') {
             await reviewRecharge({
               data: {
