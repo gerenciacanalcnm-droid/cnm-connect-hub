@@ -270,15 +270,21 @@ export function WhatsAppTemplates() {
 
         {selectedComponent === 'BODY' && (
           <div className="space-y-4">
-            <Textarea 
-              value={body} 
-              onChange={(e) => setBody(e.target.value)} 
-              className="h-64 text-sm" 
-              placeholder="Hola mundo..." 
-            />
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cuerpo del mensaje</label>
+                <Badge variant="secondary" className="text-[10px]">Recomendado</Badge>
+              </div>
+              <Textarea 
+                value={body} 
+                onChange={(e) => setBody(e.target.value)} 
+                className="h-64 text-sm text-slate-900 bg-white border-slate-200 focus:ring-emerald-500" 
+                placeholder="Hola {{1}}, tu pedido {{2}} está listo." 
+              />
+            </div>
             <Button 
               variant="outline" 
-              className="w-full text-xs" 
+              className="w-full text-xs hover:bg-slate-50 border-slate-200 text-slate-600" 
               onClick={() => {
                 const variables = (body.match(/\{\{\d+\}\}/g) || []);
                 const nextIndex = variables.length + 1;
@@ -287,6 +293,11 @@ export function WhatsAppTemplates() {
             >
               <Variable className="h-3 w-3 mr-2" /> Insertar variable
             </Button>
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+              <p className="text-[10px] text-blue-600 leading-relaxed font-medium">
+                Las variables <code className="bg-blue-100 px-1 rounded">{"{{n}}"}</code> serán reemplazadas por datos reales. Ejemplo: <span className="italic">"Hola Juan, tu pedido 12345..."</span>
+              </p>
+            </div>
           </div>
         )}
 
