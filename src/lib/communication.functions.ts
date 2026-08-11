@@ -308,7 +308,6 @@ export const getChannelAnalytics = createServerFn({ method: "GET" })
 
 /**
  * Envía un SMS y descuenta el saldo de la wallet de la empresa.
- * Implementa idempotencia mediante el ID del mensaje generado.
  */
 export const sendSmsMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -317,10 +316,11 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
       to: z.string().min(8),
       body: z.string().min(1),
       provider: z.string().optional().default("CNM"),
+      isFlash: z.boolean().optional().default(false),
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
-    // 1. Registrar mensaje en DB (Estado: pending)
+    // 1. Registrar mensaje en DB (Estado: sending)
     const { data: sms, error: smsErr } = await context.supabase
       .from("sms_messages")
       .insert({
@@ -329,29 +329,33 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
         body: data.body,
         status: "sending" as never,
         provider: data.provider as never,
-        cost: 0.19, 
+        is_flash: data.isFlash, // Asegurar que esta columna exista en la tabla
       })
-
       .select("id")
       .single();
 
-
     if (smsErr) throw new Error(smsErr.message);
 
-    // 2. Descontar saldo de la wallet (Atómico)
+    // 2. Descontar saldo de la wallet (Atómico y consultando Motor Comercial)
     try {
-      await trackServiceUsage({
+      const usage = await trackServiceUsage({
         data: {
           company_id: CNM_COMPANY_ID,
           channel: "sms",
-          amount: 0.19,
           units: 1,
-          description: `Envío SMS a ${data.to}`,
+          description: `Envío SMS${data.isFlash ? ' FLASH' : ''} a ${data.to}`,
           reference: sms.id,
+          isFlash: data.isFlash,
         },
       });
-    } catch (err: any) {
 
+      // Actualizar el costo real aplicado en el registro del mensaje
+      await context.supabase
+        .from("sms_messages")
+        .update({ cost: usage.amount } as never)
+        .eq("id", sms.id);
+
+    } catch (err: any) {
       // Si falla el cobro (ej. saldo insuficiente), marcamos como fallido
       await context.supabase
         .from("sms_messages")
@@ -360,7 +364,7 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
       throw err;
     }
 
-    // 3. Enviar a Gateway (Simulado para este Sprint)
+    // 3. Enviar a Gateway (Simulación)
     await new Promise(r => setTimeout(r, 500));
     
     // 4. Actualizar estado final
@@ -385,9 +389,6 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
-    // Tarifa WA: 0.50 por mensaje de salida
-    const WA_COST = 0.50;
-
     // 1. Registrar mensaje
     const { data: msg, error: msgErr } = await context.supabase
       .from("whatsapp_messages")
@@ -397,29 +398,31 @@ export const sendWhatsAppMessage = createServerFn({ method: "POST" })
         body: data.body,
         direction: "outbound" as never,
         status: "sending" as never,
-        cost: WA_COST,
       })
-
       .select("id")
       .single();
 
-
     if (msgErr) throw new Error(msgErr.message);
 
-    // 2. Cobro atómico
+    // 2. Cobro atómico consultando Motor Comercial
     try {
-      await trackServiceUsage({
+      const usage = await trackServiceUsage({
         data: {
           company_id: CNM_COMPANY_ID,
           channel: "whatsapp",
-          amount: WA_COST,
           units: 1,
           description: `Salida WA a ${data.to}`,
           reference: msg.id,
         },
       });
-    } catch (err: any) {
 
+      // Actualizar el costo real en el mensaje
+      await context.supabase
+        .from("whatsapp_messages")
+        .update({ cost: usage.amount } as never)
+        .eq("id", msg.id);
+
+    } catch (err: any) {
       await context.supabase
         .from("whatsapp_messages")
         .update({ status: "failed" } as never)
@@ -451,10 +454,7 @@ export const sendEmailMessage = createServerFn({ method: "POST" })
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
-    // Tarifa Email: 0.05 por envío
-    const EMAIL_COST = 0.05;
-
-    // 1. Cobro atómico (Sin registro previo de tabla específica aún, usamos UUID para ref)
+    // 1. Cobro atómico consultando Motor Comercial
     const reference = crypto.randomUUID();
     
     try {
@@ -462,7 +462,6 @@ export const sendEmailMessage = createServerFn({ method: "POST" })
         data: {
           company_id: CNM_COMPANY_ID,
           channel: "email",
-          amount: EMAIL_COST,
           units: 1,
           description: `Envío Email a ${data.to}: ${data.subject}`,
           reference: reference,
