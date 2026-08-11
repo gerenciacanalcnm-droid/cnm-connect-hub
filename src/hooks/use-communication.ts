@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { conversationRepository } from "@/repositories/conversation.repository";
 import { communicationRepository } from "@/repositories/communication.repository";
+import { sendWhatsAppMessage } from "@/lib/communication.functions";
 import type { Conversation } from "@/types/communication";
+import { toast } from "sonner";
 import { queryKeys } from "./queries/keys";
 
 export function useConversations(filters?: {
@@ -47,4 +49,25 @@ export function useCommunicationSettings() {
 
 export function useCommunicationProviders() {
   return communicationRepository.providers();
+}
+
+export function useSendWhatsApp() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { to: string; body: string; accountId: string; conversationId?: string }) =>
+      sendWhatsAppMessage({ data }),
+    onSuccess: (_, variables) => {
+      if (variables.conversationId) {
+        qc.invalidateQueries({ queryKey: queryKeys.conversationMessages(variables.conversationId) });
+        qc.invalidateQueries({ queryKey: ["conversations"] });
+      }
+    },
+    onError: (error: any) => {
+      if (error.message?.includes("saldo") || error.message?.includes("balance")) {
+        toast.error("Saldo insuficiente");
+      } else {
+        toast.error("Error al enviar mensaje");
+      }
+    },
+  });
 }

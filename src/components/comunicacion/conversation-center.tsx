@@ -10,7 +10,9 @@ import {
   Video,
   Send,
   Search,
+  MoreVertical,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +32,8 @@ import {
   useConversations,
   useConversationMessages,
   useUpdateConversation,
+  useSendWhatsApp,
+  useCommunicationSettings,
 } from "@/hooks/use-communication";
 import type { CommunicationChannel, Conversation, ConversationStatus } from "@/types/communication";
 import { cn } from "@/lib/utils";
@@ -59,6 +63,7 @@ export function ConversationCenter() {
   const [status, setStatus] = useState<"all" | ConversationStatus>("all");
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [replyBody, setReplyBody] = useState("");
 
   const filters = useMemo(
     () => ({
@@ -72,6 +77,31 @@ export function ConversationCenter() {
   const { data: conversations = [], isLoading } = useConversations(filters);
   const { data: messages = [] } = useConversationMessages(activeId);
   const updateConv = useUpdateConversation();
+  const sendWhatsApp = useSendWhatsApp();
+  const { data: commSettings } = useCommunicationSettings();
+
+  const handleSendReply = async () => {
+    if (!active || !replyBody.trim()) return;
+
+    // Obtener la cuenta de WhatsApp (accountId) vinculada a la conversación o la primaria
+    const accountId = active.accountId;
+    if (!accountId) {
+      toast.error("No hay una cuenta de WhatsApp vinculada a esta conversación.");
+      return;
+    }
+
+    try {
+      await sendWhatsApp.mutateAsync({
+        to: active.contactPhone,
+        body: replyBody,
+        accountId: accountId,
+        conversationId: active.id,
+      });
+      setReplyBody("");
+    } catch (err) {
+      // Error manejado en el hook
+    }
+  };
 
   const active = conversations.find((c) => c.id === activeId) ?? null;
 
@@ -239,14 +269,31 @@ export function ConversationCenter() {
                 ))}
               </div>
               <div className="flex gap-2">
-                <Input placeholder="Escribe un mensaje…" disabled />
-                <Button className="gap-1.5" disabled>
-                  <Send className="h-4 w-4" /> Enviar
+                <Input
+                  placeholder="Escribe un mensaje…"
+                  value={replyBody}
+                  onChange={(e) => setReplyBody(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendReply();
+                    }
+                  }}
+                  disabled={sendWhatsApp.isPending}
+                />
+                <Button
+                  className="gap-1.5"
+                  onClick={handleSendReply}
+                  disabled={!replyBody.trim() || sendWhatsApp.isPending}
+                >
+                  {sendWhatsApp.isPending ? (
+                    <Loader size="sm" className="h-4 w-4" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  Enviar
                 </Button>
               </div>
-              <p className="text-[11px] text-muted-foreground">
-                Disponible en la siguiente actualización.
-              </p>
             </div>
           </>
         )}
