@@ -3,7 +3,7 @@ import { OpenAI } from "openai";
 
 /**
  * Motor Nova AI - Fase 2
- * Generación de respuestas utilizando OpenAI y contexto real de la empresa.
+ * Generación de respuestas utilizando OpenAI y contexto real de cada empresa.
  */
 export async function generateNovaResponse(
   companyId: string,
@@ -14,12 +14,13 @@ export async function generateNovaResponse(
   const sb = supabaseAdmin;
 
   // 1. Obtener configuración de Nova
-  const { data: settings, error: sErr } = await sb
+  const { data: settingsData, error: sErr } = await sb
     .from("nova_settings" as any)
     .select("*" as any)
     .eq("company_id", companyId)
     .maybeSingle();
   
+  const settings = settingsData as any;
   if (sErr || !settings || settings.status !== "ACTIVO") {
     throw new Error("Nova no está activo para esta empresa.");
   }
@@ -32,19 +33,23 @@ export async function generateNovaResponse(
     .maybeSingle();
 
   // 3. Obtener contexto del contacto
-  const { data: contact } = await sb
+  const { data: contactData } = await sb
     .from("contacts" as any)
     .select("*" as any)
     .eq("id", contactId)
     .single();
 
+  const contact = contactData as any;
+
   // 4. Obtener historial reciente de WhatsApp
-  const { data: history } = await sb
+  const { data: historyData } = await sb
     .from("whatsapp_messages" as any)
     .select("*" as any)
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: false })
     .limit(10);
+
+  const history = (historyData ?? []) as any[];
 
   // 5. Construir System Prompt
   const systemPrompt = `
@@ -72,7 +77,7 @@ Responde de forma natural y concisa.
   const messages: any[] = [{ role: "system", content: systemPrompt }];
   
   // Agregar historial (reverso para orden cronológico)
-  const sortedHistory = (history || []).reverse();
+  const sortedHistory = [...history].reverse();
   for (const msg of sortedHistory) {
     messages.push({
       role: msg.direction === "inbound" ? "user" : "assistant",
@@ -96,7 +101,7 @@ Responde de forma natural y concisa.
   // 8. Registrar uso (Fase 2 - Sin cobro inmediato)
   await sb.from("automation_logs" as any).insert({
     company_id: companyId,
-    automation_id: null, // No es una automatización fija
+    automation_id: null,
     trigger_type: "nova_ai_query",
     trigger_data: { userMessage, contactId, conversationId },
     result: "SUCCESS",
