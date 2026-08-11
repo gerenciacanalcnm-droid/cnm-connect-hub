@@ -329,307 +329,298 @@ function WalletPage() {
               <div className={formMode ? "hidden" : "block"}>
                 <div className="space-y-4">
                   <div className="grid gap-3 sm:grid-cols-3">
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-xs text-muted-foreground">Saldo actual</div>
-                    <div className="mt-1 text-2xl font-semibold">
-                      {formatCurrency(managed.balance, managed.currency)}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-xs text-muted-foreground">Créditos disponibles</div>
-                    <div className="mt-1 text-2xl font-semibold">
-                      {formatNumber(managed.credits)}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-xs text-muted-foreground">Consumo</div>
-                    <div className="mt-1 text-2xl font-semibold">
-                      {formatCurrency(managed.consumed, managed.currency)}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Button onClick={() => openForm("add")}>
-                  <Plus className="mr-1.5 h-4 w-4" /> Agregar saldo
-                </Button>
-                <Button variant="outline" onClick={() => openForm("adjust")}>
-                  <Minus className="mr-1.5 h-4 w-4" /> Ajustar saldo
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => {
-                  const tabsTrigger = document.querySelector('[value="movimientos"]') as HTMLElement;
-                  tabsTrigger?.click();
-                }}>
-                  Ver movimientos
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => {
-                  const tabsTrigger = document.querySelector('[value="recargas"]') as HTMLElement;
-                  tabsTrigger?.click();
-                }}>
-                  Ver recargas
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => {
-                  const tabsTrigger = document.querySelector('[value="consumo"]') as HTMLElement;
-                  tabsTrigger?.click();
-                }}>
-                  Ver consumo
-                </Button>
-              </div>
-
-              <Tabs defaultValue="movimientos">
-                <TabsList>
-                  <TabsTrigger value="movimientos">Movimientos</TabsTrigger>
-                  <TabsTrigger value="recargas">Recargas</TabsTrigger>
-                  <TabsTrigger value="consumo">Consumo</TabsTrigger>
-                </TabsList>
-                <TabsContent value="movimientos" className="max-h-72 overflow-auto">
-                  {walletTxs.length === 0 ? (
-                    <p className="py-6 text-center text-sm text-muted-foreground">
-                      Sin movimientos registrados.
-                    </p>
-                  ) : (
-                    <ul className="divide-y divide-border text-sm">
-                      {walletTxs.map((t) => (
-                        <li key={t.id} className="flex items-center justify-between gap-3 py-2">
-                          <div>
-                            <div className="font-medium">{t.concept ?? t.type}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {fmtDate(t.createdAt)} · {t.type}
-                              {t.reference ? ` · ref ${t.reference}` : ""}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className={t.amount < 0 ? "text-destructive" : "text-success"}>
-                              {formatCurrency(t.amount)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {t.balanceBefore == null ? "—" : formatCurrency(t.balanceBefore)} →{" "}
-                              {t.balanceAfter == null ? "—" : formatCurrency(t.balanceAfter)}
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </TabsContent>
-                <TabsContent value="recargas" className="max-h-72 overflow-auto">
-                  {walletRecharges.length === 0 ? (
-                    <p className="py-6 text-center text-sm text-muted-foreground">
-                      Sin solicitudes de recarga.
-                    </p>
-                  ) : (
-                    <ul className="divide-y divide-border text-sm">
-                      {walletRecharges.map((r) => (
-                        <li key={r.id} className="flex items-center justify-between py-2">
-                          <div>
-                            <div className="font-medium">
-                              {formatCurrency(r.amount, r.currency)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {fmtDate(r.createdAt)} · {r.mode} · {r.gatewayCode ?? "manual"}
-                              {r.receiptPath && <span className="ml-2 text-primary underline cursor-pointer">Ver comprobante</span>}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">{r.reviewStatus}</Badge>
-                            {r.reviewStatus === "pendiente" && (
-                              <div className="flex gap-1">
-                                <Button size="sm" variant="ghost" className="h-7 text-success px-2" onClick={async () => {
-                                  if(confirm("¿Aprobar esta recarga?")) {
-                                    const { reviewRecharge } = await import("@/lib/commercial.functions");
-                                    try {
-                                      await reviewRecharge({ data: { id: r.id, status: "aprobada", note: "Aprobada por Super Admin" } });
-                                      toast.success("Recarga aprobada");
-                                    } catch (e: any) {
-                                      toast.error(e.message);
-                                    }
-                                  }
-                                }}>Aprobar</Button>
-                                <Button size="sm" variant="ghost" className="h-7 text-destructive px-2" onClick={async () => {
-                                  const note = prompt("Motivo del rechazo:");
-                                  if(note) {
-                                    const { reviewRecharge } = await import("@/lib/commercial.functions");
-                                    try {
-                                      await reviewRecharge({ data: { id: r.id, status: "rechazada", note } });
-                                      toast.success("Recarga rechazada");
-                                    } catch (e: any) {
-                                      toast.error(e.message);
-                                    }
-                                  }
-                                }}>Rechazar</Button>
-                              </div>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </TabsContent>
-                <TabsContent value="consumo">
-                  <div className="grid gap-3 py-3 sm:grid-cols-2">
                     <Card>
                       <CardContent className="p-4">
-                        <div className="text-xs text-muted-foreground">Consumo acumulado</div>
-                        <div className="mt-1 text-xl font-semibold">
+                        <div className="text-xs text-muted-foreground">Saldo actual</div>
+                        <div className="mt-1 text-2xl font-semibold">
+                          {formatCurrency(managed.balance, managed.currency)}
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-xs text-muted-foreground">Créditos disponibles</div>
+                        <div className="mt-1 text-2xl font-semibold">
+                          {formatNumber(managed.credits)}
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-xs text-muted-foreground">Consumo</div>
+                        <div className="mt-1 text-2xl font-semibold">
                           {formatCurrency(managed.consumed, managed.currency)}
                         </div>
                       </CardContent>
                     </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="text-xs text-muted-foreground">Última actualización</div>
-                        <div className="mt-1 text-xl font-semibold">
-                          {fmtDate(managed.updatedAt)}
-                        </div>
-                      </CardContent>
-                    </Card>
                   </div>
-                </TabsContent>
-              </Tabs>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button onClick={() => openForm("add")}>
+                      <Plus className="mr-1.5 h-4 w-4" /> Agregar saldo
+                    </Button>
+                    <Button variant="outline" onClick={() => openForm("adjust")}>
+                      <Minus className="mr-1.5 h-4 w-4" /> Ajustar saldo
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      const tabsTrigger = document.querySelector('[value="movimientos"]') as HTMLElement;
+                      tabsTrigger?.click();
+                    }}>
+                      Ver movimientos
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      const tabsTrigger = document.querySelector('[value="recargas"]') as HTMLElement;
+                      tabsTrigger?.click();
+                    }}>
+                      Ver recargas
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      const tabsTrigger = document.querySelector('[value="consumo"]') as HTMLElement;
+                      tabsTrigger?.click();
+                    }}>
+                      Ver consumo
+                    </Button>
+                  </div>
+
+                  <Tabs defaultValue="movimientos">
+                    <TabsList>
+                      <TabsTrigger value="movimientos">Movimientos</TabsTrigger>
+                      <TabsTrigger value="recargas">Recargas</TabsTrigger>
+                      <TabsTrigger value="consumo">Consumo</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="movimientos" className="max-h-72 overflow-auto">
+                      {walletTxs.length === 0 ? (
+                        <p className="py-6 text-center text-sm text-muted-foreground">
+                          Sin movimientos registrados.
+                        </p>
+                      ) : (
+                        <ul className="divide-y divide-border text-sm">
+                          {walletTxs.map((t) => (
+                            <li key={t.id} className="flex items-center justify-between gap-3 py-2">
+                              <div>
+                                <div className="font-medium">{t.concept ?? t.type}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {fmtDate(t.createdAt)} · {t.type}
+                                  {t.reference ? ` · ref ${t.reference}` : ""}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className={t.amount < 0 ? "text-destructive" : "text-success"}>
+                                  {formatCurrency(t.amount)}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {t.balanceBefore == null ? "—" : formatCurrency(t.balanceBefore)} →{" "}
+                                  {t.balanceAfter == null ? "—" : formatCurrency(t.balanceAfter)}
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </TabsContent>
+                    <TabsContent value="recargas" className="max-h-72 overflow-auto">
+                      {walletRecharges.length === 0 ? (
+                        <p className="py-6 text-center text-sm text-muted-foreground">
+                          Sin solicitudes de recarga.
+                        </p>
+                      ) : (
+                        <ul className="divide-y divide-border text-sm">
+                          {walletRecharges.map((r) => (
+                            <li key={r.id} className="flex items-center justify-between py-2">
+                              <div>
+                                <div className="font-medium">
+                                  {formatCurrency(r.amount, r.currency)}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {fmtDate(r.createdAt)} · {r.mode} · {r.gatewayCode ?? "manual"}
+                                  {r.receiptPath && <span className="ml-2 text-primary underline cursor-pointer">Ver comprobante</span>}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline">{r.reviewStatus}</Badge>
+                                {r.reviewStatus === "pendiente" && (
+                                  <div className="flex gap-1">
+                                    <Button size="sm" variant="ghost" className="h-7 text-success px-2" onClick={async () => {
+                                      if(confirm("¿Aprobar esta recarga?")) {
+                                        const { reviewRecharge } = await import("@/lib/commercial.functions");
+                                        try {
+                                          await reviewRecharge({ data: { id: r.id, status: "aprobada", note: "Aprobada por Super Admin" } });
+                                          toast.success("Recarga aprobada");
+                                        } catch (e: any) {
+                                          toast.error(e.message);
+                                        }
+                                      }
+                                    }}>Aprobar</Button>
+                                    <Button size="sm" variant="ghost" className="h-7 text-destructive px-2" onClick={async () => {
+                                      const note = prompt("Motivo del rechazo:");
+                                      if(note) {
+                                        const { reviewRecharge } = await import("@/lib/commercial.functions");
+                                        try {
+                                          await reviewRecharge({ data: { id: r.id, status: "rechazada", note } });
+                                          toast.success("Recarga rechazada");
+                                        } catch (e: any) {
+                                          toast.error(e.message);
+                                        }
+                                      }
+                                    }}>Rechazar</Button>
+                                  </div>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </TabsContent>
+                    <TabsContent value="consumo">
+                      <div className="grid gap-3 py-3 sm:grid-cols-2">
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="text-xs text-muted-foreground">Consumo acumulado</div>
+                            <div className="mt-1 text-xl font-semibold">
+                              {formatCurrency(managed.consumed, managed.currency)}
+                            </div>
+                          </CardContent>
+                        </Card>
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="text-xs text-muted-foreground">Última actualización</div>
+                            <div className="mt-1 text-xl font-semibold">
+                              {fmtDate(managed.updatedAt)}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </div>
               </div>
 
-
-
-
-
-
-
-
-
-
-          {managed && formMode === "add" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>Valor</Label>
-                  <Input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="Monto a acreditar"
-                  />
+              {formMode === "add" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label>Valor</Label>
+                      <Input
+                        type="number"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder="Monto a acreditar"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Créditos (opcional)</Label>
+                      <Input type="number" value={units} onChange={(e) => setUnits(e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label>Tipo de operación</Label>
+                      <Select value={type} onValueChange={(v) => setType(v as WalletOperationType)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CREDIT_TYPES.map((o) => (
+                            <SelectItem key={o.value} value={o.value}>
+                              {o.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Método de pago</Label>
+                      <Select value={method} onValueChange={setMethod}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PAYMENT_METHODS.map((m) => (
+                            <SelectItem key={m} value={m}>
+                              {m}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Concepto</Label>
+                    <Input
+                      value={concept}
+                      onChange={(e) => setConcept(e.target.value)}
+                      maxLength={200}
+                      placeholder="Ej. Recarga corporativa agosto"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Referencia</Label>
+                    <Input
+                      value={reference}
+                      onChange={(e) => setReference(e.target.value)}
+                      maxLength={120}
+                      placeholder="Comprobante, factura o transacción"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Observaciones</Label>
+                    <Textarea
+                      value={notes}
+                      maxLength={500}
+                      onChange={(e) => setNotes(e.target.value)}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Saldo actual {formatCurrency(managed.balance, managed.currency)} + {amount || 0} ={" "}
+                    {formatCurrency(managed.balance + (Number(amount) || 0), managed.currency)}
+                  </p>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Créditos (opcional)</Label>
-                  <Input type="number" value={units} onChange={(e) => setUnits(e.target.value)} />
+              )}
+
+              {formMode === "adjust" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label>Valor a descontar</Label>
+                      <Input
+                        type="number"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder="Monto a debitar"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Referencia</Label>
+                      <Input
+                        value={reference}
+                        onChange={(e) => setReference(e.target.value)}
+                        placeholder="Ref. del ajuste"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Motivo / Concepto</Label>
+                    <Input
+                      value={concept}
+                      onChange={(e) => setConcept(e.target.value)}
+                      placeholder="Ej. Corrección por error en envío"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Observaciones</Label>
+                    <Textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Saldo actual {formatCurrency(managed.balance, managed.currency)} - {amount || 0} ={" "}
+                    {formatCurrency(managed.balance - (Number(amount) || 0), managed.currency)}
+                  </p>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>Tipo de operación</Label>
-                  <Select value={type} onValueChange={(v) => setType(v as WalletOperationType)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CREDIT_TYPES.map((o) => (
-                        <SelectItem key={o.value} value={o.value}>
-                          {o.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Método de pago</Label>
-                  <Select value={method} onValueChange={setMethod}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PAYMENT_METHODS.map((m) => (
-                        <SelectItem key={m} value={m}>
-                          {m}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Concepto</Label>
-                <Input
-                  value={concept}
-                  onChange={(e) => setConcept(e.target.value)}
-                  maxLength={200}
-                  placeholder="Ej. Recarga corporativa agosto"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Referencia</Label>
-                <Input
-                  value={reference}
-                  onChange={(e) => setReference(e.target.value)}
-                  maxLength={120}
-                  placeholder="Comprobante, factura o transacción"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Observaciones</Label>
-                <Textarea
-                  value={notes}
-                  maxLength={500}
-                  onChange={(e) => setNotes(e.target.value)}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Saldo actual {formatCurrency(managed.balance, managed.currency)} + {amount || 0} ={" "}
-                {formatCurrency(managed.balance + (Number(amount) || 0), managed.currency)}
-              </p>
+              )}
             </div>
           )}
-
-          {managed && formMode === "adjust" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>Valor a descontar</Label>
-                  <Input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="Monto a debitar"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Referencia</Label>
-                  <Input
-                    value={reference}
-                    onChange={(e) => setReference(e.target.value)}
-                    placeholder="Ref. del ajuste"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Motivo / Concepto</Label>
-                <Input
-                  value={concept}
-                  onChange={(e) => setConcept(e.target.value)}
-                  placeholder="Ej. Corrección por error en envío"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Observaciones</Label>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Saldo actual {formatCurrency(managed.balance, managed.currency)} - {amount || 0} ={" "}
-                {formatCurrency(managed.balance - (Number(amount) || 0), managed.currency)}
-              </p>
-            </div>
-          )}
-        </>
-      )}
 
       <DialogFooter>
 
