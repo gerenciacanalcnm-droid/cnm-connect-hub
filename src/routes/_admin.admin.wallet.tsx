@@ -492,7 +492,8 @@ function WalletPage() {
                 </TabsContent>
               </Tabs>
             </div>
-          )}
+          </div>
+        )}
 
 
           {managed && formMode === "add" && (
