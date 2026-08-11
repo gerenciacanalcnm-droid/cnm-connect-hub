@@ -327,7 +327,8 @@ function WalletPage() {
           {managed && (
             <div className="space-y-4">
               <div className={formMode ? "hidden" : "block"}>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-3">
                 <Card>
                   <CardContent className="p-4">
                     <div className="text-xs text-muted-foreground">Saldo actual</div>
