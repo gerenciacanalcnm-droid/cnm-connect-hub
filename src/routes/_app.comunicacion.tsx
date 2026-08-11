@@ -44,63 +44,38 @@ function ComunicacionPage() {
       </div>
 
       <Tabs defaultValue="enviar" className="w-full">
-        <TabsList className="mb-6 grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4 lg:grid-cols-13">
-          <TabsTrigger value="enviar">Enviar</TabsTrigger>
-          <TabsTrigger value="masivo">Masivo</TabsTrigger>
-          <TabsTrigger value="programar">Programar</TabsTrigger>
-          <TabsTrigger value="historial">Historial</TabsTrigger>
-          <TabsTrigger value="plantillas">Plantillas</TabsTrigger>
-          <TabsTrigger value="unificadas">Unificadas</TabsTrigger>
-          <TabsTrigger value="grupos">Grupos</TabsTrigger>
-          <TabsTrigger value="importar">Importar</TabsTrigger>
-          <TabsTrigger value="whatsapp" className="gap-1.5">
-            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+        <TabsList className="mb-6 flex overflow-x-auto h-auto w-full gap-1 p-1 bg-muted/50">
+          <TabsTrigger value="enviar" className="gap-1.5 flex-1 min-w-[100px]">
+            <Send className="h-3.5 w-3.5" /> SMS
           </TabsTrigger>
-          <TabsTrigger value="campanas" className="gap-1.5">
-            <MessageSquare className="h-3.5 w-3.5" /> Campañas
-          </TabsTrigger>
-          <TabsTrigger value="conversaciones" className="gap-1.5">
+          <TabsTrigger value="conversaciones" className="gap-1.5 flex-1 min-w-[130px]">
             <Inbox className="h-3.5 w-3.5" /> Conversaciones
           </TabsTrigger>
-          <TabsTrigger value="email" className="gap-1.5">
+          <TabsTrigger value="historial" className="gap-1.5 flex-1 min-w-[100px]">
+            <Inbox className="h-3.5 w-3.5" /> Historial
+          </TabsTrigger>
+          <TabsTrigger value="whatsapp" className="gap-1.5 flex-1 min-w-[110px]">
+            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+          </TabsTrigger>
+          <TabsTrigger value="email" className="gap-1.5 flex-1 min-w-[90px]">
             <Mail className="h-3.5 w-3.5" /> Email
           </TabsTrigger>
-          <TabsTrigger value="ajustes" className="gap-1.5">
+          <TabsTrigger value="ajustes" className="gap-1.5 flex-1 min-w-[90px]">
             <Settings2 className="h-3.5 w-3.5" /> Ajustes
           </TabsTrigger>
         </TabsList>
+        
         <TabsContent value="enviar">
           <SendSms />
         </TabsContent>
-        <TabsContent value="masivo">
-          <BulkSend />
-        </TabsContent>
-        <TabsContent value="programar">
-          <ScheduleSms />
+        <TabsContent value="conversaciones">
+          <ConversationCenter />
         </TabsContent>
         <TabsContent value="historial">
           <SmsHistory />
         </TabsContent>
-        <TabsContent value="plantillas">
-          <Templates />
-        </TabsContent>
-        <TabsContent value="unificadas">
-          <UnifiedTemplates />
-        </TabsContent>
-        <TabsContent value="grupos">
-          <Groups />
-        </TabsContent>
-        <TabsContent value="importar">
-          <Importer />
-        </TabsContent>
         <TabsContent value="whatsapp">
           <WhatsAppAccounts />
-        </TabsContent>
-        <TabsContent value="campanas">
-          <CampaignsList />
-        </TabsContent>
-        <TabsContent value="conversaciones">
-          <ConversationCenter />
         </TabsContent>
         <TabsContent value="email">
           <EmailMarketing />
