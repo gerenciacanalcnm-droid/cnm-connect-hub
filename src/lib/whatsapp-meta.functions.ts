@@ -97,46 +97,7 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
       });
     }
 
-    // Header
-    const metadata = (template as any).metadata || {};
-    const headerType = metadata.header_type || "NONE";
-
-    if (headerType !== "NONE") {
-      const headerComp: any = {
-        type: "HEADER",
-        format: headerType
-      };
-
-      if (headerType === "TEXT") {
-        headerComp.text = metadata.header_text;
-      } else {
-        headerComp.example = { header_handle: [metadata.header_handle || ""] };
-      }
-      
-      components.push(headerComp);
-    }
-
-    // Body
-    components.push({
-      type: "BODY",
-      text: template.body
-    });
-
-    // Footer
-    if (template.footer) {
-      components.push({
-        type: "FOOTER",
-        text: template.footer
-      });
-    }
-
-    // Buttons
-    if (template.buttons && Array.isArray(template.buttons)) {
-      components.push({
-        type: "BUTTONS",
-        buttons: template.buttons
-      });
-    }
+    // The redundant logic block building components again was removed to fix duplicate variable declarations.
 
     const payload = {
       name: template.name,
