@@ -2,6 +2,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import { supabaseAdmin } from '@/integrations/supabase/client.server';
 import { processAutomationTrigger } from '@/lib/automation-engine.server';
 import { generateNovaResponse } from '@/lib/nova-engine.server';
+import { Database } from '@/integrations/supabase/types';
+
+type MessageStatus = Database['public']['Enums']['message_status'];
+type ConversationStatus = Database['public']['Enums']['conversation_status'];
 
 export const Route = createFileRoute('/api/public/whatsapp-webhook')({
   server: {
@@ -52,7 +56,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
           if (statuses && Array.isArray(statuses)) {
             for (const statusUpdate of statuses) {
               const remoteId = statusUpdate.id;
-              const newStatus = statusUpdate.status;
+              const newStatus = statusUpdate.status as MessageStatus;
               const timestamp = statusUpdate.timestamp;
               
               const { data: msg } = await supabaseAdmin
@@ -64,7 +68,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               if (!msg) continue;
 
               const statusPriority: Record<string, number> = {
-                'sending': 0, 'sent': 1, 'delivered': 2, 'read': 3, 'failed': 4
+                'queued': 0, 'sending': 1, 'sent': 2, 'delivered': 3, 'read': 4, 'failed': 5
               };
 
               const currentPriority = statusPriority[msg.status] || 0;
@@ -106,7 +110,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
 
               if (!account) continue;
 
-              // Identificar o crear conversación y contacto
+              // Identificar contacto
               const { data: contact } = await supabaseAdmin
                 .from('contacts')
                 .select('id')
@@ -114,9 +118,9 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                 .eq('phone', from)
                 .maybeSingle();
               
-              if (!contact) continue; // Por simplicidad, asumimos contacto existente en CRM
+              if (!contact) continue;
 
-              const { data: conv, error: convErr } = await supabaseAdmin
+              const { data: conv } = await supabaseAdmin
                 .from('whatsapp_conversations')
                 .select('id, status, assigned_to')
                 .eq('company_id', account.company_id)
@@ -130,8 +134,10 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   .insert({
                     company_id: account.company_id,
                     contact_id: contact.id,
-                    last_message: text,
-                    status: 'SIN_ASIGNAR'
+                    contact_phone: from,
+                    last_message_preview: text,
+                    status: 'open',
+                    channel: 'whatsapp'
                   })
                   .select('id')
                   .single();
@@ -139,20 +145,22 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               } else {
                 await supabaseAdmin
                   .from('whatsapp_conversations')
-                  .update({ last_message: text, updated_at: new Date().toISOString() })
+                  .update({ last_message_preview: text, updated_at: new Date().toISOString() })
                   .eq('id', conversationId);
               }
+
+              if (!conversationId) continue;
 
               // Registrar mensaje entrante
               await supabaseAdmin.from('whatsapp_messages').insert({
                 company_id: account.company_id,
                 conversation_id: conversationId,
-                contact_id: contact.id,
+                to_phone: from,
                 body: text,
                 direction: 'inbound',
                 status: 'delivered',
                 external_id: wamid
-              });
+              } as any);
 
               // Disparar automatizaciones estándar
               await processAutomationTrigger(
@@ -163,16 +171,15 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               );
 
               // --- CICLO NOVA AI ---
-              // Reglas: Nova Activo + Conversación NO asignada/Cerrada
-              const { data: settings } = await supabaseAdmin
+              const { data: settingsData } = await supabaseAdmin
                 .from('nova_settings' as any)
                 .select('status')
                 .eq('company_id', account.company_id)
                 .maybeSingle();
 
-              const isNovaActive = (settings as any)?.status === 'ACTIVO';
+              const isNovaActive = (settingsData as any)?.status === 'ACTIVO';
               const isAssigned = conv?.assigned_to != null;
-              const isClosed = conv?.status === 'CERRADA';
+              const isClosed = conv?.status === 'closed';
 
               if (isNovaActive && !isAssigned && !isClosed) {
                 try {
@@ -184,11 +191,6 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   );
 
                   if (novaResp.response) {
-                    // Cargar dinámicamente el servicio de envío que maneja Wallet
-                    const { sendWhatsAppIndividual } = await import('@/lib/whatsapp.functions');
-                    
-                    // Ejecutar vía server function interna para asegurar cobro y RLS simulado vía admin
-                    // Como el webhook es público, usamos una versión interna o llamamos directamente al servicio
                     await internalSendNovaResponse(
                       account.company_id,
                       account.id,
@@ -200,7 +202,6 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   }
                 } catch (novaErr) {
                   console.error('[Nova Engine Error]:', novaErr);
-                  // Registrar error en logs pero no interrumpir el webhook
                 }
               }
             }
@@ -216,10 +217,6 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
   }
 });
 
-/**
- * Función interna para enviar la respuesta de Nova
- * Asegura: Wallet, Registro con etiqueta AI, Evitar loops
- */
 async function internalSendNovaResponse(
   companyId: string,
   accountId: string,
@@ -230,18 +227,17 @@ async function internalSendNovaResponse(
 ) {
   const { trackServiceUsage } = await import('@/lib/commercial.functions');
   
-  // 1. Registrar mensaje en estado 'sending' marcado como NOVA
+  // 1. Registrar mensaje en estado 'sending'
   const { data: msg } = await supabaseAdmin
     .from('whatsapp_messages')
     .insert({
       company_id: companyId,
       conversation_id: conversationId,
-      contact_id: contactId,
+      to_phone: recipient,
       body: body,
       direction: 'outbound',
-      status: 'sending',
-      metadata: { source: 'NOVA', account_id: accountId }
-    })
+      status: 'sending' as MessageStatus
+    } as any)
     .select('id')
     .single();
 
@@ -258,6 +254,66 @@ async function internalSendNovaResponse(
         reference: msg.id,
         messageType: 'nova_ai'
       }
+    });
+
+    // 3. Obtener credenciales
+    const { data: account } = await supabaseAdmin
+      .from('whatsapp_accounts')
+      .select('phone_number_id, access_token')
+      .eq('id', accountId)
+      .single();
+
+    if (!account || !account.access_token || !account.phone_number_id) {
+      throw new Error("Cuenta incompleta");
+    }
+
+    // 4. Envío real a Meta
+    const metaResponse = await fetch(
+      `https://graph.facebook.com/v20.0/${account.phone_number_id}/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${account.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          recipient_type: "individual",
+          to: recipient,
+          type: "text",
+          text: { body: body },
+        }),
+      }
+    );
+
+    const metaResult = await metaResponse.json();
+
+    if (!metaResponse.ok) {
+      throw new Error(metaResult.error?.message || "Error Meta");
+    }
+
+    // 5. Actualizar a SENT
+    await supabaseAdmin
+      .from('whatsapp_messages')
+      .update({ 
+        status: 'sent' as MessageStatus,
+        external_id: metaResult.messages?.[0]?.id,
+        cost: usage.amount
+      } as any)
+      .eq('id', msg.id);
+
+  } catch (err: any) {
+    console.error('[Internal Nova Send Error]:', err.message);
+    await supabaseAdmin
+      .from('whatsapp_messages')
+      .update({ 
+        status: 'failed' as MessageStatus,
+        error_code: err.message.includes('Saldo') ? 'insufficient_balance' : 'api_error'
+      } as any)
+      .eq('id', msg.id);
+  }
+}
+
     });
 
     // 3. Obtener credenciales de cuenta
