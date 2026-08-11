@@ -371,9 +371,26 @@ export function WhatsAppTemplates() {
             </DialogContent>
           </Dialog>
 
+                          const saved = await saveMutation.mutateAsync({ ...values, variables }) as any;
+                          if (saved?.id) {
+                            await handleSubmitToMeta(saved.id);
+                            setIsCreateOpen(false);
+                            form.reset();
+                          }
+                        }
+                      }}
+                    >
+                      Enviar a Meta
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+
           <Button 
             onClick={handleSync} 
-            disabled={syncMutation.isPending || !connectedAccount}
+            disabled={syncMutation.isPending}
             variant="outline"
             className="gap-2"
           >
@@ -383,15 +400,13 @@ export function WhatsAppTemplates() {
         </div>
       </div>
 
-      {!connectedAccount && (
-        <Alert variant="destructive" className="bg-destructive/10 border-none">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Cuenta no conectada</AlertTitle>
-          <AlertDescription>
-            Debes tener una cuenta de WhatsApp Business configurada y activa para sincronizar plantillas.
-          </AlertDescription>
-        </Alert>
-      )}
+      <Alert variant="destructive" className={`bg-destructive/10 border-none ${connectedAccount ? 'hidden' : ''}`}>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Cuenta no conectada</AlertTitle>
+        <AlertDescription>
+          Debes tener una cuenta de WhatsApp Business configurada y activa para sincronizar plantillas.
+        </AlertDescription>
+      </Alert>
 
       <Card>
         <CardHeader className="pb-3">

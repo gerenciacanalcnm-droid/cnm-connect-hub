@@ -141,7 +141,7 @@ export const upsertWhatsAppTemplate = createServerFn({ method: "POST" })
       : context.supabase.from("whatsapp_templates").insert(row).select().single();
     const { data: saved, error } = await q;
     if (error) throw new Error(error.message);
-    return { ok: true, id: saved?.id ?? null };
+    return { ok: true, id: saved?.id ?? null, name: saved?.name ?? data.name };
   });
 
 export const deleteWhatsAppTemplate = createServerFn({ method: "POST" })
