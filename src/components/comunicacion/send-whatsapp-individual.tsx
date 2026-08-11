@@ -36,7 +36,7 @@ import { useWhatsAppAccounts, useSendWhatsAppIndividual, useSendWhatsAppBulk, us
 import { useContacts } from "@/hooks/use-contacts";
 import { useContactGroups } from "@/hooks/use-platform";
 
-type SendMode = "individual" | "bulk";
+type SendMode = "individual" | "bulk" | "schedule";
 type MessageType = "text" | "template";
 
 export function SendWhatsAppIndividual() {
