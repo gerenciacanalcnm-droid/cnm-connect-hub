@@ -2,9 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { trackServiceUsage } from "./commercial.functions";
-import { Database } from "@/integrations/supabase/types";
-
-type Tables = Database["public"]["Tables"];
 
 const uuid = z.string().uuid();
 
@@ -20,7 +17,7 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
     const { supabase } = context;
 
     // 1. Validar Empresa y Cuenta WhatsApp
-    const { data: account, error: accErr } = await supabase
+    const { data: account, error: accErr } = await (supabase as any)
       .from("whatsapp_accounts")
       .select("phone_number_id, access_token")
       .eq("id", data.whatsappAccountId)
@@ -30,7 +27,7 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
     if (accErr || !account) throw new Error("Cuenta de WhatsApp no válida para esta empresa.");
 
     // 2. Validar Encuesta y Opciones
-    const { data: survey, error: survErr } = await supabase
+    const { data: survey, error: survErr } = await (supabase as any)
       .from("whatsapp_surveys")
       .select("*, options:whatsapp_survey_options(*)")
       .eq("id", data.surveyId)
@@ -49,8 +46,8 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
       type: "interactive",
       interactive: {
         type: "list",
-        header: { type: "text", text: survey.title || "Encuesta" },
-        body: { text: survey.question },
+        header: { type: "text", text: (survey as any).title || "Encuesta" },
+        body: { text: (survey as any).question },
         footer: { text: "Selecciona una opción" },
         action: {
           button: "Ver opciones",
@@ -68,12 +65,12 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
     };
 
     // 4. Registrar mensaje en estado 'sending'
-    const { data: msgRow, error: msgErr } = await supabase
+    const { data: msgRow, error: msgErr } = await (supabase as any)
       .from("whatsapp_messages")
       .insert({
         company_id: data.companyId,
         to_phone: data.recipient,
-        body: `[ENCUESTA] ${survey.question}`,
+        body: `[ENCUESTA] ${(survey as any).question}`,
         direction: "outbound",
         status: "sending",
         metadata: { survey_id: data.surveyId }
@@ -91,7 +88,7 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
           company_id: data.companyId,
           channel: "whatsapp",
           units: 1,
-          description: `Envío de Encuesta: ${survey.title}`,
+          description: `Envío de Encuesta: ${(survey as any).title}`,
           reference: `survey_${data.surveyId}_${data.recipient}_${messageId}`
         }
       });
@@ -115,7 +112,7 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
       }
 
       // 7. Actualizar mensaje con ID de Meta
-      await supabase
+      await (supabase as any)
         .from("whatsapp_messages")
         .update({
           status: "sent",
@@ -127,7 +124,7 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
       return { ok: true, messageId, metaId: metaResult.messages?.[0]?.id };
 
     } catch (err: any) {
-      await supabase
+      await (supabase as any)
         .from("whatsapp_messages")
         .update({ status: "failed", error_code: "send_error" } as any)
         .eq("id", messageId);
@@ -149,20 +146,22 @@ export const saveSurvey = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     
-    // Obtener company_id del usuario desde profiles
-    const { data: profile, error: profErr } = await supabase
+    // Obtener profile
+    const { data: profile, error: profErr } = await (supabase as any)
       .from("profiles")
-      .select("company_id")
+      .select("*")
       .eq("id", userId)
       .single();
     
-    if (profErr || !profile?.company_id) throw new Error("Empresa no identificada.");
+    // Usamos duck typing/casting para acceder a company_id
+    const companyId = (profile as any)?.company_id;
+    if (profErr || !companyId) throw new Error("Empresa no identificada.");
 
-    const { data: survey, error } = await supabase
+    const { data: survey, error } = await (supabase as any)
       .from("whatsapp_surveys")
       .upsert({
         id: data.id,
-        company_id: profile.company_id,
+        company_id: companyId,
         title: data.title,
         question: data.question,
         status: "ACTIVE"
@@ -174,7 +173,7 @@ export const saveSurvey = createServerFn({ method: "POST" })
 
     // Borrar opciones viejas si es update
     if (data.id) {
-      await supabase.from("whatsapp_survey_options").delete().eq("survey_id", survey.id);
+      await (supabase as any).from("whatsapp_survey_options").delete().eq("survey_id", survey.id);
     }
 
     // Insertar nuevas opciones
@@ -185,7 +184,7 @@ export const saveSurvey = createServerFn({ method: "POST" })
       sort_order: index
     }));
 
-    await supabase.from("whatsapp_survey_options").insert(optionsToInsert as any);
+    await (supabase as any).from("whatsapp_survey_options").insert(optionsToInsert as any);
 
     return { id: survey.id };
   });
