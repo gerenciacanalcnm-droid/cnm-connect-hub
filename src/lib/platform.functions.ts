@@ -479,6 +479,68 @@ export const saveNovaKnowledge = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ═══════════════════ CONVERSATION MAPS ═══════════════════
+
+export const listConversationMaps = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await (context.supabase as any)
+      .from("conversation_maps")
+      .select("*")
+      .eq("company_id", CNM_COMPANY_ID)
+      .order("updated_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const getConversationMap = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { data: result, error } = await (context.supabase as any)
+      .from("conversation_maps")
+      .select("*")
+      .eq("id", data.id)
+      .eq("company_id", CNM_COMPANY_ID)
+      .single();
+    if (error) throw new Error(error.message);
+    return result;
+  });
+
+export const upsertConversationMap = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({
+    id: z.string().uuid().optional(),
+    name: z.string(),
+    description: z.string().optional().nullable(),
+    status: z.enum(["ACTIVO", "PAUSADO", "BORRADOR"]),
+    nodes: z.array(z.any()),
+    edges: z.array(z.any())
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { data: result, error } = await (context.supabase as any)
+      .from("conversation_maps")
+      .upsert({ ...data, company_id: CNM_COMPANY_ID })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return result;
+  });
+
+export const deleteConversationMap = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { error } = await (context.supabase as any)
+      .from("conversation_maps")
+      .delete()
+      .eq("id", data.id)
+      .eq("company_id", CNM_COMPANY_ID);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
 export const getNovaClientContext = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ contact_id: z.string().uuid() }).parse(v))

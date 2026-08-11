@@ -33,6 +33,7 @@ import { Route as AppApiRouteImport } from './routes/_app.api'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicSmsSchedulerRouteImport } from './routes/api/public/sms-scheduler'
+import { Route as AppNovaMapasRouteImport } from './routes/_app.nova.mapas'
 import { Route as AdminAdminWalletRouteImport } from './routes/_admin.admin.wallet'
 import { Route as AdminAdminUsuariosRouteImport } from './routes/_admin.admin.usuarios'
 import { Route as AdminAdminTarifasRouteImport } from './routes/_admin.admin.tarifas'
@@ -178,6 +179,11 @@ const ApiPublicSmsSchedulerRoute = ApiPublicSmsSchedulerRouteImport.update({
   id: '/api/public/sms-scheduler',
   path: '/api/public/sms-scheduler',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppNovaMapasRoute = AppNovaMapasRouteImport.update({
+  id: '/mapas',
+  path: '/mapas',
+  getParentRoute: () => AppNovaRoute,
 } as any)
 const AdminAdminWalletRoute = AdminAdminWalletRouteImport.update({
   id: '/admin/wallet',
@@ -329,7 +335,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/finanzas': typeof AppFinanzasRoute
   '/mi-empresa': typeof AppMiEmpresaRoute
-  '/nova': typeof AppNovaRoute
+  '/nova': typeof AppNovaRouteWithChildren
   '/soporte': typeof AppSoporteRoute
   '/account-locked': typeof AuthAccountLockedRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
@@ -364,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
+  '/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
@@ -379,7 +386,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/finanzas': typeof AppFinanzasRoute
   '/mi-empresa': typeof AppMiEmpresaRoute
-  '/nova': typeof AppNovaRoute
+  '/nova': typeof AppNovaRouteWithChildren
   '/soporte': typeof AppSoporteRoute
   '/account-locked': typeof AuthAccountLockedRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
@@ -414,6 +421,7 @@ export interface FileRoutesByTo {
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
+  '/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
@@ -433,7 +441,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/finanzas': typeof AppFinanzasRoute
   '/_app/mi-empresa': typeof AppMiEmpresaRoute
-  '/_app/nova': typeof AppNovaRoute
+  '/_app/nova': typeof AppNovaRouteWithChildren
   '/_app/soporte': typeof AppSoporteRoute
   '/_auth/account-locked': typeof AuthAccountLockedRoute
   '/_auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -468,6 +476,7 @@ export interface FileRoutesById {
   '/_admin/admin/tarifas': typeof AdminAdminTarifasRoute
   '/_admin/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/_admin/admin/wallet': typeof AdminAdminWalletRoute
+  '/_app/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
@@ -520,6 +529,7 @@ export interface FileRouteTypes {
     | '/admin/tarifas'
     | '/admin/usuarios'
     | '/admin/wallet'
+    | '/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
     | '/api/public/webhooks/wompi'
@@ -570,6 +580,7 @@ export interface FileRouteTypes {
     | '/admin/tarifas'
     | '/admin/usuarios'
     | '/admin/wallet'
+    | '/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
     | '/api/public/webhooks/wompi'
@@ -623,6 +634,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/tarifas'
     | '/_admin/admin/usuarios'
     | '/_admin/admin/wallet'
+    | '/_app/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
     | '/api/public/webhooks/wompi'
@@ -807,6 +819,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/sms-scheduler'
       preLoaderRoute: typeof ApiPublicSmsSchedulerRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/nova/mapas': {
+      id: '/_app/nova/mapas'
+      path: '/mapas'
+      fullPath: '/nova/mapas'
+      preLoaderRoute: typeof AppNovaMapasRouteImport
+      parentRoute: typeof AppNovaRoute
     }
     '/_admin/admin/wallet': {
       id: '/_admin/admin/wallet'
@@ -1060,6 +1079,17 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AppNovaRouteChildren {
+  AppNovaMapasRoute: typeof AppNovaMapasRoute
+}
+
+const AppNovaRouteChildren: AppNovaRouteChildren = {
+  AppNovaMapasRoute: AppNovaMapasRoute,
+}
+
+const AppNovaRouteWithChildren =
+  AppNovaRoute._addFileChildren(AppNovaRouteChildren)
+
 interface AppRouteChildren {
   AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppApiRoute: typeof AppApiRoute
@@ -1070,7 +1100,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppFinanzasRoute: typeof AppFinanzasRoute
   AppMiEmpresaRoute: typeof AppMiEmpresaRoute
-  AppNovaRoute: typeof AppNovaRoute
+  AppNovaRoute: typeof AppNovaRouteWithChildren
   AppSoporteRoute: typeof AppSoporteRoute
 }
 
@@ -1084,7 +1114,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppFinanzasRoute: AppFinanzasRoute,
   AppMiEmpresaRoute: AppMiEmpresaRoute,
-  AppNovaRoute: AppNovaRoute,
+  AppNovaRoute: AppNovaRouteWithChildren,
   AppSoporteRoute: AppSoporteRoute,
 }
 
