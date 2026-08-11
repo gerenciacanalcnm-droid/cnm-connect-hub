@@ -359,7 +359,11 @@ export const sendSmsMessage = createServerFn({ method: "POST" })
       // Si falla el cobro (ej. saldo insuficiente), marcamos como fallido
       await context.supabase
         .from("sms_messages")
-        .update({ status: "failed", error_message: err.message } as never)
+        .update({ 
+          status: "failed", 
+          error_message: err.message,
+          metadata: { failure_type: "INSUFFICIENT_BALANCE" }
+        } as never)
         .eq("id", sms.id);
       throw err;
     }
