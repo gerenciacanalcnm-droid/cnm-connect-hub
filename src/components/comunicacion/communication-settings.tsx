@@ -215,29 +215,38 @@ export function CommunicationSettings() {
                   
                   <div className="grid gap-2 text-[11px] font-mono bg-slate-950 text-slate-300 p-3 rounded-md overflow-x-auto">
                     <p className="text-blue-400">// Configuración</p>
-                    <p>WABA_ID: {detail.config?.businessAccountId}</p>
-                    <p>PHONE_ID: {detail.config?.phoneNumberId}</p>
+                    <p>WABA configurado: {detail.config?.businessAccountId}</p>
+                    <p>Phone Number ID: {detail.config?.phoneNumberId}</p>
                     
                     <p className="text-blue-400 mt-2">// Propiedad WABA</p>
-                    <p>Phone WABA Owner: {detail.phone_details?.whatsapp_business_account?.id || 'NO ENCONTRADO'}</p>
-                    <p>Match WABA/Phone: {detail.phone_details?.whatsapp_business_account?.id === detail.config?.businessAccountId ? 'SÍ' : 'NO (ERROR DE CONFIGURACIÓN)'}</p>
+                    <p>WABA real del Phone Number: {detail.phone_details?.whatsapp_business_account?.id || 'NO ENCONTRADO'}</p>
+                    <p>Número: {detail.phone_details?.display_phone_number || 'N/A'} ({detail.phone_details?.verified_name || 'N/A'})</p>
+                    <p>¿Phone pertenece al WABA?: {
+                      detail.waba_phone_numbers?.some((p: any) => p.id === detail.config?.phoneNumberId) ? 'SÍ' : 'NO (ERROR CRÍTICO)'
+                    }</p>
 
                     <p className="text-blue-400 mt-2">// Plantillas ({detail.templates?.length || 0})</p>
                     {detail.cnm_prueba_match ? (
                       <div className="bg-green-500/10 p-1 rounded border border-green-500/20 text-green-400">
-                        CNM_PRUEBA ENCONTRADA:
+                        Plantilla encontrada:
                         <br/>Name: {detail.cnm_prueba_match.name}
                         <br/>Lang: {detail.cnm_prueba_match.language}
                         <br/>Status: {detail.cnm_prueba_match.status}
                         <br/>Category: {detail.cnm_prueba_match.category}
                       </div>
                     ) : (
-                      <p className="text-red-400">cnm_prueba: NO ENCONTRADA EN ESTE WABA</p>
+                      <p className="text-red-400">
+                        {detail.phone_details?.whatsapp_business_account?.id === detail.config?.businessAccountId 
+                          ? "La conexión es correcta. La plantilla cnm_prueba no existe en este WABA o no está disponible para este token."
+                          : "La plantilla no pertenece al WABA consultado o el token no tiene acceso a ese WABA."}
+                      </p>
                     )}
 
                     <div className="mt-2 text-[10px] text-slate-500">
-                      Lista de nombres: {detail.templates?.map((t: any) => `${t.name} (${t.status})`).join(', ')}
+                      Total de plantillas: {detail.templates?.length || 0}
+                      <br/>Lista de nombres: {detail.templates?.map((t: any) => `${t.name} (${t.status})`).join(', ')}
                     </div>
+
                   </div>
                 </div>
               )}
