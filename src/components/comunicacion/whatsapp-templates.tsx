@@ -211,88 +211,77 @@ export function WhatsAppTemplates() {
                 Crear plantilla
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col p-0">
               <DialogHeader className="p-6 border-b">
                 <DialogTitle>Editor Visual de Plantilla</DialogTitle>
                 <DialogDescription>Configura los componentes de tu plantilla y previsualiza el resultado.</DialogDescription>
               </DialogHeader>
               <div className="flex flex-1 overflow-hidden">
-                {/* IZQUIERDA: Configuración */}
-                <div className="w-1/3 border-r p-6 overflow-y-auto space-y-4">
-                  <Form {...form}>
-                    <form className="space-y-4">
-                      <FormField control={form.control} name="name" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nombre</FormLabel>
-                          <FormControl><Input {...field} /></FormControl>
-                        </FormItem>
-                      )} />
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField control={form.control} name="category" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Categoría</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <SelectTrigger><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="MARKETING">Marketing</SelectItem>
-                                <SelectItem value="UTILITY">Utilidad</SelectItem>
-                                <SelectItem value="AUTHENTICATION">Autenticación</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )} />
-                        <FormField control={form.control} name="language" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Idioma</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <SelectTrigger><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="es">Español</SelectItem>
-                                <SelectItem value="en">Inglés</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )} />
+                {/* IZQUIERDA: Componentes */}
+                <div className="w-64 border-r p-4 space-y-4">
+                  <h4 className="font-semibold text-sm">COMPONENTES</h4>
+                  <div className="grid gap-2">
+                    <Button variant="outline" className="justify-start gap-2" onClick={() => form.setValue("headerType", "TEXT")}>
+                      <Type className="h-4 w-4" /> + Encabezado
+                    </Button>
+                    <Button variant="outline" className="justify-start gap-2" onClick={() => setSelectedComponent("BODY")}>
+                      <FileText className="h-4 w-4" /> + Cuerpo
+                    </Button>
+                    <Button variant="outline" className="justify-start gap-2" onClick={() => setSelectedComponent("FOOTER")}>
+                      <Type className="h-4 w-4" /> + Pie de página
+                    </Button>
+                    <Button variant="outline" className="justify-start gap-2" onClick={() => setSelectedComponent("BUTTONS")}>
+                      <MousePointer2 className="h-4 w-4" /> + Botón
+                    </Button>
+                  </div>
+                </div>
+
+                {/* CENTRO: Preview */}
+                <div className="flex-1 bg-slate-50 p-8 flex flex-col items-center overflow-y-auto">
+                   <div className="bg-[#E7FFDB] rounded-lg shadow-sm w-full max-w-sm p-3 relative space-y-2 border border-slate-200">
+                    {form.watch("headerType") !== "NONE" && (
+                      <div className="font-bold text-sm border-b pb-1">
+                        {form.watch("headerType") === "TEXT" ? form.watch("headerText") : "Archivo adjunto..."}
                       </div>
-                      <FormField control={form.control} name="header" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Encabezado (Texto)</FormLabel>
-                          <FormControl><Input {...field} placeholder="Opcional..." /></FormControl>
-                        </FormItem>
-                      )} />
+                    )}
+                    <div className="text-sm whitespace-pre-wrap">
+                      {form.watch("body") || "Cuerpo del mensaje..."}
+                    </div>
+                    {form.watch("footer") && (
+                      <div className="text-[11px] text-slate-500 pt-1 border-t border-black/10">{form.watch("footer")}</div>
+                    )}
+                    {form.watch("buttons")?.map((b, i) => (
+                      <div key={i} className="bg-white text-blue-600 text-sm py-1 rounded border text-center shadow-sm font-medium">
+                        {b.text}
+                      </div>
+                    ))}
+                   </div>
+                </div>
+                
+                {/* DERECHA: Configuración */}
+                <div className="w-80 p-6 border-l overflow-y-auto space-y-4">
+                  <h4 className="font-semibold text-sm border-b pb-2 mb-4">CONFIGURACIÓN</h4>
+                  {selectedComponent === "BODY" && (
+                    <Form {...form}>
                       <FormField control={form.control} name="body" render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Cuerpo</FormLabel>
-                          <FormControl><Textarea className="h-32" {...field} /></FormControl>
+                          <FormLabel>Cuerpo del mensaje</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} ref={bodyRef} className="h-32" />
+                          </FormControl>
+                          <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => {
+                            const cursor = bodyRef.current?.selectionStart || 0;
+                            const text = form.getValues("body");
+                            const newText = text.slice(0, cursor) + "{{1}}" + text.slice(cursor);
+                            form.setValue("body", newText);
+                          }}>
+                            <Variable className="h-4 w-4 mr-2" /> Insertar variable
+                          </Button>
                         </FormItem>
                       )} />
-                      <FormField control={form.control} name="footer" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Pie de página</FormLabel>
-                          <FormControl><Input {...field} placeholder="Opcional..." /></FormControl>
-                        </FormItem>
-                      )} />
-                    </form>
-                  </Form>
-                </div>
-                {/* CENTRO: Preview */}
-                <div className="w-1/3 bg-slate-100 p-8 flex items-center justify-center">
-                  <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-4 space-y-2 border border-slate-200">
-                    {previewValues.header && <div className="font-bold text-sm border-b pb-1">{previewValues.header}</div>}
-                    <div className="text-sm whitespace-pre-wrap">{previewValues.body || "Cuerpo del mensaje..."}</div>
-                    {previewValues.footer && <div className="text-[11px] text-slate-500 pt-1">{previewValues.footer}</div>}
-                  </div>
-                </div>
-                {/* DERECHA: Botones y Variables */}
-                <div className="w-1/3 p-6 border-l overflow-y-auto space-y-6">
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2">Variables Detectadas</h4>
-                    <div className="flex gap-2 flex-wrap">
-                      {(previewValues.body.match(/\{\{\d+\}\}/g) || []).map((v, i) => (
-                        <Badge key={i} variant="outline" className="bg-indigo-50">{v}</Badge>
-                      ))}
-                    </div>
-                  </div>
+                    </Form>
+                  )}
+                  {/* Otros componentes... */}
                 </div>
               </div>
               <DialogFooter className="p-6 border-t flex justify-end gap-2">
@@ -300,8 +289,7 @@ export function WhatsAppTemplates() {
                 <Button onClick={form.handleSubmit(onSubmit)}>Guardar borrador</Button>
                 <Button className="bg-emerald-600" onClick={async () => {
                   const val = form.getValues();
-                  const variables = val.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
-                  const saved = await saveMutation.mutateAsync({ ...val, variables }) as any;
+                  const saved = await saveMutation.mutateAsync(val) as any;
                   if (saved?.id) await handleSubmitToMeta(saved.id);
                   setIsCreateOpen(false);
                 }}>Enviar a Meta</Button>
