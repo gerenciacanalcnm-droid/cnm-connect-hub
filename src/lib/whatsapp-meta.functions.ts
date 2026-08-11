@@ -39,8 +39,63 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
     }
 
     // 2. Construir Payload para Meta
-    // https://developers.facebook.com/docs/whatsapp/cloud-api/reference/message-templates
     const components: any[] = [];
+    const metadata = (template as any).metadata || {};
+
+    // Header
+    const headerType = metadata.header_type || "NONE";
+    if (headerType !== "NONE") {
+      const headerComp: any = {
+        type: "HEADER",
+        format: headerType,
+      };
+
+      if (headerType === "TEXT") {
+        headerComp.text = metadata.header_text || template.header;
+      } else {
+        // Para Media (IMAGE, VIDEO, DOCUMENT) Meta requiere un handle de ejemplo
+        headerComp.example = { 
+          header_handle: [metadata.header_handle || "https://example.com/placeholder.png"] 
+        };
+      }
+      components.push(headerComp);
+    }
+
+    // Body
+    // Extraer variables {{n}} para el ejemplo
+    const variables = template.body.match(/\{\{(\d+)\}\}/g) || [];
+    const bodyComp: any = {
+      type: "BODY",
+      text: template.body,
+    };
+
+    if (variables.length > 0) {
+      bodyComp.example = {
+        body_text: [variables.map((_, i) => `Ejemplo ${i + 1}`)]
+      };
+    }
+    components.push(bodyComp);
+
+    // Footer
+    if (template.footer) {
+      components.push({
+        type: "FOOTER",
+        text: template.footer
+      });
+    }
+
+    // Buttons
+    if (template.buttons && Array.isArray(template.buttons) && template.buttons.length > 0) {
+      components.push({
+        type: "BUTTONS",
+        buttons: (template.buttons as any[]).map(b => {
+          const btn: any = { type: b.type, text: b.text };
+          if (b.type === 'URL') btn.url = b.url;
+          if (b.type === 'PHONE') btn.phone_number = b.phoneNumber;
+          return btn;
+        })
+      });
+    }
 
     // Header
     const metadata = (template as any).metadata || {};
