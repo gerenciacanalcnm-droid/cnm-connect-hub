@@ -442,8 +442,9 @@ async function applyWalletMovement(
 
   const { data: w, error } = await supabase
     .from("wallets")
-    .select("id, company_id, balance, credits, currency")
+    .select("id, company_id, balance, credits, currency, consumed")
     .eq("id", input.walletId)
+
     .single();
   if (error) throw new Error(error.message);
   const wallet = w as {
@@ -451,7 +452,9 @@ async function applyWalletMovement(
     balance: number;
     credits: number;
     currency: string;
+    consumed: number;
   };
+
   const balanceBefore = Number(wallet.balance);
   const balanceAfter = balanceBefore + input.amount;
   const creditsAfter = Number(wallet.credits) + input.units;
@@ -745,12 +748,8 @@ export const trackServiceUsage = createServerFn({ method: "POST" })
       performedBy: context.userId,
     });
 
-    // 3. Incrementar contador de consumo acumulado en la wallet (atómico)
-    await context.supabase.rpc('increment_wallet_consumed', {
-      w_id: w.id,
-      val: Math.abs(data.amount)
-    });
-
+    // 3. El contador de consumo ya se incrementó dentro de applyWalletMovement
     return { ok: true, balance: res.balanceAfter };
+
   });
 
