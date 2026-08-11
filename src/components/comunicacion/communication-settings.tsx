@@ -1,4 +1,4 @@
-import { Settings2, MessageSquare, MessageCircle, Mail } from "lucide-react";
+import { Settings2, MessageSquare, MessageCircle, Mail, Activity } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,6 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/common/loader";
 import { useCommunicationSettings, useCommunicationProviders } from "@/hooks/use-communication";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { testMetaConnection } from "@/lib/whatsapp-diagnostic.functions";
+import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 const SOON = "Disponible en la siguiente actualización.";
 
@@ -27,8 +33,31 @@ const ICONS: Record<string, typeof MessageSquare> = {
 export function CommunicationSettings() {
   const { data: settings, isLoading } = useCommunicationSettings();
   const providers = useCommunicationProviders();
+  const [diagnostic, setDiagnostic] = useState<any>(null);
+  const [testing, setTesting] = useState(false);
+  const runDiagnostic = useServerFn(testMetaConnection);
+
+  const handleDiagnostic = async () => {
+    setTesting(true);
+    setDiagnostic(null);
+    try {
+      const res = await runDiagnostic();
+      setDiagnostic(res);
+      if (res && 'PHONE_NUMBER' in res && res.PHONE_NUMBER === "OK" && res.WABA === "OK" && res.TEMPLATES === "OK") {
+        toast.success("Conexión con Meta verificada");
+      } else {
+        toast.warning("La conexión con Meta tiene errores");
+      }
+    } catch (e) {
+      toast.error("Error al ejecutar diagnóstico");
+    } finally {
+      setTesting(false);
+    }
+  };
+
 
   if (isLoading || !settings) return <Loader />;
+
 
   return (
     <div className="space-y-4">
@@ -96,6 +125,84 @@ export function CommunicationSettings() {
           </div>
         </CardContent>
       </Card>
+
+      <Card className="border-blue-500/20">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Activity className="h-4 w-4 text-blue-500" /> Diagnóstico Meta Cloud
+            </CardTitle>
+            <CardDescription>
+              Verifica la conexión real con los Secrets configurados en Lovable Cloud.
+            </CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleDiagnostic}
+            disabled={testing}
+            className="gap-2"
+          >
+            {testing ? "Probando..." : "Ejecutar Prueba"}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {diagnostic && (
+            <div className="space-y-4">
+              {'success' in diagnostic && diagnostic.success === false ? (
+                <Alert variant="destructive">
+                  <AlertTitle>Error de Configuración</AlertTitle>
+                  <AlertDescription>{diagnostic.error}</AlertDescription>
+                </Alert>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="p-3 rounded-lg border bg-muted/30">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Phone Number</p>
+                    <Badge variant={diagnostic.PHONE_NUMBER === "OK" ? "default" : "destructive"}>
+                      {diagnostic.PHONE_NUMBER}
+                    </Badge>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-muted/30">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">WABA Account</p>
+                    <Badge variant={diagnostic.WABA === "OK" ? "default" : "destructive"}>
+                      {diagnostic.WABA}
+                    </Badge>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-muted/30">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Templates API</p>
+                    <Badge variant={diagnostic.TEMPLATES === "OK" ? "default" : "destructive"}>
+                      {diagnostic.TEMPLATES}
+                    </Badge>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-muted/30">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">CNM_PRUEBA</p>
+                    <Badge variant={diagnostic.CNM_PRUEBA === "ENCONTRADA" ? "default" : "secondary"}>
+                      {diagnostic.CNM_PRUEBA}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+
+              {diagnostic.raw_errors && diagnostic.raw_errors.length > 0 && (
+                <div className="mt-4 p-3 rounded-lg border border-destructive/20 bg-destructive/5">
+                  <p className="text-xs font-bold text-destructive mb-2">Detalles de errores:</p>
+                  <ul className="text-[11px] list-disc pl-4 space-y-1 text-destructive/80 font-mono">
+                    {diagnostic.raw_errors.map((err: string, i: number) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          {!diagnostic && !testing && (
+            <p className="text-sm text-muted-foreground italic">
+              Haz clic en "Ejecutar Prueba" para validar la conectividad con Meta.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
+
