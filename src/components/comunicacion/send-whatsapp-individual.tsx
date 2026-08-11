@@ -544,20 +544,49 @@ export function SendWhatsAppIndividual() {
               </div>
             </div>
 
-            {isInsufficient && (
+            {isInsufficient && totalCost > 0 && (
               <Alert variant="destructive" className="py-2 px-3">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-xs font-bold uppercase">Saldo insuficiente</AlertDescription>
+                <AlertDescription className="text-xs font-bold uppercase">
+                  Saldo insuficiente. Necesitas {formatCurrency(totalCost)} para realizar este envío.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {!connectedAccount && accounts.length > 0 && (
+              <Alert variant="warning" className="py-2 px-3 bg-amber-50 border-amber-200">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-xs text-amber-800">
+                  Selecciona una cuenta de envío para continuar.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {messageType === 'template' && selectedTemplateId && selectedTemplate?.variables.length > 0 && 
+             Object.values(templateVariables).some(v => !v.trim()) && (
+              <Alert variant="warning" className="py-2 px-3 bg-blue-50 border-blue-200">
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-xs text-blue-800">
+                  Completa todas las variables de la plantilla.
+                </AlertDescription>
               </Alert>
             )}
 
             <Button
               onClick={handleSend}
-              disabled={isInsufficient || stats.valid === 0 || (messageType === 'text' ? !msg.trim() : !selectedTemplateId) || !connectedAccount}
+              disabled={
+                isInsufficient || 
+                stats.valid === 0 || 
+                (messageType === 'text' ? !msg.trim() : !selectedTemplateId) || 
+                !connectedAccount ||
+                (messageType === 'template' && selectedTemplate?.variables.length > 0 && Object.values(templateVariables).some(v => !v.trim()))
+              }
               className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
             >
               <Send className="h-4 w-4 mr-2" />
-              {mode === 'individual' ? 'Enviar Ahora' : mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'}
+              {isInsufficient ? 'Saldo Insuficiente' : 
+               mode === 'individual' ? 'Enviar Ahora' : 
+               mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'}
             </Button>
             
             <div className="flex items-center gap-2 p-3 rounded border bg-amber-50/50 border-amber-100 text-[11px] text-amber-800 italic">
