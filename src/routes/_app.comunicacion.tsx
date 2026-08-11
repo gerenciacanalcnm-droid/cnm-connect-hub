@@ -48,6 +48,9 @@ function ComunicacionPage() {
           <TabsTrigger value="plantillas" className="gap-1.5 flex-1 min-w-[110px]">
             <FileText className="h-3.5 w-3.5" /> Plantillas WA
           </TabsTrigger>
+          <TabsTrigger value="programacion-wa" className="gap-1.5 flex-1 min-w-[110px]">
+            <Calendar className="h-3.5 w-3.5" /> Programar WA
+          </TabsTrigger>
           <TabsTrigger value="email" className="gap-1.5 flex-1 min-w-[90px]">
             <Mail className="h-3.5 w-3.5" /> Email
           </TabsTrigger>
