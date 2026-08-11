@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Send, Zap, Calendar, Users, MessageSquare, Info, AlertCircle, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -50,7 +50,14 @@ export function SendSms() {
 
   const basePrice = isFlash ? 105 : 30; // Precios de prueba
   const estimatedCost = recipientsCount * basePrice;
-  const balance = 150000; // Mock de saldo real
+  const [wallet, setWallet] = useState<{ balance: number } | null>(null);
+  const balance = wallet?.balance ?? 0;
+
+  // En una implementación real, usaríamos un hook que consulte la wallet del contexto de empresa
+  useEffect(() => {
+    // Simular carga de saldo
+    setWallet({ balance: 150000 });
+  }, []);
 
   const handleSend = async (flash: boolean = false) => {
     if (!msg.trim()) return toast.error("El mensaje no puede estar vacío");
