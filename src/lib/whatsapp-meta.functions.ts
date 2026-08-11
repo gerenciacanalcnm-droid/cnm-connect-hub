@@ -43,12 +43,22 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
     const components: any[] = [];
 
     // Header
-    if (template.header) {
-      components.push({
+    const metadata = (template as any).metadata || {};
+    const headerType = metadata.header_type || "NONE";
+
+    if (headerType !== "NONE") {
+      const headerComp: any = {
         type: "HEADER",
-        format: "TEXT",
-        text: template.header
-      });
+        format: headerType
+      };
+
+      if (headerType === "TEXT") {
+        headerComp.text = metadata.header_text;
+      } else {
+        headerComp.example = { header_handle: [metadata.header_handle || ""] };
+      }
+      
+      components.push(headerComp);
     }
 
     // Body
