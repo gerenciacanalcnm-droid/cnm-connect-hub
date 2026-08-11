@@ -251,34 +251,10 @@ export function WhatsAppTemplates() {
                 {/* CENTRO: Preview */}
                 <div className="flex-1 bg-slate-50 p-8 flex flex-col items-center overflow-y-auto">
                    <div className="bg-[#E7FFDB] rounded-lg shadow-sm w-full max-w-sm p-3 relative space-y-2 border border-slate-200">
-                    {form.watch("headerType") !== "NONE" && (
-                      <div className="font-bold text-sm border-b pb-1">
-                        {form.watch("headerType") === "TEXT" ? (form.watch("headerText") || "Texto del encabezado") : "Archivo adjunto..."}
-                      </div>
-                    )}
-                    <div className="text-sm whitespace-pre-wrap">
-                      {(() => {
-                        const body = form.watch("body") || "Cuerpo del mensaje...";
-                        // Replace {{n}} with real examples if provided, otherwise default to "Ejemplo"
-                        return body.replace(/\{\{(\d+)\}\}/g, (match, number) => {
-                          const examples: Record<string, string> = {
-                            "1": "Juan",
-                            "2": "12345",
-                            "3": "Bogotá",
-                            "4": "Premium"
-                          };
-                          return examples[number] || `[Variable ${number}]`;
-                        });
-                      })()}
+                    {/* PRUEBA DE AISLAMIENTO: EDITOR TEST */}
+                    <div className="p-10 text-center font-bold text-slate-400">
+                      EDITOR TEST
                     </div>
-                    {form.watch("footer") && (
-                      <div className="text-[11px] text-slate-500 pt-1 border-t border-black/10">{form.watch("footer")}</div>
-                    )}
-                    {form.watch("buttons")?.map((b, i) => (
-                      <div key={i} className="bg-white text-blue-600 text-sm py-1 rounded border text-center shadow-sm font-medium">
-                        {b.text || "Botón sin texto"}
-                      </div>
-                    ))}
                    </div>
                 </div>
                 
