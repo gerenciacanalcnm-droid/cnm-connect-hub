@@ -44,6 +44,9 @@ function ComunicacionPage() {
           <TabsTrigger value="whatsapp" className="gap-1.5 flex-1 min-w-[110px]">
             <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
           </TabsTrigger>
+          <TabsTrigger value="plantillas" className="gap-1.5 flex-1 min-w-[110px]">
+            <FileText className="h-3.5 w-3.5" /> Plantillas WA
+          </TabsTrigger>
           <TabsTrigger value="email" className="gap-1.5 flex-1 min-w-[90px]">
             <Mail className="h-3.5 w-3.5" /> Email
           </TabsTrigger>
@@ -60,6 +63,9 @@ function ComunicacionPage() {
         </TabsContent>
         <TabsContent value="whatsapp">
           <SendWhatsAppIndividual />
+        </TabsContent>
+        <TabsContent value="plantillas">
+          <WhatsAppTemplates />
         </TabsContent>
         <TabsContent value="email">
           <EmailMarketing />
