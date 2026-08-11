@@ -130,7 +130,8 @@ export function SendWhatsAppIndividual() {
 
   const stats = useMemo(() => {
     if (mode === "individual") {
-      const valid = /^3\d{9}$/.test(toManual.trim());
+      const cleaned = toManual.trim().replace(/\D/g, "");
+      const valid = cleaned.length >= 10 && /^573\d{9}$|^3\d{9}$/.test(cleaned);
       return { total: 1, valid: valid ? 1 : 0, invalid: !valid && toManual ? 1 : 0 };
     }
     const raw = toManual.split(/[\s,;]+/).filter(Boolean);
