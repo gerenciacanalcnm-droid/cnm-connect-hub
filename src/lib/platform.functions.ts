@@ -512,14 +512,6 @@ export const testNovaResponse = createServerFn({ method: "POST" })
   });
 
 
-export const testNovaResponse = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ contact_id: z.string().uuid(), conversation_id: z.string().uuid(), message: z.string() }).parse(v))
-  .handler(async ({ data, context }) => {
-    const { generateNovaResponse } = await import("./nova-engine.server");
-    return await generateNovaResponse(CNM_COMPANY_ID, data.contact_id, data.conversation_id, data.message);
-  });
-
 // ═══════════════════ AUTOMATIONS ═══════════════════
 
 export const listAutomations = createServerFn({ method: "GET" })
