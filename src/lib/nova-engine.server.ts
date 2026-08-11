@@ -122,6 +122,8 @@ Responde de forma natural y concisa.
       prompt_tokens: usage?.prompt_tokens,
       completion_tokens: usage?.completion_tokens,
     }
+  };
+}
 
 /**
  * Motor de Ejecución de Mapas de Conversación
