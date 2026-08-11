@@ -193,182 +193,103 @@ export function WhatsAppTemplates() {
                 Crear plantilla
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Nueva Plantilla de WhatsApp</DialogTitle>
-                <DialogDescription>
-                  Completa los detalles para crear una nueva plantilla. Las plantillas deben ser aprobadas por Meta.
-                </DialogDescription>
+            <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+              <DialogHeader className="p-6 border-b">
+                <DialogTitle>Editor Visual de Plantilla</DialogTitle>
+                <DialogDescription>Configura los componentes de tu plantilla y previsualiza el resultado.</DialogDescription>
               </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
+              <div className="flex flex-1 overflow-hidden">
+                {/* IZQUIERDA: Configuración */}
+                <div className="w-1/3 border-r p-6 overflow-y-auto space-y-4">
+                  <Form {...form}>
+                    <form className="space-y-4">
+                      <FormField control={form.control} name="name" render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nombre de la plantilla</FormLabel>
-                          <FormControl>
-                            <Input placeholder="ej: bienvenida_usuario" {...field} />
-                          </FormControl>
-                          <FormMessage />
+                          <FormLabel>Nombre</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
                         </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Categoría</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecciona una categoría" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="MARKETING">Marketing</SelectItem>
-                              <SelectItem value="UTILITY">Utilidad</SelectItem>
-                              <SelectItem value="AUTHENTICATION">Autenticación</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="language"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Idioma</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona el idioma" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="es">Español</SelectItem>
-                            <SelectItem value="en">Inglés</SelectItem>
-                            <SelectItem value="pt_BR">Portugués</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="header"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Encabezado (Opcional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Texto del encabezado..." {...field} />
-                        </FormControl>
-                        <FormDescription>Máximo 60 caracteres.</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="body"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cuerpo del mensaje</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Hola {{1}}, gracias por contactarnos..." 
-                            className="min-h-[120px]"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Usa {"{{1}}"}, {"{{2}}"} para variables.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="footer"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Pie de página (Opcional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Texto del pie de página..." {...field} />
-                        </FormControl>
-                        <FormDescription>Máximo 60 caracteres.</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="pt-4 border-t flex flex-col gap-4">
-                    <h4 className="text-sm font-semibold flex items-center gap-2">
-                      <Eye className="h-4 w-4" />
-                      Previsualización
-                    </h4>
-                    <div className="bg-slate-100 rounded-lg p-4 border border-slate-200 max-w-sm ml-auto mr-auto w-full relative">
-                      <div className="absolute top-0 right-0 p-2 text-[10px] text-slate-400">10:00 AM</div>
-                      <div className="bg-white rounded-lg shadow-sm p-3 space-y-2 text-sm">
-                        {previewValues.header && (
-                          <div className="font-bold border-b pb-1 text-slate-800">{previewValues.header}</div>
-                        )}
-                        <div className="whitespace-pre-wrap text-slate-700">
-                          {previewValues.body || "El contenido del mensaje aparecerá aquí..."}
-                        </div>
-                        {previewValues.footer && (
-                          <div className="text-[11px] text-slate-500 pt-1">{previewValues.footer}</div>
-                        )}
+                      )} />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="category" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Categoría</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="MARKETING">Marketing</SelectItem>
+                                <SelectItem value="UTILITY">Utilidad</SelectItem>
+                                <SelectItem value="AUTHENTICATION">Autenticación</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="language" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Idioma</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="es">Español</SelectItem>
+                                <SelectItem value="en">Inglés</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )} />
                       </div>
+                      <FormField control={form.control} name="header" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Encabezado (Texto)</FormLabel>
+                          <FormControl><Input {...field} placeholder="Opcional..." /></FormControl>
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="body" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cuerpo</FormLabel>
+                          <FormControl><Textarea className="h-32" {...field} /></FormControl>
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="footer" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Pie de página</FormLabel>
+                          <FormControl><Input {...field} placeholder="Opcional..." /></FormControl>
+                        </FormItem>
+                      )} />
+                    </form>
+                  </Form>
+                </div>
+                {/* CENTRO: Preview */}
+                <div className="w-1/3 bg-slate-100 p-8 flex items-center justify-center">
+                  <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-4 space-y-2 border border-slate-200">
+                    {previewValues.header && <div className="font-bold text-sm border-b pb-1">{previewValues.header}</div>}
+                    <div className="text-sm whitespace-pre-wrap">{previewValues.body || "Cuerpo del mensaje..."}</div>
+                    {previewValues.footer && <div className="text-[11px] text-slate-500 pt-1">{previewValues.footer}</div>}
+                  </div>
+                </div>
+                {/* DERECHA: Botones y Variables */}
+                <div className="w-1/3 p-6 border-l overflow-y-auto space-y-6">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Variables Detectadas</h4>
+                    <div className="flex gap-2 flex-wrap">
+                      {(previewValues.body.match(/\{\{\d+\}\}/g) || []).map((v, i) => (
+                        <Badge key={i} variant="outline" className="bg-indigo-50">{v}</Badge>
+                      ))}
                     </div>
                   </div>
-
-                  <DialogFooter className="gap-2 sm:gap-0">
-                    <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
-                      Cancelar
-                    </Button>
-                    <Button 
-                      type="submit" 
-                      disabled={saveMutation.isPending}
-                      className="bg-emerald-600 hover:bg-emerald-700"
-                    >
-                      Guardar borrador
-                    </Button>
-                    <Button 
-                      type="button" 
-                      disabled={saveMutation.isPending || submitMutation.isPending}
-                      onClick={async () => {
-                        const isValid = await form.trigger();
-                        if (isValid) {
-                          if (!connectedAccount) {
-                            return toast.error("Conecta primero una cuenta de WhatsApp Business para enviar esta plantilla a Meta.");
-                          }
-                          // Primero guardamos y luego enviamos
-                          const values = form.getValues();
-                          const variables = values.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
-                          const saved = await saveMutation.mutateAsync({ ...values, variables }) as any;
-                          if (saved?.id) {
-                            await handleSubmitToMeta(saved.id);
-                            setIsCreateOpen(false);
-                            form.reset();
-                          }
-                        }
-                      }}
-                    >
-                      Enviar a Meta
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
+                </div>
+              </div>
+              <DialogFooter className="p-6 border-t flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
+                <Button onClick={form.handleSubmit(onSubmit)}>Guardar borrador</Button>
+                <Button className="bg-emerald-600" onClick={async () => {
+                  const val = form.getValues();
+                  const variables = val.body.match(/\{\{\d+\}\}/g)?.map(v => v.replace(/[\{\}]/g, "")) || [];
+                  const saved = await saveMutation.mutateAsync({ ...val, variables }) as any;
+                  if (saved?.id) await handleSubmitToMeta(saved.id);
+                  setIsCreateOpen(false);
+                }}>Enviar a Meta</Button>
+              </DialogFooter>
             </DialogContent>
+
           </Dialog>
 
           <Button 

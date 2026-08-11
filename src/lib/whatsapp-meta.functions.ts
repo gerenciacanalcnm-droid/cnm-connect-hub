@@ -6,8 +6,7 @@ const CNM_COMPANY_ID = "00000000-0000-4000-8000-000000000001";
 
 /**
  * Enviar plantilla a Meta para aprobación.
- * Por ahora simula el comportamiento ya que requiere credenciales de Meta y 
- * seguir el flujo de revisión de Meta.
+ * Payload compatible con: POST /{WABA_ID}/message_templates
  */
 export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -17,7 +16,7 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
-    // 1. Obtener la plantilla
+    // 1. Obtener la plantilla y la cuenta conectada
     const { data: template, error: getErr } = await context.supabase
       .from("whatsapp_templates")
       .select("*")
@@ -26,20 +25,95 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
 
     if (getErr || !template) throw new Error("Plantilla no encontrada");
 
-    // 2. Simular envío a Meta
-    // En una integración real aquí llamaríamos a:
-    // POST https://graph.facebook.com/v20.0/{waba-id}/message_templates
-    
-    // 3. Actualizar estado a PENDING
+    // Buscar cuenta de la empresa
+    const { data: account, error: accErr } = await context.supabase
+      .from("whatsapp_accounts")
+      .select("business_account_id, access_token")
+      .eq("company_id", template.company_id)
+      .eq("status", "connected")
+      .limit(1)
+      .maybeSingle();
+
+    if (accErr || !account || !account.business_account_id || !account.access_token) {
+      throw new Error("No hay una cuenta de WhatsApp Business conectada para realizar el envío a Meta.");
+    }
+
+    // 2. Construir Payload para Meta
+    // https://developers.facebook.com/docs/whatsapp/cloud-api/reference/message-templates
+    const components: any[] = [];
+
+    // Header
+    if (template.header) {
+      components.push({
+        type: "HEADER",
+        format: "TEXT",
+        text: template.header
+      });
+    }
+
+    // Body
+    components.push({
+      type: "BODY",
+      text: template.body
+    });
+
+    // Footer
+    if (template.footer) {
+      components.push({
+        type: "FOOTER",
+        text: template.footer
+      });
+    }
+
+    // Buttons
+    if (template.buttons && Array.isArray(template.buttons)) {
+      components.push({
+        type: "BUTTONS",
+        buttons: template.buttons
+      });
+    }
+
+    const payload = {
+      name: template.name,
+      category: template.category,
+      language: template.language,
+      components
+    };
+
+    // 3. Envío Real a Meta
+    const response = await fetch(
+      `https://graph.facebook.com/v20.0/${account.business_account_id}/message_templates`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${account.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error?.message || "Error al enviar plantilla a Meta API");
+    }
+
+    // 4. Actualizar estado según Meta
+    const metaStatus = result.status || "PENDING";
+    const externalId = result.id;
+
     const { error: updErr } = await context.supabase
       .from("whatsapp_templates")
       .update({ 
-        status: "PENDING",
+        status: metaStatus,
+        external_id: externalId,
         updated_at: new Date().toISOString()
       } as any)
       .eq("id", data.id);
 
     if (updErr) throw new Error(updErr.message);
 
-    return { ok: true, status: "PENDING" };
+    return { ok: true, status: metaStatus, metaId: externalId };
   });
+
