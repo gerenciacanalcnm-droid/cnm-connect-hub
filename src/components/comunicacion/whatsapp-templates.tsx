@@ -271,7 +271,14 @@ export function WhatsAppTemplates() {
                 
                 {/* DERECHA: Configuración */}
                 <div className="w-80 p-6 border-l overflow-y-auto space-y-4">
-                  <h4 className="font-semibold text-sm border-b pb-2 mb-4">CONFIGURACIÓN</h4>
+                  <div className="flex flex-col sm:flex-row justify-between items-center border-b pb-2 mb-4">
+                    <h4 className="font-semibold text-sm">CONFIGURACIÓN</h4>
+                    {selectedComponent && (
+                      <Badge variant="outline" className="text-[10px] bg-slate-100 uppercase font-mono">
+                        {selectedComponent}
+                      </Badge>
+                    )}
+                  </div>
                   {!selectedComponent && (
                     <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 opacity-50">
                       <MousePointer2 className="h-12 w-12 mb-4" />
