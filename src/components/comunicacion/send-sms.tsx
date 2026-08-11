@@ -36,8 +36,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { sendSmsMessage } from "@/lib/communication.functions";
 import { sendBulkSms } from "@/lib/sms-bulk.functions";
 import { createSmsSchedule, listSmsSchedules, cancelSmsSchedule } from "@/lib/sms-schedule.functions";
+import { getCurrentCompany } from "@/lib/platform.functions";
 import { useContacts } from "@/hooks/use-contacts";
 import { useContactGroups, usePermissions } from "@/hooks/use-platform";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useWallets, useRateTiers } from "@/hooks/use-commercial";
