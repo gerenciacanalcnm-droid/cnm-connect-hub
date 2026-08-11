@@ -729,9 +729,11 @@ export const trackServiceUsage = createServerFn({ method: "POST" })
       amount: z.number().positive(),
       units: z.number().int().nonnegative().default(1),
       description: z.string().max(200).optional(),
-      reference: z.string().uuid(), // ID del mensaje o tarea para idempotencia
+      reference: z.string(), // ID del mensaje o tarea para idempotencia
+      isFlash: z.boolean().optional().default(false),
     }).parse(v)
   )
+
   .handler(async ({ data, context }) => {
     // 1. Localizar la wallet del canal
     const { data: w } = await context.supabase
@@ -743,16 +745,26 @@ export const trackServiceUsage = createServerFn({ method: "POST" })
 
     if (!w) throw new Error(`No existe wallet para el canal ${data.channel}`);
 
-    // 2. Aplicar descuento (amount negativo)
+    // 2. Determinar tarifa (SMS Flash tiene recargo)
+    let finalAmount = data.amount;
+    let finalConcept = data.description || `Consumo ${data.channel.toUpperCase()}`;
+    
+    if (data.channel === "sms" && data.isFlash) {
+      finalAmount = data.amount * 1.5; // Recargo 50% por Flash
+      finalConcept += " (FLASH)";
+    }
+
+    // 3. Aplicar descuento (amount negativo)
     const res = await applyWalletMovement(context.supabase as unknown as Sb, {
       walletId: w.id,
-      amount: -Math.abs(data.amount),
+      amount: -Math.abs(finalAmount),
       units: -Math.abs(data.units),
-      type: "AJUSTE_DEBITO", // El consumo se registra como débito operativo
-      concept: data.description || `Consumo ${data.channel.toUpperCase()}`,
+      type: "AJUSTE_DEBITO",
+      concept: finalConcept,
       reference: data.reference,
       performedBy: context.userId,
     });
+
 
     // 3. El contador de consumo ya se incrementó dentro de applyWalletMovement
     return { ok: true, balance: res.balanceAfter };
