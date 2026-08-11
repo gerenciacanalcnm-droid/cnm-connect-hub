@@ -493,7 +493,7 @@ function WalletPage() {
             </div>
           )}
 
-          {managed && formMode && (
+          {managed && formMode === "add" && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -502,7 +502,7 @@ function WalletPage() {
                     type="number"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    placeholder={formMode === "add" ? "Monto a acreditar" : "Monto a ajustar"}
+                    placeholder="Monto a acreditar"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -518,7 +518,7 @@ function WalletPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {typeOptions.map((o) => (
+                      {CREDIT_TYPES.map((o) => (
                         <SelectItem key={o.value} value={o.value}>
                           {o.label}
                         </SelectItem>
@@ -569,16 +569,51 @@ function WalletPage() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Saldo actual {formatCurrency(managed.balance, managed.currency)} → nuevo saldo{" "}
-                {formatCurrency(
-                  managed.balance +
-                    (formMode === "add"
-                      ? Math.abs(Number(amount) || 0)
-                      : type === "AJUSTE_DEBITO"
-                        ? -Math.abs(Number(amount) || 0)
-                        : Number(amount) || 0),
-                  managed.currency,
-                )}
+                Saldo actual {formatCurrency(managed.balance, managed.currency)} + {amount || 0} ={" "}
+                {formatCurrency(managed.balance + (Number(amount) || 0), managed.currency)}
+              </p>
+            </div>
+          )}
+
+          {managed && formMode === "adjust" && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Valor a descontar</Label>
+                  <Input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="Monto a debitar"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Referencia</Label>
+                  <Input
+                    value={reference}
+                    onChange={(e) => setReference(e.target.value)}
+                    placeholder="Ref. del ajuste"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Motivo / Concepto</Label>
+                <Input
+                  value={concept}
+                  onChange={(e) => setConcept(e.target.value)}
+                  placeholder="Ej. Corrección por error en envío"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Observaciones</Label>
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Saldo actual {formatCurrency(managed.balance, managed.currency)} - {amount || 0} ={" "}
+                {formatCurrency(managed.balance - (Number(amount) || 0), managed.currency)}
               </p>
             </div>
           )}
