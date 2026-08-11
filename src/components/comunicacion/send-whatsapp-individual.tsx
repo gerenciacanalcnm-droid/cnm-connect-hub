@@ -601,15 +601,15 @@ export function SendWhatsAppIndividual() {
               </div>
               <div className="flex justify-between">
                 <span>Estado:</span>
-                <span className={selectedTemplate?.status === 'APPROVED' ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
-                  {selectedTemplate?.status || "N/A"}
+                <span className={String(selectedTemplate?.status) === 'APPROVED' ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
+                  {String(selectedTemplate?.status || "N/A")}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Variables:</span>
-                {selectedTemplate?.variables && selectedTemplate.variables.length > 0 ? (
-                  <span className={!Object.values(templateVariables).some(v => !v.trim()) ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
-                    {!Object.values(templateVariables).some(v => !v.trim()) ? "OK" : "FALTANTES"}
+                {selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0 ? (
+                  <span className={!Object.values(templateVariables).some(v => !v?.trim()) ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
+                    {!Object.values(templateVariables).some(v => !v?.trim()) ? "OK" : "FALTANTES"}
                   </span>
                 ) : (
                   <span className="text-emerald-600 font-bold">OK</span>
@@ -642,7 +642,7 @@ export function SendWhatsAppIndividual() {
                 stats.valid === 0 || 
                 (messageType === 'text' ? !msg.trim() : !selectedTemplateId) || 
                 !connectedAccount ||
-                (messageType === 'template' && (selectedTemplate?.variables?.length ?? 0) > 0 && Object.values(templateVariables).some(v => !v.trim()))
+                (messageType === 'template' && selectedTemplate?.variables && Array.isArray(selectedTemplate.variables) && selectedTemplate.variables.length > 0 && Object.values(templateVariables).some(v => !v?.trim()))
               }
               className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4"
             >
