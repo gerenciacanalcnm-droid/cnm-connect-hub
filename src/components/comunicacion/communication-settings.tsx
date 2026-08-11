@@ -337,7 +337,4 @@ export function CommunicationSettings() {
     </div>
   );
 }
-    </div>
-  );
-}
 
