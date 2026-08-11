@@ -246,8 +246,14 @@ export function SendWhatsAppIndividual() {
       setMsg("");
       setSelectedTemplateId("");
     } catch (err: any) {
-      toast.error(err.message || "Error al enviar WhatsApp");
+      console.error("[whatsapp.handleSend] Error:", err.message);
+      const technicalMsg = err.message || "Error desconocido";
+      toast.error(technicalMsg, {
+        duration: 10000,
+        description: "Revisa el panel de diagnóstico para más detalles."
+      });
     }
+
   };
 
   return (
@@ -585,6 +591,10 @@ export function SendWhatsAppIndividual() {
             )}
 
             <div className="mt-4 p-3 bg-slate-50 border rounded-lg text-[10px] space-y-1 font-mono">
+              <div className="flex justify-between font-bold border-b pb-1 mb-1 text-slate-700">
+                <span>DIAGNÓSTICO TÉCNICO</span>
+              </div>
+
               <div className="flex justify-between">
                 <span>Cuenta:</span>
                 <span className={connectedAccount ? "text-emerald-600 font-bold" : "text-destructive font-bold"}>
@@ -637,7 +647,20 @@ export function SendWhatsAppIndividual() {
                   {!isInsufficient ? "SÍ" : "NO"}
                 </span>
               </div>
+              
+              {sendIndividualMutation.error && (
+                <div className="mt-2 pt-2 border-t border-red-100 text-red-700 space-y-1">
+                  <div className="flex justify-between">
+                    <span>STATUS:</span>
+                    <span className="font-bold">ERROR</span>
+                  </div>
+                  <div className="break-words">
+                    {String(sendIndividualMutation.error)}
+                  </div>
+                </div>
+              )}
             </div>
+
 
             <Button
               onClick={handleSend}
@@ -652,7 +675,7 @@ export function SendWhatsAppIndividual() {
             >
               <Send className="h-4 w-4 mr-2" />
               {isInsufficient ? `Saldo insuficiente. Necesitas ${formatCurrency(totalCost)} para realizar este envío.` : 
-               mode === 'individual' ? 'Authentication Error' : 
+               mode === 'individual' ? 'Enviar Ahora' : 
                mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'}
             </Button>
             
