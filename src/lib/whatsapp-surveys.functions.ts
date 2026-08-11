@@ -174,10 +174,13 @@ export const saveSurvey = createServerFn({ method: "POST" })
     id: uuid.optional(),
     title: z.string().min(1),
     question: z.string().min(1),
+    type: z.enum(['INTERACTIVE_LIST', 'INTERACTIVE_BUTTONS']).default('INTERACTIVE_LIST'),
+    metadata: z.record(z.any()).optional(),
     options: z.array(z.object({
       label: z.string().min(1),
-      option_key: z.string()
-    })).min(2).max(10)
+      option_key: z.string(),
+      metadata: z.record(z.any()).optional()
+    })).min(1).max(10)
   }).parse(v))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -189,7 +192,6 @@ export const saveSurvey = createServerFn({ method: "POST" })
       .eq("id", userId)
       .single();
     
-    // Usamos duck typing/casting para acceder a company_id
     const companyId = (profile as any)?.company_id;
     if (profErr || !companyId) throw new Error("Empresa no identificada.");
 
@@ -200,7 +202,10 @@ export const saveSurvey = createServerFn({ method: "POST" })
         company_id: companyId,
         title: data.title,
         question: data.question,
-        status: "ACTIVE"
+        type: data.type,
+        metadata: data.metadata || {},
+        status: "ACTIVE",
+        updated_at: new Date().toISOString()
       } as any)
       .select("id")
       .single();
@@ -217,10 +222,44 @@ export const saveSurvey = createServerFn({ method: "POST" })
       survey_id: survey.id,
       label: opt.label,
       option_key: opt.option_key,
+      metadata: opt.metadata || {},
       sort_order: index
     }));
 
     await (supabase as any).from("whatsapp_survey_options").insert(optionsToInsert as any);
 
     return { id: survey.id };
+  });
+
+export const getSurveyStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ surveyId: uuid }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+
+    const { data: options, error: optErr } = await (supabase as any)
+      .from("whatsapp_survey_options")
+      .select("id, label, option_key")
+      .eq("survey_id", data.surveyId);
+    
+    if (optErr) throw new Error("Error cargando opciones");
+
+    const { data: responses, error: resErr } = await (supabase as any)
+      .from("whatsapp_survey_responses")
+      .select("option_id")
+      .eq("survey_id", data.surveyId);
+
+    if (resErr) throw new Error("Error cargando respuestas");
+
+    const total = responses.length;
+    const stats = options.map((opt: any) => {
+      const count = responses.filter((r: any) => r.option_id === opt.id).length;
+      return {
+        label: opt.label,
+        count,
+        percentage: total > 0 ? Math.round((count / total) * 100) : 0
+      };
+    });
+
+    return { total, stats };
   });
