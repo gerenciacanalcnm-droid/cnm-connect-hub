@@ -117,6 +117,16 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
+    // 0. Obtener company_id del usuario (de company_members)
+    const { data: membership } = await context.supabase
+      .from("company_members")
+      .select("company_id")
+      .eq("user_id", context.userId)
+      .eq("is_active", true)
+      .maybeSingle();
+    
+    const companyId = membership?.company_id || CNM_COMPANY_ID;
+
     // 1. Obtener credenciales de la cuenta (usamos context.supabase con RLS)
     const { data: account, error: accErr } = await context.supabase
       .from("whatsapp_accounts")
@@ -130,7 +140,7 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
     const { data: msg, error: msgErr } = await context.supabase
       .from("whatsapp_messages")
       .insert({
-        company_id: CNM_COMPANY_ID,
+        company_id: companyId,
         to_phone: data.recipient,
         body: data.body,
         direction: "outbound" as const,
@@ -146,7 +156,7 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
     try {
       const usage = await trackServiceUsage({
         data: {
-          company_id: CNM_COMPANY_ID,
+          company_id: companyId,
           channel: "whatsapp",
           units: 1,
           description: `WA Individual a ${data.recipient}`,
