@@ -35,33 +35,69 @@ export const sendWhatsAppSurvey = createServerFn({ method: "POST" })
       .single();
 
     if (survErr || !survey) throw new Error("Encuesta no encontrada.");
-    const options = (survey as any).options || [];
-    if (options.length < 2) throw new Error("La encuesta debe tener al menos 2 opciones.");
+    const s = survey as any;
+    const options = s.options || [];
+    if (options.length < 1) throw new Error("La encuesta debe tener al menos 1 opción.");
 
-    // 3. Preparar mensaje interactivo Meta
+    // 3. Preparar mensaje interactivo Meta basado en el tipo
+    let interactive: any = {
+      body: { text: s.question },
+      footer: s.metadata?.footer ? { text: s.metadata.footer } : undefined
+    };
+
+    if (s.type === 'INTERACTIVE_LIST') {
+      interactive.type = "list";
+      interactive.header = { type: "text", text: s.title || "Encuesta" };
+      interactive.action = {
+        button: s.metadata?.button_text || "Ver opciones",
+        sections: [
+          {
+            title: s.metadata?.section_title || "Opciones",
+            rows: options.map((opt: any) => ({
+              id: opt.option_key,
+              title: opt.label.substring(0, 24),
+              description: opt.metadata?.description?.substring(0, 72)
+            }))
+          }
+        ]
+      };
+    } else if (s.type === 'INTERACTIVE_BUTTONS') {
+      interactive.type = "button";
+      
+      // Header multimedia para botones
+      if (s.metadata?.header_type && s.metadata?.header_type !== 'NONE') {
+        const hType = s.metadata.header_type.toLowerCase();
+        interactive.header = {
+          type: hType,
+          [hType]: hType === 'text' ? { text: s.metadata.header_text } : { link: s.metadata.header_url }
+        };
+      }
+
+      interactive.action = {
+        buttons: options.slice(0, 3).map((opt: any) => ({
+          type: "reply",
+          reply: {
+            id: opt.option_key,
+            title: opt.label.substring(0, 24)
+          }
+        }))
+      };
+    } else {
+      // Legacy fallback
+      interactive.type = "list";
+      interactive.header = { type: "text", text: s.title };
+      interactive.action = {
+        button: "Ver opciones",
+        sections: [{ title: "Opciones", rows: options.map((opt: any) => ({ id: opt.option_key, title: opt.label })) }]
+      };
+    }
+
     const interactivePayload = {
       messaging_product: "whatsapp",
       recipient_type: "individual",
       to: data.recipient,
       type: "interactive",
-      interactive: {
-        type: "list",
-        header: { type: "text", text: (survey as any).title || "Encuesta" },
-        body: { text: (survey as any).question },
-        footer: { text: "Selecciona una opción" },
-        action: {
-          button: "Ver opciones",
-          sections: [
-            {
-              title: "Opciones disponibles",
-              rows: options.map((opt: any) => ({
-                id: opt.option_key,
-                title: opt.label.substring(0, 24),
-              }))
-            }
-          ]
-        }
-      }
+      interactive
     };
 
     // 4. Registrar mensaje en estado 'sending'
@@ -138,10 +174,13 @@ export const saveSurvey = createServerFn({ method: "POST" })
     id: uuid.optional(),
     title: z.string().min(1),
     question: z.string().min(1),
+    type: z.enum(['INTERACTIVE_LIST', 'INTERACTIVE_BUTTONS']).default('INTERACTIVE_LIST'),
+    metadata: z.record(z.any()).optional(),
     options: z.array(z.object({
       label: z.string().min(1),
-      option_key: z.string()
-    })).min(2).max(10)
+      option_key: z.string(),
+      metadata: z.record(z.any()).optional()
+    })).min(1).max(10)
   }).parse(v))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -153,7 +192,6 @@ export const saveSurvey = createServerFn({ method: "POST" })
       .eq("id", userId)
       .single();
     
-    // Usamos duck typing/casting para acceder a company_id
     const companyId = (profile as any)?.company_id;
     if (profErr || !companyId) throw new Error("Empresa no identificada.");
 
@@ -164,7 +202,10 @@ export const saveSurvey = createServerFn({ method: "POST" })
         company_id: companyId,
         title: data.title,
         question: data.question,
-        status: "ACTIVE"
+        type: data.type,
+        metadata: data.metadata || {},
+        status: "ACTIVE",
+        updated_at: new Date().toISOString()
       } as any)
       .select("id")
       .single();
@@ -181,10 +222,44 @@ export const saveSurvey = createServerFn({ method: "POST" })
       survey_id: survey.id,
       label: opt.label,
       option_key: opt.option_key,
+      metadata: opt.metadata || {},
       sort_order: index
     }));
 
     await (supabase as any).from("whatsapp_survey_options").insert(optionsToInsert as any);
 
     return { id: survey.id };
+  });
+
+export const getSurveyStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ surveyId: uuid }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+
+    const { data: options, error: optErr } = await (supabase as any)
+      .from("whatsapp_survey_options")
+      .select("id, label, option_key")
+      .eq("survey_id", data.surveyId);
+    
+    if (optErr) throw new Error("Error cargando opciones");
+
+    const { data: responses, error: resErr } = await (supabase as any)
+      .from("whatsapp_survey_responses")
+      .select("option_id")
+      .eq("survey_id", data.surveyId);
+
+    if (resErr) throw new Error("Error cargando respuestas");
+
+    const total = responses.length;
+    const stats = options.map((opt: any) => {
+      const count = responses.filter((r: any) => r.option_id === opt.id).length;
+      return {
+        label: opt.label,
+        count,
+        percentage: total > 0 ? Math.round((count / total) * 100) : 0
+      };
+    });
+
+    return { total, stats };
   });

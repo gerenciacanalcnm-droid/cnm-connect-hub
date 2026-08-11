@@ -1,63 +1,51 @@
 import { useState } from "react";
-import { 
-  Plus, 
-  Trash2,
-  ChevronLeft,
-  Smartphone,
-  Send,
-  Save,
-  CheckCircle2
-} from "lucide-react";
+import { Plus, Trash2, ChevronLeft, Smartphone, Send, Save, Variable, Image, Video, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { saveSurvey } from "@/lib/whatsapp-surveys.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { cn } from "@/lib/utils";
 
 export function WhatsAppSurveys() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [type, setType] = useState<'INTERACTIVE_LIST' | 'INTERACTIVE_BUTTONS'>('INTERACTIVE_LIST');
   const [title, setTitle] = useState("");
   const [question, setQuestion] = useState("");
+  const [footer, setFooter] = useState("");
+  const [headerType, setHeaderType] = useState<'NONE' | 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT'>('NONE');
   const [options, setOptions] = useState([
     { label: "", option_key: "option_1" },
     { label: "", option_key: "option_2" }
   ]);
+  const [selectedComp, setSelectedComp] = useState<'GENERAL' | 'OPTIONS' | 'PREVIEW'>('GENERAL');
   const [isSaving, setIsSaving] = useState(false);
 
   const saveSurveyFn = useServerFn(saveSurvey);
 
-  const addOption = () => {
-    if (options.length >= 10) return;
-    const nextIndex = options.length + 1;
-    setOptions([...options, { label: "", option_key: `option_${nextIndex}` }]);
-  };
-
-  const removeOption = (index: number) => {
-    if (options.length <= 2) return;
-    setOptions(options.filter((_, i) => i !== index));
-  };
-
   const handleSave = async () => {
     if (!title || !question || options.some(o => !o.label)) {
-      toast.error("Por favor completa todos los campos.");
+      toast.error("Por favor completa los campos requeridos.");
       return;
     }
-
     setIsSaving(true);
     try {
       await saveSurveyFn({
         data: {
           title,
           question,
-          options
+          type,
+          options,
+          metadata: { footer, header_type: headerType }
         }
       });
-      toast.success("Encuesta guardada correctamente.");
+      toast.success("Encuesta guardada.");
       setIsEditorOpen(false);
     } catch (err: any) {
-      toast.error(err.message || "Error al guardar la encuesta.");
+      toast.error(err.message);
     } finally {
       setIsSaving(false);
     }
@@ -68,145 +56,64 @@ export function WhatsAppSurveys() {
       <div className="p-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Encuestas WhatsApp</h1>
-          <Button onClick={() => setIsEditorOpen(true)} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4 mr-2" /> Crear encuesta
+          <Button onClick={() => setIsEditorOpen(true)} className="bg-blue-600">
+            <Plus className="h-4 w-4 mr-2" /> Crear Encuesta
           </Button>
         </div>
-        <Card className="border-dashed">
-          <CardContent className="p-12 text-center text-muted-foreground">
-            <Smartphone className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p>Crea encuestas interactivas para tus clientes en WhatsApp.</p>
-            <Button variant="link" onClick={() => setIsEditorOpen(true)} className="mt-2">
-              Comenzar ahora
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* IZQUIERDA: Editor */}
-      <div className="w-96 bg-white border-r p-6 overflow-y-auto space-y-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Button variant="ghost" size="icon" onClick={() => setIsEditorOpen(false)}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="font-semibold text-slate-900">Nueva Encuesta</span>
-        </div>
-
+    <div className="flex h-screen bg-slate-50">
+      {/* IZQ: Configuración */}
+      <div className="w-80 bg-white border-r p-6 overflow-y-auto space-y-6">
+        <Button variant="ghost" className="mb-4" onClick={() => setIsEditorOpen(false)}>
+          <ChevronLeft className="h-4 w-4 mr-2" /> Volver
+        </Button>
         <div className="space-y-4">
+          <Select value={type} onValueChange={(v: any) => setType(v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="INTERACTIVE_LIST">Lista Interactiva</SelectItem>
+              <SelectItem value="INTERACTIVE_BUTTONS">Botones de Respuesta</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Título (Meta: 60 chars)" maxLength={60} />
+          <Textarea value={question} onChange={e => setQuestion(e.target.value)} placeholder="Pregunta/Cuerpo (Meta: 1024 chars)" maxLength={1024} />
+          {type === 'INTERACTIVE_BUTTONS' && (
+             <Select value={headerType} onValueChange={(v: any) => setHeaderType(v)}>
+               <SelectTrigger><SelectValue placeholder="Tipo de Header" /></SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="NONE">Sin header</SelectItem>
+                 <SelectItem value="TEXT">Texto</SelectItem>
+                 <SelectItem value="IMAGE">Imagen</SelectItem>
+               </SelectContent>
+             </Select>
+          )}
+          <Input value={footer} onChange={e => setFooter(e.target.value)} placeholder="Pie de página" />
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase">Información General</label>
-            <Input 
-              value={title} 
-              onChange={(e) => setTitle(e.target.value)} 
-              placeholder="Nombre interno (Ej: Calificación Servicio)" 
-              className="text-slate-900"
-            />
-            <Select defaultValue="SINGLE_CHOICE">
-              <SelectTrigger className="text-slate-900">
-                <SelectValue placeholder="Tipo de encuesta" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="SINGLE_CHOICE">Selección de una opción</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2 pt-4">
-            <label className="text-xs font-bold text-slate-500 uppercase">Contenido</label>
-            <Input 
-              value={question} 
-              onChange={(e) => setQuestion(e.target.value)} 
-              placeholder="¿Cómo calificarías nuestro servicio?" 
-              className="text-slate-900"
-            />
-          </div>
-
-          <div className="space-y-3 pt-4">
-            <label className="text-xs font-bold text-slate-500 uppercase">Opciones</label>
+            <label className="text-xs font-bold uppercase text-slate-500">Opciones {options.length}/{type === 'INTERACTIVE_BUTTONS' ? 3 : 10}</label>
             {options.map((opt, i) => (
-              <div key={i} className="flex gap-2">
-                <Input 
-                  value={opt.label} 
-                  onChange={(e) => {
-                    const newOptions = [...options];
-                    newOptions[i].label = e.target.value;
-                    setOptions(newOptions);
-                  }} 
-                  placeholder={`Opción ${i + 1}`}
-                  className="text-slate-900"
-                />
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => removeOption(i)}
-                  disabled={options.length <= 2}
-                  className="text-slate-400 hover:text-red-500"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              <Input key={i} value={opt.label} onChange={e => {
+                const ns = [...options]; ns[i].label = e.target.value; setOptions(ns);
+              }} placeholder={`Opción ${i + 1}`} />
             ))}
-            <Button 
-              variant="outline" 
-              className="w-full text-xs" 
-              onClick={addOption}
-              disabled={options.length >= 10}
-            >
-              <Plus className="h-3 w-3 mr-2" /> Agregar opción
-            </Button>
+            <Button onClick={() => setOptions([...options, { label: "", option_key: `option_${options.length + 1}` }])}>+ Agregar</Button>
           </div>
-        </div>
-
-        <div className="pt-8">
-          <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={handleSave} disabled={isSaving}>
-            <Save className="h-4 w-4 mr-2" /> {isSaving ? "Guardando..." : "Guardar Encuesta"}
-          </Button>
+          <Button className="w-full" onClick={handleSave} disabled={isSaving}>Guardar</Button>
         </div>
       </div>
-
-      {/* DERECHA: Preview WhatsApp */}
-      <div className="flex-1 p-12 flex items-center justify-center bg-[#E5DDD5]">
-        <div className="w-full max-w-[320px] bg-white rounded-lg shadow-xl overflow-hidden border border-slate-300">
-          {/* WhatsApp Header */}
-          <div className="bg-[#075E54] p-3 flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-slate-200" />
-            <div className="flex-1">
-              <div className="text-white text-[13px] font-bold">CNM Digital Media</div>
-              <div className="text-white/70 text-[10px]">en línea</div>
-            </div>
-          </div>
-
-          {/* Chat Area */}
-          <div className="p-4 space-y-4 min-h-[400px]">
-            <div className="bg-white rounded-lg shadow-sm p-3 max-w-[85%] relative border border-slate-100">
-              <div className="font-bold text-emerald-600 text-[12px] mb-1">{title || "Encuesta"}</div>
-              <div className="text-slate-900 text-sm mb-3">{question || "¿Cómo calificarías nuestro servicio?"}</div>
-              
-              <Button variant="outline" className="w-full h-9 text-blue-500 text-sm border-t border-slate-100 rounded-none bg-transparent hover:bg-slate-50 flex items-center justify-center gap-2">
-                <Send className="h-3 w-3" /> Ver opciones
-              </Button>
-            </div>
-
-            {/* Simulated List Popup */}
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <div className="bg-white rounded-t-2xl shadow-2xl border-t border-slate-200 mt-8">
-                <div className="p-4 border-b border-slate-100">
-                  <div className="text-slate-900 text-[13px] font-bold">Selecciona una opción</div>
-                </div>
-                <div className="max-h-48 overflow-y-auto">
-                  {options.map((opt, i) => (
-                    <div key={i} className="p-3 border-b border-slate-50 flex items-center gap-3 hover:bg-slate-50 cursor-pointer">
-                      <div className="w-4 h-4 rounded-full border border-slate-300" />
-                      <div className="text-slate-700 text-sm">{opt.label || `Opción ${i + 1}`}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+      {/* CENTRO: Preview */}
+      <div className="flex-1 p-12 bg-[#E5DDD5] flex justify-center items-start">
+        <div className="w-[300px] bg-white rounded-lg p-4 shadow-xl border">
+          <div className="font-bold text-emerald-600 text-sm">{title}</div>
+          <div className="text-sm mt-1">{question}</div>
+          {footer && <div className="text-xs text-slate-500 mt-2">{footer}</div>}
+          <div className="mt-4 space-y-2">
+            {options.map((o, i) => (
+              <div key={i} className="bg-slate-100 p-2 rounded text-sm">{o.label || `Opción ${i + 1}`}</div>
+            ))}
           </div>
         </div>
       </div>

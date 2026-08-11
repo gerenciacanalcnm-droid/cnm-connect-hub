@@ -165,8 +165,8 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               const inboundMsgId = (inboundMsgRow as any)?.id;
 
               // --- PROCESAR RESPUESTA A ENCUESTA ---
-              if (message.type === 'interactive' && message.interactive?.list_reply) {
-                const reply = message.interactive.list_reply;
+              if (message.type === 'interactive' && (message.interactive?.list_reply || message.interactive?.button_reply)) {
+                const reply = message.interactive.list_reply || message.interactive.button_reply;
                 const optionKey = reply.id; // Ejemplo: option_1
 
                 // 1. Buscar encuesta asociada al último mensaje saliente de esta conversación
