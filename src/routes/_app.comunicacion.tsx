@@ -56,9 +56,6 @@ function ComunicacionPage() {
           <TabsTrigger value="plantillas" className="gap-1.5 flex-1 min-w-[110px]">
             <FileText className="h-3.5 w-3.5" /> Plantillas WA
           </TabsTrigger>
-          <TabsTrigger value="contactos" className="gap-1.5 flex-1 min-w-[110px]">
-            <Users className="h-3.5 w-3.5" /> Centro de Contactos
-          </TabsTrigger>
           <TabsTrigger value="encuestas" className="gap-1.5 flex-1 min-w-[110px]">
             <Smartphone className="h-3.5 w-3.5" /> Encuestas
           </TabsTrigger>
@@ -93,9 +90,6 @@ function ComunicacionPage() {
         </TabsContent>
         <TabsContent value="plantillas">
           <WhatsAppTemplates />
-        </TabsContent>
-        <TabsContent value="contactos">
-          <ContactCenterHub />
         </TabsContent>
         <TabsContent value="encuestas">
           <WhatsAppSurveys />
