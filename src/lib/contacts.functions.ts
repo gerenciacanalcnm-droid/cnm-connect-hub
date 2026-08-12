@@ -52,3 +52,30 @@ export const exportContacts = createServerFn({ method: "GET" })
     return csv;
   });
 
+export const getSegmentContacts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({
+    conditions: z.array(z.object({
+      field: z.string(),
+      operator: z.enum(["eq", "ilike", "contains"]),
+      value: z.any()
+    }))
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    let query = (context.supabase as any)
+      .from("contacts")
+      .select("*")
+      .eq("company_id", CNM_COMPANY_ID);
+    
+    for (const cond of data.conditions) {
+      if (cond.operator === "eq") query = query.eq(cond.field, cond.value);
+      if (cond.operator === "ilike") query = query.ilike(cond.field, `%${cond.value}%`);
+      if (cond.operator === "contains") query = query.contains(cond.field, [cond.value]);
+    }
+
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+    return rows || [];
+  });
+
+
