@@ -44,8 +44,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useWhatsAppCampaigns, useCreateWhatsAppCampaign } from "@/hooks/use-whatsapp-campaigns";
-import { useWhatsAppAccounts } from "@/hooks/use-whatsapp-accounts";
-import { useWhatsAppTemplates } from "@/hooks/use-whatsapp-templates";
+import { useWhatsAppAccounts, useWhatsAppTemplates } from "@/hooks/use-whatsapp";
 import { useMyWallet } from "@/hooks/use-commercial";
 import { formatCurrency } from "@/lib/format";
 import { format } from "date-fns";
@@ -70,11 +69,11 @@ export function WhatsAppCampaigns() {
   const [manualPhones, setManualPhones] = useState("");
   
   const approvedTemplates = useMemo(() => 
-    allTemplates.filter(t => t.status === 'APPROVED'),
+    allTemplates.filter((t: any) => t.status === 'APPROVED'),
   [allTemplates]);
 
   const selectedTemplate = useMemo(() => 
-    approvedTemplates.find(t => t.id === selectedTemplateId),
+    approvedTemplates.find((t: any) => t.id === selectedTemplateId),
   [approvedTemplates, selectedTemplateId]);
 
   const filteredCampaigns = campaigns?.filter(c => 
@@ -171,7 +170,7 @@ export function WhatsAppCampaigns() {
                     <SelectValue placeholder="Selecciona un número de WhatsApp" />
                   </SelectTrigger>
                   <SelectContent>
-                    {accounts.filter(a => a.nova_status === 'ASSIGNED').map(acc => (
+                    {accounts.filter((a: any) => a.nova_status === 'ASSIGNED').map((acc: any) => (
                       <SelectItem key={acc.id} value={acc.id}>
                         {acc.alias} ({acc.displayPhone || acc.phoneNumberId})
                       </SelectItem>
@@ -187,7 +186,7 @@ export function WhatsAppCampaigns() {
                     <SelectValue placeholder="Selecciona una plantilla aprobada" />
                   </SelectTrigger>
                   <SelectContent>
-                    {approvedTemplates.map(tpl => (
+                    {approvedTemplates.map((tpl: any) => (
                       <SelectItem key={tpl.id} value={tpl.id}>
                         {tpl.name} ({tpl.language.toUpperCase()})
                       </SelectItem>
