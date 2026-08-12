@@ -61,11 +61,16 @@ export function WhatsAppTemplates() {
   const { data: account } = useQuery({
     queryKey: ['whatsapp_account_connected'],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('whatsapp_accounts')
         .select('*')
         .eq('status', 'connected')
         .maybeSingle();
+      
+      if (error) {
+        console.error("Error fetching account:", error);
+        return null;
+      }
       return data;
     }
   });
@@ -88,10 +93,10 @@ export function WhatsAppTemplates() {
       setIsEditorOpen(false);
     },
     onError: (err: any) => {
-      // El error ya viene con el formato detallado desde el server function
-      // Para evitar problemas de compilación JSX en algunos entornos de transformación,
-      // nos aseguramos de que el mensaje sea procesado correctamente
-      toast.error(String(String(err.message)), { 
+      // Garantizar que no enviamos JSX a toast para evitar errores de transformación de Vite
+      const errorMessage = String(err.message || "Error desconocido al enviar a Meta");
+      
+      toast.error(errorMessage, { 
         duration: 10000,
         description: "Error detallado de Meta Cloud API" 
       });
