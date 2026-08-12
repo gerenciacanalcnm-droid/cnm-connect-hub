@@ -671,7 +671,7 @@ export function WhatsAppTemplates() {
           
           <Button 
             className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" 
-            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending}
+            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending || (headerType !== 'NONE' && headerType !== 'TEXT' && !headerText)}
             onClick={async () => {
               const saved: any = await saveMutation.mutateAsync({ 
                 data: { 
