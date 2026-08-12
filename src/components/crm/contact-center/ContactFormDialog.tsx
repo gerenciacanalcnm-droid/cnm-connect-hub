@@ -13,9 +13,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { upsertContact } from "@/lib/contacts.functions";
+import { listContactTags, assignTagToContact, removeTagFromContact, listContactTagsForContact } from "@/lib/tags.functions";
 import { toast } from "sonner";
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
+import { X, Check } from "lucide-react";
 
 const formSchema = z.object({
   first_name: z.string().min(1, "Nombre es requerido"),

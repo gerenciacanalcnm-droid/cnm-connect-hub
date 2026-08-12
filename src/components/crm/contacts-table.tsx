@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Plus, Mail, Phone, MessageCircle, MessageSquare, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import type { ColumnDef } from "@/components/common/data-table";
 import { DataTable } from "@/components/common/data-table";
@@ -38,7 +38,8 @@ import { toast } from "sonner";
 import { ContactFormDialog } from "./contact-center/ContactFormDialog";
 import { deleteContact } from "@/lib/contacts.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { listContactTagsForContact } from "@/lib/tags.functions";
 
 
 function initials(c: Contact) {
@@ -126,15 +127,33 @@ export function ContactsTable() {
       {
         accessorKey: "tags",
         header: "Etiquetas",
-        cell: ({ row }) => (
-          <div className="flex flex-wrap gap-1">
-            {row.original.tags.slice(0, 3).map((t) => (
-              <Badge key={t} variant="secondary" className="text-[10px]">
-                {t}
-              </Badge>
-            ))}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const contact = row.original;
+          const getContactTagsFn = useServerFn(listContactTagsForContact);
+          
+          const { data: realTags } = useQuery({
+            queryKey: ["contact-tags", contact.id],
+            queryFn: () => getContactTagsFn({ data: { contact_id: contact.id } }),
+          });
+
+          // Fallback to legacy tags if real tags are not yet loaded or empty
+          const displayTags = realTags?.length ? realTags : (contact.tags || []).map(t => ({ name: t, color: '#94a3b8' }));
+
+          return (
+            <div className="flex flex-wrap gap-1">
+              {displayTags.slice(0, 3).map((t: any) => (
+                <Badge 
+                  key={typeof t === 'string' ? t : t.id || t.name} 
+                  variant="secondary" 
+                  className="text-[10px] text-white"
+                  style={{ backgroundColor: typeof t === 'string' ? '#94a3b8' : t.color }}
+                >
+                  {typeof t === 'string' ? t : t.name}
+                </Badge>
+              ))}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "createdAt",
@@ -279,6 +298,7 @@ export function ContactsTable() {
                 <div>
                   <div className="mb-2 text-xs uppercase text-muted-foreground">Etiquetas</div>
                   <div className="flex flex-wrap gap-1">
+                    {/* Using a separate query component here would be cleaner, but for now we follow the pattern */}
                     {selected.tags.map((t) => (
                       <Badge key={t} variant="secondary">
                         {t}
