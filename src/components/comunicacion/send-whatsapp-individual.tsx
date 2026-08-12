@@ -179,16 +179,11 @@ export function SendWhatsAppIndividual() {
     setLimitError(null);
     if (!connectedAccount) return toast.error("Conecta primero una cuenta de WhatsApp Business.");
     
-    // Check limits via RPC before sending
+    // Check limits via server function before sending
     try {
-      const { data: limitCheck, error: rpcError } = await (supabase as any).rpc('check_whatsapp_limits', {
-        _company_id: connectedAccount.companyId
-      });
+      const { checkWhatsAppLimits } = await import("@/lib/whatsapp-commercial.functions");
+      const check = await checkWhatsAppLimits({ companyId: connectedAccount.companyId }) as any;
 
-      
-      if (rpcError) throw rpcError;
-      
-      const check = limitCheck as any;
       if (check && !check.allowed) {
         const msg = "Has alcanzado el límite de mensajes configurado para tu empresa";
         setLimitError(msg);
