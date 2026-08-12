@@ -32,7 +32,10 @@ const KINDS = Object.keys(KIND_META) as Kind[];
 /** Timeline unificado del CRM: todas las interacciones en un solo hilo. */
 export function UnifiedTimeline() {
   const [active, setActive] = useState<Kind[]>(KINDS);
-  const { data: conversations = [], isLoading } = useConversations();
+  const conversationsQuery = useConversations();
+  const conversations = (conversationsQuery.data ?? []) as any[];
+  const isLoading = conversationsQuery.isLoading;
+
 
   const items = useMemo<TimelineItem[]>(() => {
     return conversations
