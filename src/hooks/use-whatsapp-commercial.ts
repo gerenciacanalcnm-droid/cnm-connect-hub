@@ -26,8 +26,14 @@ export function useWhatsAppConsumptionStats(companyId: string, period: 'today' |
 export function useWhatsAppLimitMutations() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Parameters<typeof updateWhatsAppLimits>[0]['data']) => 
-      updateWhatsAppLimits({ data }),
+    mutationFn: (data: { 
+      companyId: string;
+      monthlyLimit: number | null;
+      dailyLimit: number | null;
+      hourlyLimit: number | null;
+      campaignLimit: number | null;
+      isActive: boolean;
+    }) => updateWhatsAppLimits({ data }),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: key("profile", variables.companyId) });
     },
