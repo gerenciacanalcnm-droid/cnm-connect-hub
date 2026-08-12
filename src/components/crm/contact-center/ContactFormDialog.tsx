@@ -75,8 +75,24 @@ export function ContactFormDialog({
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues || { first_name: "", last_name: "", phone: "", email: "" },
+    defaultValues: {
+      first_name: defaultValues?.first_name || "",
+      last_name: defaultValues?.last_name || "",
+      phone: defaultValues?.phone || "",
+      email: defaultValues?.email || "",
+    },
   });
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        first_name: defaultValues?.first_name || "",
+        last_name: defaultValues?.last_name || "",
+        phone: defaultValues?.phone || "",
+        email: defaultValues?.email || "",
+      });
+    }
+  }, [open, defaultValues, form]);
 
   const toggleTag = async (tagId: string) => {
     if (!defaultValues?.id) {
@@ -124,7 +140,7 @@ export function ContactFormDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{defaultValues ? "Editar contacto" : "Nuevo contacto"}</DialogTitle>
+          <DialogTitle>{defaultValues?.id ? "Editar contacto" : "Nuevo contacto"}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -153,9 +169,9 @@ export function ContactFormDialog({
                       variant={isSelected ? "default" : "outline"}
                       className="cursor-pointer transition-all hover:scale-105 flex items-center gap-1 py-1"
                       style={{ 
-                        backgroundColor: isSelected ? tag.color : 'transparent',
-                        borderColor: tag.color,
-                        color: isSelected ? 'white' : tag.color
+                        backgroundColor: isSelected ? (tag?.color || '#3b82f6') : 'transparent',
+                        borderColor: tag?.color || '#3b82f6',
+                        color: isSelected ? 'white' : (tag?.color || '#3b82f6')
                       }}
                       onClick={() => toggleTag(tag.id)}
                     >
