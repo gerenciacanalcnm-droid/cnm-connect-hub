@@ -217,6 +217,17 @@ export const exportListCsv = createServerFn({ method: "POST" })
   .inputValidator((v) => z.object({ list_id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     try {
+      // Validate list ownership
+      const { data: listExists, error: listError } = await (context.supabase as any)
+        .from("contact_lists")
+        .select("id")
+        .eq("id", data.list_id)
+        .eq("company_id", CNM_COMPANY_ID)
+        .maybeSingle();
+
+      if (listError) throw new Error(listError.message);
+      if (!listExists) throw new Error("La lista no existe o no pertenece a esta empresa.");
+
       const { data: members, error } = await (context.supabase as any)
         .from("contact_list_members")
         .select(`
@@ -244,20 +255,19 @@ export const exportListCsv = createServerFn({ method: "POST" })
         throw new Error(`Error al exportar lista: ${error.message}`);
       }
 
-      const rows = (members ?? []).map((m: any) => m.contact);
+      const rows = (members ?? []).map((m: any) => m.contact).filter(Boolean);
       if (!rows || rows.length === 0) {
         throw new Error("No hay contactos para exportar en esta lista.");
       }
 
       const csv = [
-        ["nombre", "telefono", "email", "ciudad", "tipo_contacto", "listas", "etiquetas", "estado"].join(","),
+        ["nombre", "telefono", "email", "ciudad", "tipo_contacto", "etiquetas", "estado"].join(","),
         ...rows.map((r: any) => [
-          `"${r.first_name} ${r.last_name || ''}"`,
-          `"${r.phone}"`,
+          `"${r.first_name || ''} ${r.last_name || ''}"`.trim(),
+          `"${r.phone || ''}"`,
           `"${r.email || ''}"`,
           `"${r.city || ''}"`,
-          `"${r.city || ''}"`, // Legacy fix for columns if needed, keeping structure
-          `""`, // Individual list view context
+          `"${r.preferred_channel || ''}"`,
           `"${(r.tags || []).join(';')}"`,
           `"${r.status || ''}"`
         ].join(","))
