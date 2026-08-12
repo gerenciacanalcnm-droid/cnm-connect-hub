@@ -68,6 +68,7 @@ export function SendWhatsAppIndividual() {
     return allAccounts.filter(a => a.novaStatus === 'ASSIGNED');
   }, [allAccounts]);
 
+
   const { data: allTemplates = [] } = useWhatsAppTemplates();
   
   const sendIndividualMutation = useSendWhatsAppIndividual();
