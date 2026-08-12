@@ -490,21 +490,59 @@ export type Database = {
           },
         ]
       }
-      contact_group_members: {
+      contact_channel_preferences: {
+        Row: {
+          channel: Database["public"]["Enums"]["communication_channel_type"]
+          contact_id: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          status: Database["public"]["Enums"]["contact_channel_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["communication_channel_type"]
+          contact_id: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: Database["public"]["Enums"]["contact_channel_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["communication_channel_type"]
+          contact_id?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: Database["public"]["Enums"]["contact_channel_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_channel_preferences_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_list_members: {
         Row: {
           added_at: string
           contact_id: string
-          group_id: string
+          list_id: string
         }
         Insert: {
           added_at?: string
           contact_id: string
-          group_id: string
+          list_id: string
         }
         Update: {
           added_at?: string
           contact_id?: string
-          group_id?: string
+          list_id?: string
         }
         Relationships: [
           {
@@ -516,14 +554,14 @@ export type Database = {
           },
           {
             foreignKeyName: "contact_group_members_group_id_fkey"
-            columns: ["group_id"]
+            columns: ["list_id"]
             isOneToOne: false
-            referencedRelation: "contact_groups"
+            referencedRelation: "contact_lists"
             referencedColumns: ["id"]
           },
         ]
       }
-      contact_groups: {
+      contact_lists: {
         Row: {
           color: string | null
           company_id: string
@@ -576,6 +614,8 @@ export type Database = {
           id: string
           last_conversation_at: string | null
           last_name: string | null
+          name: string | null
+          normalized_phone: string | null
           opt_in: boolean
           phone: string
           preferred_channel: Database["public"]["Enums"]["preferred_channel"]
@@ -595,6 +635,8 @@ export type Database = {
           id?: string
           last_conversation_at?: string | null
           last_name?: string | null
+          name?: string | null
+          normalized_phone?: string | null
           opt_in?: boolean
           phone: string
           preferred_channel?: Database["public"]["Enums"]["preferred_channel"]
@@ -614,6 +656,8 @@ export type Database = {
           id?: string
           last_conversation_at?: string | null
           last_name?: string | null
+          name?: string | null
+          normalized_phone?: string | null
           opt_in?: boolean
           phone?: string
           preferred_channel?: Database["public"]["Enums"]["preferred_channel"]
@@ -3115,7 +3159,14 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "failed"
+      communication_channel_type: "SMS" | "WHATSAPP" | "EMAIL"
       company_status: "active" | "suspended" | "trial" | "cancelled"
+      contact_channel_status:
+        | "OPTED_IN"
+        | "OPTED_OUT"
+        | "PENDING"
+        | "BOUNCED"
+        | "SPAM_REPORT"
       conversation_status: "open" | "pending" | "closed" | "archived"
       invoice_status: "draft" | "issued" | "paid" | "overdue" | "cancelled"
       message_channel: "sms" | "whatsapp"
@@ -3296,7 +3347,15 @@ export const Constants = {
         "cancelled",
         "failed",
       ],
+      communication_channel_type: ["SMS", "WHATSAPP", "EMAIL"],
       company_status: ["active", "suspended", "trial", "cancelled"],
+      contact_channel_status: [
+        "OPTED_IN",
+        "OPTED_OUT",
+        "PENDING",
+        "BOUNCED",
+        "SPAM_REPORT",
+      ],
       conversation_status: ["open", "pending", "closed", "archived"],
       invoice_status: ["draft", "issued", "paid", "overdue", "cancelled"],
       message_channel: ["sms", "whatsapp"],
