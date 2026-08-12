@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageStatus } from "@/integrations/supabase/types";
+import { Database } from "@/integrations/supabase/types";
+type MessageStatus = Database['public']['Enums']['message_status'];
 
 /**
  * Fetch all conversations for the current company.
