@@ -27,3 +27,28 @@ export const upsertContact = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return result;
   });
+
+export const exportContacts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await (context.supabase as any)
+      .from("contacts")
+      .select("first_name, last_name, phone, email, tags")
+      .eq("company_id", CNM_COMPANY_ID);
+    
+    if (error) throw new Error(error.message);
+    
+    const csv = [
+      ["Nombre", "Apellido", "Telefono", "Email", "Etiquetas"].join(","),
+      ...data.map((r: any) => [
+        r.first_name,
+        r.last_name,
+        r.phone,
+        r.email,
+        (r.tags || []).join(";")
+      ].join(","))
+    ].join("\n");
+
+    return csv;
+  });
+

@@ -10,18 +10,37 @@ import { ContactListManager } from "./ContactListManager";
 import { Badge } from "@/components/ui/badge";
 import { ContactFormDialog } from "./ContactFormDialog";
 import { CSVImporter } from "./CSVImporter";
+import { useServerFn } from "@tanstack/react-start";
+import { exportContacts } from "@/lib/contacts.functions";
+import { toast } from "sonner";
 
 
 
 export function ContactCenterHub() {
-  return (
+  const exportFn = useServerFn(exportContacts);
+
+  const handleExport = async () => {
+    try {
+      const csv = await exportFn();
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `contactos-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      toast.success("Exportación iniciada");
+    } catch {
+      toast.error("Error al exportar contactos");
+    }
+  };
+
     <div className="space-y-6">
       <PageHeader
         title="Centro de Contactos"
         description="Gestión centralizada de identidad y preferencias multicanal."
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="mr-2 h-4 w-4" />
               Exportar
             </Button>
