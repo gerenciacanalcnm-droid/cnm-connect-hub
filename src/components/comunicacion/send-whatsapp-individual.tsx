@@ -36,6 +36,8 @@ import { formatCurrency } from "@/lib/format";
 import { useWhatsAppAccounts, useSendWhatsAppIndividual, useSendWhatsAppBulk, useWhatsAppTemplates, useSendWhatsAppTemplate, useCreateWhatsAppSchedule } from "@/hooks/use-whatsapp";
 import { useContacts } from "@/hooks/use-contacts";
 import { useContactGroups } from "@/hooks/use-platform";
+import { supabase } from "@/integrations/supabase/client";
+
 
 type SendMode = "individual" | "bulk" | "schedule";
 type MessageType = "text" | "template";
@@ -46,8 +48,11 @@ export function SendWhatsAppIndividual() {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [templateVariables, setTemplateVariables] = useState<Record<string, string>>({});
   
+  const [limitError, setLimitError] = useState<string | null>(null);
+  
   const [toManual, setToManual] = useState("");
   const [msg, setMsg] = useState("");
+
   
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
@@ -171,13 +176,35 @@ export function SendWhatsAppIndividual() {
   const isInsufficient = balance < totalCost;
 
   const handleSend = async () => {
+    setLimitError(null);
     if (!connectedAccount) return toast.error("Conecta primero una cuenta de WhatsApp Business.");
+    
+    // Check limits via server function before sending
+    try {
+      const { checkWhatsAppLimits } = await import("@/lib/whatsapp-commercial.functions");
+      const check = await checkWhatsAppLimits({ data: { companyId: connectedAccount.companyId } }) as any;
+
+
+      if (check && !check.allowed) {
+        const msg = "Has alcanzado el límite de mensajes configurado para tu empresa";
+        setLimitError(msg);
+        return toast.error(msg, {
+          description: `Razón: ${check.reason} (${check.current}/${check.limit})`
+        });
+      }
+    } catch (e: any) {
+      console.error("Limit check failed:", e);
+      // Fallback: allow sending if RPC fails but log it
+    }
+
+
     if (stats.valid === 0) return toast.error("Sin destinatarios válidos.");
     if (isInsufficient) {
       return toast.error(
         `Saldo insuficiente. Disponible: ${formatCurrency(balance)}, Requerido: ${formatCurrency(totalCost)}, Faltante: ${formatCurrency(totalCost - balance)}`
       );
     }
+
 
     if (messageType === "text" && !msg.trim()) return toast.error("El mensaje no puede estar vacío.");
     if (messageType === "template" && !selectedTemplateId) return toast.error("Selecciona una plantilla.");
@@ -303,6 +330,17 @@ export function SendWhatsAppIndividual() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {limitError && (
+              <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Límite Alcanzado</AlertTitle>
+                <AlertDescription className="text-xs">
+                  {limitError}
+                </AlertDescription>
+              </Alert>
+            )}
+
+
             {mode === "schedule" && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-emerald-50/30 rounded-lg border border-emerald-100">
                 <div className="space-y-2">

@@ -120,6 +120,14 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     try {
+      // 0. Security: Check commercial limits
+      const { checkWhatsAppLimits } = await import("./whatsapp-commercial.functions");
+      const limitCheck = await checkWhatsAppLimits({ 
+        data: { companyId: CNM_COMPANY_ID } // We'll resolve real company_id below
+      }) as any;
+      
+      // We'll perform the real check after resolving real companyId
+
       // 0. Autenticación y Empresa
       const { data: membership, error: memErr } = await context.supabase
         .from("company_members")
@@ -135,6 +143,16 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
 
       const companyId = membership?.company_id || CNM_COMPANY_ID;
       if (!companyId) throw new Error("AUTH_USER_ERROR: No se pudo determinar el company_id");
+
+      // Now verify limits with the real companyId
+      const realLimitCheck = await (await import("./whatsapp-commercial.functions")).checkWhatsAppLimits({
+        data: { companyId }
+      }) as any;
+
+      if (realLimitCheck && !realLimitCheck.allowed) {
+        throw new Error(`COMMERCIAL_LIMIT_EXCEEDED: Has alcanzado el límite de mensajes (${realLimitCheck.reason}).`);
+      }
+
 
       // 1. Obtener credenciales de la cuenta
       const { data: account, error: accErr } = await context.supabase
@@ -303,7 +321,9 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
             template_id: data.templateId,
             direction: "outbound",
             status: "sent",
+            consumption_type: "individual",
             external_id: wamid,
+
             metadata: { ...metaResult, variables: data.variables },
             cost: 250
           } as never);
@@ -382,7 +402,18 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
     }
 
     try {
+      // 0. Check limits
+      const { checkWhatsAppLimits } = await import("./whatsapp-commercial.functions");
+      const limitCheck = await checkWhatsAppLimits({
+        data: { companyId: realCompanyId }
+      }) as any;
+
+      if (limitCheck && !limitCheck.allowed) {
+        throw new Error(`COMMERCIAL_LIMIT_EXCEEDED: Límite alcanzado (${limitCheck.reason}).`);
+      }
+
       await trackServiceUsage({
+
         data: {
           company_id: realCompanyId,
           channel: "whatsapp",
@@ -463,7 +494,9 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
             template_id: templateId,
             direction: "outbound",
             status: isOk ? "sent" : "failed",
+            consumption_type: "bulk",
             external_id: metaResult.messages?.[0]?.id,
+
             error_code: isOk ? null : metaResult.error?.code?.toString(),
             metadata: { batch_id: batchId, ...metaResult, variables },
             cost: isOk ? 250 : 0, // Costo real si fue enviado

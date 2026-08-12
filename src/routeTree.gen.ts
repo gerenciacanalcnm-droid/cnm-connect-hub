@@ -62,6 +62,7 @@ import { Route as AdminAdminConfigApiRouteImport } from './routes/_admin.admin.c
 import { Route as AdminAdminCommunicationRouteImport } from './routes/_admin.admin.communication'
 import { Route as AdminAdminAuditoriaRouteImport } from './routes/_admin.admin.auditoria'
 import { Route as ApiPublicWebhooksWompiRouteImport } from './routes/api/public/webhooks/wompi'
+import { Route as AdminAdminEmpresasCompanyIdWhatsappRouteImport } from './routes/_admin.admin.empresas.$companyId.whatsapp'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -330,6 +331,12 @@ const ApiPublicWebhooksWompiRoute = ApiPublicWebhooksWompiRouteImport.update({
   path: '/api/public/webhooks/wompi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAdminEmpresasCompanyIdWhatsappRoute =
+  AdminAdminEmpresasCompanyIdWhatsappRouteImport.update({
+    id: '/$companyId/whatsapp',
+    path: '/$companyId/whatsapp',
+    getParentRoute: () => AdminAdminEmpresasRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -359,7 +366,7 @@ export interface FileRoutesByFullPath {
   '/admin/config-sms': typeof AdminAdminConfigSmsRoute
   '/admin/config-whatsapp': typeof AdminAdminConfigWhatsappRoute
   '/admin/dashboard': typeof AdminAdminDashboardRoute
-  '/admin/empresas': typeof AdminAdminEmpresasRoute
+  '/admin/empresas': typeof AdminAdminEmpresasRouteWithChildren
   '/admin/feature-flags': typeof AdminAdminFeatureFlagsRoute
   '/admin/historial-comercial': typeof AdminAdminHistorialComercialRoute
   '/admin/integraciones': typeof AdminAdminIntegracionesRoute
@@ -382,6 +389,7 @@ export interface FileRoutesByFullPath {
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
+  '/admin/empresas/$companyId/whatsapp': typeof AdminAdminEmpresasCompanyIdWhatsappRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -411,7 +419,7 @@ export interface FileRoutesByTo {
   '/admin/config-sms': typeof AdminAdminConfigSmsRoute
   '/admin/config-whatsapp': typeof AdminAdminConfigWhatsappRoute
   '/admin/dashboard': typeof AdminAdminDashboardRoute
-  '/admin/empresas': typeof AdminAdminEmpresasRoute
+  '/admin/empresas': typeof AdminAdminEmpresasRouteWithChildren
   '/admin/feature-flags': typeof AdminAdminFeatureFlagsRoute
   '/admin/historial-comercial': typeof AdminAdminHistorialComercialRoute
   '/admin/integraciones': typeof AdminAdminIntegracionesRoute
@@ -434,6 +442,7 @@ export interface FileRoutesByTo {
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
+  '/admin/empresas/$companyId/whatsapp': typeof AdminAdminEmpresasCompanyIdWhatsappRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -467,7 +476,7 @@ export interface FileRoutesById {
   '/_admin/admin/config-sms': typeof AdminAdminConfigSmsRoute
   '/_admin/admin/config-whatsapp': typeof AdminAdminConfigWhatsappRoute
   '/_admin/admin/dashboard': typeof AdminAdminDashboardRoute
-  '/_admin/admin/empresas': typeof AdminAdminEmpresasRoute
+  '/_admin/admin/empresas': typeof AdminAdminEmpresasRouteWithChildren
   '/_admin/admin/feature-flags': typeof AdminAdminFeatureFlagsRoute
   '/_admin/admin/historial-comercial': typeof AdminAdminHistorialComercialRoute
   '/_admin/admin/integraciones': typeof AdminAdminIntegracionesRoute
@@ -490,6 +499,7 @@ export interface FileRoutesById {
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
+  '/_admin/admin/empresas/$companyId/whatsapp': typeof AdminAdminEmpresasCompanyIdWhatsappRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -544,6 +554,7 @@ export interface FileRouteTypes {
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
     | '/api/public/webhooks/wompi'
+    | '/admin/empresas/$companyId/whatsapp'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -596,6 +607,7 @@ export interface FileRouteTypes {
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
     | '/api/public/webhooks/wompi'
+    | '/admin/empresas/$companyId/whatsapp'
   id:
     | '__root__'
     | '/'
@@ -651,6 +663,7 @@ export interface FileRouteTypes {
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
     | '/api/public/webhooks/wompi'
+    | '/_admin/admin/empresas/$companyId/whatsapp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1036,8 +1049,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksWompiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_admin/admin/empresas/$companyId/whatsapp': {
+      id: '/_admin/admin/empresas/$companyId/whatsapp'
+      path: '/$companyId/whatsapp'
+      fullPath: '/admin/empresas/$companyId/whatsapp'
+      preLoaderRoute: typeof AdminAdminEmpresasCompanyIdWhatsappRouteImport
+      parentRoute: typeof AdminAdminEmpresasRoute
+    }
   }
 }
+
+interface AdminAdminEmpresasRouteChildren {
+  AdminAdminEmpresasCompanyIdWhatsappRoute: typeof AdminAdminEmpresasCompanyIdWhatsappRoute
+}
+
+const AdminAdminEmpresasRouteChildren: AdminAdminEmpresasRouteChildren = {
+  AdminAdminEmpresasCompanyIdWhatsappRoute:
+    AdminAdminEmpresasCompanyIdWhatsappRoute,
+}
+
+const AdminAdminEmpresasRouteWithChildren =
+  AdminAdminEmpresasRoute._addFileChildren(AdminAdminEmpresasRouteChildren)
 
 interface AdminRouteChildren {
   AdminAdminAuditoriaRoute: typeof AdminAdminAuditoriaRoute
@@ -1048,7 +1080,7 @@ interface AdminRouteChildren {
   AdminAdminConfigSmsRoute: typeof AdminAdminConfigSmsRoute
   AdminAdminConfigWhatsappRoute: typeof AdminAdminConfigWhatsappRoute
   AdminAdminDashboardRoute: typeof AdminAdminDashboardRoute
-  AdminAdminEmpresasRoute: typeof AdminAdminEmpresasRoute
+  AdminAdminEmpresasRoute: typeof AdminAdminEmpresasRouteWithChildren
   AdminAdminFeatureFlagsRoute: typeof AdminAdminFeatureFlagsRoute
   AdminAdminHistorialComercialRoute: typeof AdminAdminHistorialComercialRoute
   AdminAdminIntegracionesRoute: typeof AdminAdminIntegracionesRoute
@@ -1078,7 +1110,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAdminConfigSmsRoute: AdminAdminConfigSmsRoute,
   AdminAdminConfigWhatsappRoute: AdminAdminConfigWhatsappRoute,
   AdminAdminDashboardRoute: AdminAdminDashboardRoute,
-  AdminAdminEmpresasRoute: AdminAdminEmpresasRoute,
+  AdminAdminEmpresasRoute: AdminAdminEmpresasRouteWithChildren,
   AdminAdminFeatureFlagsRoute: AdminAdminFeatureFlagsRoute,
   AdminAdminHistorialComercialRoute: AdminAdminHistorialComercialRoute,
   AdminAdminIntegracionesRoute: AdminAdminIntegracionesRoute,
@@ -1176,13 +1208,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
