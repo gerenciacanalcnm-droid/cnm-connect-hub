@@ -89,15 +89,12 @@ export function WhatsAppTemplates() {
     },
     onError: (err: any) => {
       // El error ya viene con el formato detallado desde el server function
-      toast.error(
-        <div className="flex flex-col gap-1 max-w-[400px]">
-          <span className="font-bold text-red-600">Error de Meta Cloud API</span>
-          <pre className="text-[10px] bg-slate-50 p-2 rounded border border-slate-200 overflow-x-auto whitespace-pre-wrap">
-            {err.message}
-          </pre>
-        </div>,
-        { duration: 8000 }
-      );
+      // Para evitar problemas de compilación JSX en algunos entornos de transformación,
+      // nos aseguramos de que el mensaje sea procesado correctamente
+      toast.error(err.message, { 
+        duration: 10000,
+        description: "Error detallado de Meta Cloud API" 
+      });
     }
   });
 
