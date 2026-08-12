@@ -141,11 +141,20 @@ export const listContactLists = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await (context.supabase as any)
       .from("contact_lists")
-      .select("*")
+      .select(`
+        *,
+        member_count:contact_list_members(count)
+      `)
       .eq("company_id", CNM_COMPANY_ID);
+    
     if (error) throw new Error(error.message);
-    return data ?? [];
+    
+    return (data ?? []).map((list: any) => ({
+      ...list,
+      contact_count: list.member_count?.[0]?.count ?? 0
+    }));
   });
+
 
 export const upsertContactList = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

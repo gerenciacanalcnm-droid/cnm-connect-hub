@@ -115,7 +115,7 @@ export function ContactListManager() {
                   <Badge variant="secondary" className="text-[10px]">Omnicanal</Badge>
                   <Badge variant="outline" className="text-[10px]">Activa</Badge>
                 </div>
-                <span className="text-muted-foreground font-medium">0 contactos</span>
+                <span className="text-muted-foreground font-medium">{list.contact_count ?? 0} contactos</span>
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <Button variant="outline" size="sm" className="w-full text-xs">
