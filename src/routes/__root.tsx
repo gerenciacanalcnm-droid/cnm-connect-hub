@@ -42,7 +42,12 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+  console.error("Root Error Boundary caught:", error);
+  if (error instanceof Error) {
+    console.error("Error Name:", error.name);
+    console.error("Error Message:", error.message);
+    console.error("Error Stack:", error.stack);
+  }
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
@@ -52,7 +57,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Esta página no se cargó correctamente
+          El crash ocurre exactamente cuando ________
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Ha ocurrido un error inesperado. Intenta refrescar o vuelve al inicio.
