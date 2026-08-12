@@ -50,16 +50,13 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
   });
 
   const handleExport = async () => {
-    console.log("[EXPORT_LIST] CLICK", { list_id: list.id, list_name: list.name });
     try {
       const csv = await exportFn({ data: { list_id: list.id } });
       
       if (!csv || typeof csv !== 'string') {
-        console.error("[EXPORT_LIST] RESPONSE_ERROR", typeof csv, csv);
         throw new Error(`Formato de CSV inválido (recibido: ${typeof csv})`);
       }
 
-      console.log("[EXPORT_LIST] DOWNLOAD_START", csv.length);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -73,7 +70,6 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
       setTimeout(() => {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        console.log("[EXPORT_LIST] DOWNLOAD_SUCCESS");
       }, 100);
       
       toast.success("Exportación iniciada");
