@@ -82,7 +82,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   await supabaseAdmin
                     .from('whatsapp_campaign_results')
                     .update({ 
-                      status: newStatus.toLowerCase(),
+                      status: newStatus.toLowerCase() as any,
                       updated_at: new Date().toISOString()
                     })
                     .eq('id', campaignResult.id);
