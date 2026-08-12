@@ -49,6 +49,15 @@ export function WhatsAppTemplates() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [mediaId, setMediaId] = useState<string | null>(null);
+  const [headerHandle, setHeaderHandle] = useState<string | null>(null);
+  const [uploadDiagnostic, setUploadDiagnostic] = useState<{
+    selected: boolean;
+    preview: boolean;
+    upload: boolean | null;
+    handle: boolean | null;
+    error: string | null;
+  }>({ selected: false, preview: false, upload: null, handle: null, error: null });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Cargar plantillas
@@ -130,6 +139,16 @@ export function WhatsAppTemplates() {
       setButtons(editingTemplate.buttons || []);
       
       const meta = editingTemplate.metadata || {};
+      setMediaId(meta.media_id || null);
+      setHeaderHandle(meta.header_handle || null);
+      setLocalPreviewUrl(null);
+      setUploadDiagnostic({
+        selected: !!meta.header_handle,
+        preview: false,
+        upload: meta.header_handle ? true : null,
+        handle: meta.header_handle ? true : null,
+        error: null,
+      });
       if (meta.header_type) {
         setHeaderType(meta.header_type);
       } else if (editingTemplate.header) {
@@ -145,6 +164,9 @@ export function WhatsAppTemplates() {
       setHeaderType("NONE");
       setHeaderText("");
       setLocalPreviewUrl(null);
+      setMediaId(null);
+      setHeaderHandle(null);
+      setUploadDiagnostic({ selected: false, preview: false, upload: null, handle: null, error: null });
       setFooter("");
       setButtons([]);
     }
@@ -155,35 +177,47 @@ export function WhatsAppTemplates() {
     if (!file || !account) return;
 
     setIsUploading(true);
-    try {
-      // 1. Crear preview local inmediata
-      const objectUrl = URL.createObjectURL(file);
-      setLocalPreviewUrl(objectUrl);
+    setUploadDiagnostic({ selected: true, preview: false, upload: null, handle: null, error: null });
 
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64 = reader.result as string;
-        const res = await uploadWhatsAppMedia({
-          data: {
-            fileBase64: base64,
-            fileName: file.name,
-            fileType: file.type,
-            companyId: account.company_id
-          }
-        });
-        
-        setHeaderType(res.type as any);
-        setHeaderText(res.url); // En un flujo real esto sería el handle/ID
-        toast.success("Archivo procesado correctamente");
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Error al cargar el archivo");
+    // 1. Preview local inmediata (SOLO para la UI, nunca se envía a Meta)
+    const objectUrl = URL.createObjectURL(file);
+    setLocalPreviewUrl(objectUrl);
+    setHeaderType(file.type.startsWith("video") ? "VIDEO" : file.type.startsWith("image") ? "IMAGE" : "DOCUMENT");
+    setUploadDiagnostic((d) => ({ ...d, preview: true }));
+
+    try {
+      const base64: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
+        reader.readAsDataURL(file);
+      });
+
+      const res = await uploadWhatsAppMedia({
+        data: {
+          fileBase64: base64,
+          fileName: file.name,
+          fileType: file.type,
+          accountId: account.id,
+        },
+      });
+
+      setMediaId(res.mediaId);
+      setHeaderHandle(res.headerHandle);
+      setHeaderType(res.type as any);
+      setUploadDiagnostic((d) => ({ ...d, upload: true, handle: !!res.headerHandle }));
+      toast.success("Imagen subida a Meta correctamente");
+    } catch (error: any) {
+      setMediaId(null);
+      setHeaderHandle(null);
+      const msg = String(error?.message || "Error al subir el archivo a Meta");
+      setUploadDiagnostic((d) => ({ ...d, upload: false, handle: false, error: msg }));
+      toast.error(msg, { duration: 10000 });
     } finally {
       setIsUploading(false);
     }
   };
+
 
   const renderPreviewBody = () => {
     if (!body) return "Hola mundo";
@@ -337,8 +371,8 @@ export function WhatsAppTemplates() {
 
             {headerType === "IMAGE" && (
               <div className="w-full aspect-video bg-slate-200 rounded-md flex items-center justify-center overflow-hidden border border-slate-300">
-                {(localPreviewUrl || headerText) ? (
-                  <img src={localPreviewUrl || headerText} alt="Preview" className="w-full h-full object-cover" />
+                {localPreviewUrl ? (
+                  <img src={localPreviewUrl} alt="Vista previa del encabezado" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-[10px] text-slate-500 font-bold uppercase">Vista previa de imagen</span>
                 )}
@@ -640,6 +674,31 @@ export function WhatsAppTemplates() {
         )}
 
         <div className="mt-auto pt-6 border-t space-y-3">
+          {uploadDiagnostic.selected && (
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-3 space-y-1 text-[11px] font-mono">
+              <div className="flex justify-between"><span className="text-slate-500">Imagen seleccionada</span><span className="text-emerald-600 font-bold">OK</span></div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Preview</span>
+                <span className={uploadDiagnostic.preview ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>{uploadDiagnostic.preview ? "OK" : "ERROR"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Upload Meta</span>
+                <span className={uploadDiagnostic.upload === null ? "text-slate-400" : uploadDiagnostic.upload ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>
+                  {uploadDiagnostic.upload === null ? "..." : uploadDiagnostic.upload ? "OK" : "ERROR"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Header Handle</span>
+                <span className={uploadDiagnostic.handle === null ? "text-slate-400" : uploadDiagnostic.handle ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>
+                  {uploadDiagnostic.handle === null ? "..." : uploadDiagnostic.handle ? "OK" : "ERROR"}
+                </span>
+              </div>
+              {uploadDiagnostic.error && (
+                <pre className="whitespace-pre-wrap text-[10px] text-red-600 pt-1 border-t border-slate-200">{uploadDiagnostic.error}</pre>
+              )}
+            </div>
+          )}
+
           <Button 
             variant="outline"
             className="w-full text-slate-600"
@@ -651,7 +710,7 @@ export function WhatsAppTemplates() {
                   accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
                   header: headerType === 'TEXT' ? headerText : headerType,
-                  metadata: { header_type: headerType, header_text: headerText, status: 'DRAFT', header_handle: headerText }
+                  metadata: { header_type: headerType, header_text: headerText, status: 'DRAFT', media_id: mediaId, header_handle: headerHandle }
                 } 
               });
             }}
@@ -672,15 +731,19 @@ export function WhatsAppTemplates() {
           
           <Button 
             className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" 
-            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending || (headerType !== 'NONE' && headerType !== 'TEXT' && !headerText)}
+            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending || isUploading || (headerType !== 'NONE' && headerType !== 'TEXT' && !headerHandle)}
             onClick={async () => {
+              if (headerType !== 'NONE' && headerType !== 'TEXT' && !headerHandle) {
+                toast.error("Falta el header_handle de Meta. Carga la imagen antes de enviar.");
+                return;
+              }
               const saved: any = await saveMutation.mutateAsync({ 
                 data: { 
                   id: editingTemplate?.id,
                   accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
                   header: headerType === 'TEXT' ? headerText : headerType,
-                  metadata: { header_type: headerType, header_text: headerText, header_handle: headerText }
+                  metadata: { header_type: headerType, header_text: headerText, media_id: mediaId, header_handle: headerHandle }
                 } 
               });
               
@@ -692,6 +755,7 @@ export function WhatsAppTemplates() {
             <Send className="h-4 w-4 mr-2" />
             Enviar a Meta para aprobación
           </Button>
+
           
           <Button variant="ghost" className="w-full text-xs text-slate-400" onClick={() => setIsEditorOpen(false)}>
             Cancelar
