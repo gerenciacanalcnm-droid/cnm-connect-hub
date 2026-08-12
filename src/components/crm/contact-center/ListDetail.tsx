@@ -50,18 +50,16 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
   });
 
   const handleExport = async () => {
-    console.log("[EXPORT_LIST_CLICK] list_id:", list.id, "list_name:", list.name);
+    console.log("[EXPORT_LIST] CLICK", { list_id: list.id, list_name: list.name });
     try {
       const csv = await exportFn({ data: { list_id: list.id } });
       
-      console.log("[EXPORT_LIST_RESULT_TYPE]", typeof csv);
-      
       if (!csv || typeof csv !== 'string') {
-        console.error("[EXPORT_LIST_RESPONSE_ERROR] Invalid CSV format received:", typeof csv, csv);
+        console.error("[EXPORT_LIST] RESPONSE_ERROR", typeof csv, csv);
         throw new Error(`Formato de CSV inválido (recibido: ${typeof csv})`);
       }
 
-      console.log("[EXPORT_LIST_BLOB_START] Size:", csv.length);
+      console.log("[EXPORT_LIST] DOWNLOAD_START", csv.length);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -70,12 +68,17 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
       a.download = `${list.name.toLowerCase().replace(/\s+/g, '_')}.csv`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      
+      // Delay cleanup to ensure browser handles the download trigger
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        console.log("[EXPORT_LIST] DOWNLOAD_SUCCESS");
+      }, 100);
       
       toast.success("Exportación iniciada");
     } catch (err: any) {
-      console.error("[EXPORT_LIST_FLOW_ERROR]", err);
+      console.error("[EXPORT_LIST] FLOW_ERROR", err);
       toast.error(`Error al exportar lista: ${err.message || "Error desconocido"}`);
     }
   };
