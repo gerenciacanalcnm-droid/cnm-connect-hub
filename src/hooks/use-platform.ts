@@ -6,9 +6,9 @@ import {
   listRolePermissions,
   listCompanies,
   getCurrentCompany,
-  listContactGroups,
-  upsertContactGroup,
-  deleteContactGroup,
+  listContactLists,
+  upsertContactList,
+  deleteContactList,
 } from "@/lib/platform.functions";
 
 export function useFeatureFlags() {
@@ -39,22 +39,22 @@ export function useCurrentCompany() {
   });
 }
 
-export function useContactGroups() {
+export function useContactLists() {
   return useQuery({
-    queryKey: ["contact-groups"],
-    queryFn: () => listContactGroups(),
+    queryKey: ["contact-lists"],
+    queryFn: () => listContactLists(),
   });
 }
 
-export function useContactGroupMutations() {
+export function useContactListMutations() {
   const qc = useQueryClient();
   const upsert = useMutation({
-    mutationFn: (input: any) => upsertContactGroup({ data: input }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["contact-groups"] }),
+    mutationFn: (input: any) => upsertContactList({ data: input }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["contact-lists"] }),
   });
   const remove = useMutation({
-    mutationFn: (id: string) => deleteContactGroup({ data: { id } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["contact-groups"] }),
+    mutationFn: (id: string) => deleteContactList({ data: { id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["contact-lists"] }),
   });
   return { upsert, remove };
 }

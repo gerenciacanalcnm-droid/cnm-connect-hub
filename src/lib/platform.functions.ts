@@ -121,23 +121,23 @@ export const deleteContact = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const listContactGroups = createServerFn({ method: "GET" })
+export const listContactLists = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await (context.supabase as any)
-      .from("contact_groups")
+      .from("contact_lists")
       .select("*")
       .eq("company_id", CNM_COMPANY_ID);
     if (error) throw new Error(error.message);
     return data ?? [];
   });
 
-export const upsertContactGroup = createServerFn({ method: "POST" })
+export const upsertContactList = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ id: z.string().uuid().optional(), name: z.string() }).parse(v))
   .handler(async ({ data, context }) => {
     const { data: result, error } = await (context.supabase as any)
-      .from("contact_groups")
+      .from("contact_lists")
       .upsert({ ...data, company_id: CNM_COMPANY_ID })
       .select()
       .single();
@@ -145,12 +145,12 @@ export const upsertContactGroup = createServerFn({ method: "POST" })
     return result;
   });
 
-export const deleteContactGroup = createServerFn({ method: "POST" })
+export const deleteContactList = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     const { error } = await (context.supabase as any)
-      .from("contact_groups")
+      .from("contact_lists")
       .delete()
       .eq("id", data.id)
       .eq("company_id", CNM_COMPANY_ID);

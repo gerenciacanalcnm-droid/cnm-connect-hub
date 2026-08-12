@@ -29,13 +29,14 @@ export const syncContactToWhatsApp = createServerFn({ method: "POST" })
       .upsert({
         company_id: data.companyId,
         phone: data.phone,
+        normalized_phone: whatsappPhone,
         first_name: data.firstName,
         last_name: data.lastName,
         whatsapp_phone: whatsappPhone,
         status: "active",
         updated_at: new Date().toISOString(),
       }, {
-        onConflict: "company_id, phone",
+        onConflict: "company_id, normalized_phone",
       })
       .select()
       .single();
@@ -55,7 +56,7 @@ export const getWhatsAppContacts = createServerFn({ method: "GET" })
       .from("contacts")
       .select("*")
       .eq("company_id", data.companyId)
-      .not("whatsapp_phone", "is", null)
+      .not("normalized_phone", "is", null)
       .order("last_conversation_at", { ascending: false, nullsFirst: false });
 
     if (error) throw new Error(error.message);
