@@ -77,21 +77,21 @@ export function WhatsAppTemplates() {
       queryClient.invalidateQueries({ queryKey: ['whatsapp_templates'] });
       toast.success("Borrador guardado localmente");
     },
-    onError: (err: any) => toast.error(err.message)
+    onError: (err: any) => toast.error(String(err.message))
   });
 
   const sendToMetaMutation = useMutation({
     mutationFn: submitWhatsAppTemplateToMeta,
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['whatsapp_templates'] });
-      toast.success(`Plantilla enviada a Meta. Estado: ${res.status}`);
+      toast.success(`Plantilla enviada a Meta. Estado: ${String(res.status)}`);
       setIsEditorOpen(false);
     },
     onError: (err: any) => {
       // El error ya viene con el formato detallado desde el server function
       // Para evitar problemas de compilación JSX en algunos entornos de transformación,
       // nos aseguramos de que el mensaje sea procesado correctamente
-      toast.error(err.message, { 
+      toast.error(String(err.message), { 
         duration: 10000,
         description: "Error detallado de Meta Cloud API" 
       });
@@ -106,12 +106,12 @@ export function WhatsAppTemplates() {
       const hasErrors = res.errors > 0;
       const details = res.details || [];
       
-      toast(`Sincronización completada: ${res.updated} actualizadas, ${res.errors} errores`, {
+      toast(String(`Sincronización completada: ${res.updated} actualizadas, ${res.errors} errores`), {
         duration: hasErrors ? 10000 : 4000,
         description: hasErrors ? "Revisa el detalle en los logs de la cuenta" : undefined
       });
     },
-    onError: (err: any) => toast.error(err.message)
+    onError: (err: any) => toast.error(String(err.message))
   });
 
   useEffect(() => {
