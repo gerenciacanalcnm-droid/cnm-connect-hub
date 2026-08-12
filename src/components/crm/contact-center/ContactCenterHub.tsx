@@ -98,9 +98,9 @@ export function ContactCenterHub() {
         </TabsContent>
 
         <TabsContent value="lists" className="mt-0">
-           <Card>
-            <CardContent className="py-10 text-center text-muted-foreground">
-              Gestor de Listas Centralizado en desarrollo
+           <Card className="border-none shadow-none bg-transparent">
+            <CardContent className="p-0">
+              <ContactListManager />
             </CardContent>
           </Card>
         </TabsContent>
