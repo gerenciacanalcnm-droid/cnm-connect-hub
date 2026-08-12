@@ -14,6 +14,7 @@ import { TagFormDialog } from "./TagFormDialog";
 import { useServerFn } from "@tanstack/react-start";
 import { exportContacts } from "@/lib/contacts.functions";
 import { listContactTags, deleteContactTag } from "@/lib/tags.functions";
+import { getContactCenterStats } from "@/lib/platform.functions";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -24,6 +25,7 @@ export function ContactCenterHub() {
   const exportFn = useServerFn(exportContacts);
   const getTagsFn = useServerFn(listContactTags);
   const deleteTagFn = useServerFn(deleteContactTag);
+  const statsFn = useServerFn(getContactCenterStats);
 
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<any>(null);
@@ -31,6 +33,11 @@ export function ContactCenterHub() {
   const { data: tags, isLoading: tagsLoading } = useQuery({
     queryKey: ["contact-tags"],
     queryFn: () => getTagsFn(),
+  });
+
+  const { data: stats, isLoading: statsLoading, isError: statsError } = useQuery({
+    queryKey: ["contact-center-stats"],
+    queryFn: () => statsFn(),
   });
 
   const handleExport = async () => {
@@ -100,25 +107,31 @@ export function ContactCenterHub() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Contactos</CardTitle>
-            <CardDescription className="text-2xl font-bold text-foreground">0</CardDescription>
+            <CardDescription className="text-2xl font-bold text-foreground">
+              {statsLoading ? "…" : statsError ? "Error" : (stats?.totalContacts ?? 0)}
+            </CardDescription>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">WhatsApp Activos</CardTitle>
-            <CardDescription className="text-2xl font-bold text-foreground">0</CardDescription>
+            <CardDescription className="text-2xl font-bold text-foreground">
+              {statsLoading ? "…" : statsError ? "Error" : (stats?.whatsappActive ?? 0)}
+            </CardDescription>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">SMS Disponibles</CardTitle>
-            <CardDescription className="text-2xl font-bold text-foreground">0</CardDescription>
+            <CardDescription className="text-2xl font-bold text-muted-foreground">No disponible</CardDescription>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Opt-out Total</CardTitle>
-            <CardDescription className="text-2xl font-bold text-foreground text-destructive">0</CardDescription>
+            <CardDescription className="text-2xl font-bold text-destructive">
+              {statsLoading ? "…" : statsError ? "Error" : (stats?.optOutTotal ?? 0)}
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>

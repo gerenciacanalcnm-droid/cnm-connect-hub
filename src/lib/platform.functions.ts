@@ -136,6 +136,30 @@ export const deleteContact = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const getContactCenterStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase as any;
+
+    const base = () => sb.from("contacts").select("id", { count: "exact", head: true }).eq("company_id", CNM_COMPANY_ID);
+
+    const [totalRes, waRes, optOutRes] = await Promise.all([
+      base(),
+      base().not("whatsapp_phone", "is", null),
+      base().eq("opt_in", false),
+    ]);
+
+    if (totalRes.error) throw new Error(totalRes.error.message);
+    if (waRes.error) throw new Error(waRes.error.message);
+    if (optOutRes.error) throw new Error(optOutRes.error.message);
+
+    return {
+      totalContacts: totalRes.count ?? 0,
+      whatsappActive: waRes.count ?? 0,
+      optOutTotal: optOutRes.count ?? 0,
+    };
+  });
+
 export const listContactLists = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -146,10 +170,14 @@ export const listContactLists = createServerFn({ method: "GET" })
         member_count:contact_list_members(count)
       `)
       .eq("company_id", CNM_COMPANY_ID);
-    
+
+    // Error real de base de datos: se propaga (nunca se oculta con [])
     if (error) throw new Error(error.message);
-    
-    return (data ?? []).map((list: any) => ({
+
+    // Sin resultados: siempre array vacío, nunca null/undefined
+    if (!Array.isArray(data)) return [];
+
+    return data.map((list: any) => ({
       ...list,
       contact_count: list.member_count?.[0]?.count ?? 0
     }));
