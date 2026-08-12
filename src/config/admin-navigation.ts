@@ -70,7 +70,8 @@ export const adminNavigation: AdminNavSection[] = [
     items: [
       { title: "General", to: "/admin/config-general", icon: Settings },
       { title: "SMS", to: "/admin/config-sms", icon: Send },
-      { title: "WhatsApp", to: "/admin/config-whatsapp", icon: MessageCircle, badge: "Pronto" },
+      { title: "WhatsApp", to: "/admin/config-whatsapp", icon: MessageCircle },
+      { title: "Inventario WA", to: "/admin/whatsapp-inventory", icon: Server },
       { title: "CNM Nova", to: "/admin/config-nova", icon: Sparkles },
       { title: "API", to: "/admin/config-api", icon: Code2 },
     ],
