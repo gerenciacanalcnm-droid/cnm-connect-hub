@@ -538,7 +538,7 @@ export function SendWhatsAppIndividual() {
                           </SelectItem>
                         ))}
                         {templates.length === 0 && (
-                          <div className="p-2 text-xs text-muted-foreground italic">Saldo insuficiente para ejecutar esta campaña</div>
+                          <div className="p-2 text-xs text-muted-foreground italic">No hay plantillas aprobadas disponibles</div>
                         )}
                       </SelectContent>
                     </Select>
@@ -641,7 +641,7 @@ export function SendWhatsAppIndividual() {
               <Alert variant="destructive" className="py-2 px-3 bg-blue-50 border-blue-200">
                 <Info className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-xs text-blue-800 font-bold">
-                  Saldo insuficiente para ejecutar esta campaña
+                  Falta información para completar la plantilla
                 </AlertDescription>
               </Alert>
             )}
