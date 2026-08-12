@@ -156,12 +156,21 @@ export function WhatsAppCampaigns() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
+  const [monitoringCampaignId, setMonitoringCampaignId] = useState<string | null>(null);
   
   // Form State
   const [name, setName] = useState("");
   const [selectedAccountId, setSelectedAccountId] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [manualPhones, setManualPhones] = useState("");
+
+  // Hook into monitoring
+  useEffect(() => {
+    if (isValidating && createCampaign.data?.id) {
+       // Optional: Auto-close creation and open monitoring
+    }
+  }, [isValidating, createCampaign.data]);
+
   
   const approvedTemplates = useMemo(() => 
     allTemplates.filter((t: any) => t.status === 'APPROVED'),
