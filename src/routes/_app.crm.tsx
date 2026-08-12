@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_app/crm")({
       { name: "description", content: "Contactos, segmentos y pipeline de oportunidades." },
     ],
   }),
-  component: CrmPage,
+  component: ContactCenterPage,
 });
 
 function ContactCenterPage() {
