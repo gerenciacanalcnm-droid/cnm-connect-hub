@@ -126,7 +126,7 @@ export const sendWhatsAppReply = createServerFn({ method: "POST" })
         accountId: conv.account_id!,
         recipient: conv.contact_phone,
         body: data.body,
-        // We'll pass conversationId if the function supports it to link the message
+        // En la bandeja de entrada, el receptor ya está normalizado en la conversación
       }
     });
   });

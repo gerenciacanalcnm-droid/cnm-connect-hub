@@ -139,12 +139,15 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
 
               const companyId = account.company_id as string;
 
-              // 2. Identificar o crear contacto
+              const { normalizeWhatsAppPhone } = await import('@/lib/whatsapp-contacts.functions');
+              const normalizedPhone = normalizeWhatsAppPhone(from);
+
+              // 2. Identificar o crear contacto por normalized_phone (Identidad Central)
               let { data: contact } = await supabaseAdmin
                 .from('contacts')
                 .select('id')
                 .eq('company_id', companyId)
-                .eq('phone', from)
+                .eq('normalized_phone', normalizedPhone)
                 .maybeSingle();
               
               if (!contact) {
@@ -153,7 +156,8 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   .insert({
                     company_id: companyId,
                     phone: from,
-                    whatsapp_phone: from,
+                    normalized_phone: normalizedPhone,
+                    whatsapp_phone: normalizedPhone,
                     status: 'active',
                     preferred_channel: 'whatsapp'
                   })

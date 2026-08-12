@@ -103,7 +103,7 @@ export const NOVA_TOOL_IMPLS: Record<string, NovaToolImpl> = {
     async run({ supabase, companyId }) {
       const [groups, contacts] = await Promise.all([
         supabase
-          .from("contact_groups")
+          .from("contact_lists")
           .select("name, description")
           .eq("company_id", companyId)
           .limit(20),

@@ -38,7 +38,7 @@ import { sendBulkSms } from "@/lib/sms-bulk.functions";
 import { createSmsSchedule, listSmsSchedules, cancelSmsSchedule } from "@/lib/sms-schedule.functions";
 import { getCurrentCompany } from "@/lib/platform.functions";
 import { useContacts } from "@/hooks/use-contacts";
-import { useContactGroups, usePermissions } from "@/hooks/use-platform";
+import { useContactLists, usePermissions } from "@/hooks/use-platform";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -68,7 +68,7 @@ export function SendSms() {
   
   const queryClient = useQueryClient();
   const { data: contactsData } = useContacts({ pageSize: 200 });
-  const { data: groupsData } = useContactGroups();
+  const { data: groupsData } = useContactLists();
   const { data: walletsData } = useWallets();
   const { data: tiersData } = useRateTiers();
   const { data: companyData } = useServerFn(getCurrentCompany)({ data: undefined }) as any; // Using serverFn directly as hook might hydration mismatch if not handled

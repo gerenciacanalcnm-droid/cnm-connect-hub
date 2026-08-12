@@ -32,6 +32,8 @@ type Row = {
   first_name: string | null;
   last_name: string | null;
   phone: string;
+  normalized_phone?: string | null;
+  name?: string | null;
   email: string | null;
   tags: string[] | null;
   created_at: string;
@@ -50,6 +52,8 @@ function mapRow(r: Row): Contact {
     phone: r.phone,
     email: r.email ?? undefined,
     tags: r.tags ?? [],
+    normalizedPhone: r.normalized_phone ?? undefined,
+    name: r.name ?? undefined,
     createdAt: r.created_at,
     preferredChannel: (r.preferred_channel ?? "sms") as Contact["preferredChannel"],
     whatsappPhone: r.whatsapp_phone ?? undefined,
