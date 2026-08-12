@@ -2416,6 +2416,66 @@ export type Database = {
           },
         ]
       }
+      whatsapp_campaign_results: {
+        Row: {
+          campaign_id: string
+          contact_id: string | null
+          created_at: string | null
+          delivered_at: string | null
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          phone: string
+          read_at: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["message_status"]
+          wamid: string | null
+        }
+        Insert: {
+          campaign_id: string
+          contact_id?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          phone: string
+          read_at?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["message_status"]
+          wamid?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          contact_id?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          phone?: string
+          read_at?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["message_status"]
+          wamid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_campaign_results_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_campaign_results_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_campaigns: {
         Row: {
           account_id: string | null
