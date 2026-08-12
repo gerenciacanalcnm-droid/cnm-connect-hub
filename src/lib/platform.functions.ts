@@ -178,8 +178,7 @@ export const listListMembers = createServerFn({ method: "POST" })
         .select(`
           contact:contacts(*)
         `)
-        .eq("list_id", data.list_id)
-        .eq("company_id", CNM_COMPANY_ID);
+        .eq("list_id", data.list_id);
       
       if (error) {
         console.error("Error in listListMembers:", {
@@ -205,8 +204,7 @@ export const removeMemberFromList = createServerFn({ method: "POST" })
       .from("contact_list_members")
       .delete()
       .eq("list_id", data.list_id)
-      .eq("contact_id", data.contact_id)
-      .eq("company_id", CNM_COMPANY_ID);
+      .eq("contact_id", data.contact_id);
     
     if (error) throw new Error(error.message);
     return { success: true };
@@ -242,8 +240,7 @@ export const exportListCsv = createServerFn({ method: "POST" })
             status
           )
         `)
-        .eq("list_id", data.list_id)
-        .eq("company_id", CNM_COMPANY_ID);
+        .eq("list_id", data.list_id);
       
       if (error) {
         console.error("Error in exportListCsv:", {
