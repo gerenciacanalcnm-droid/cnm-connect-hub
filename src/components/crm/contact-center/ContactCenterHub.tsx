@@ -98,7 +98,7 @@ export function ContactCenterHub() {
                 <CardTitle className="text-xl font-bold">Identidades WhatsApp</CardTitle>
                 <CardDescription>Contactos con número normalizado y verificado para Meta Cloud API.</CardDescription>
               </div>
-              <Badge variant="nova" className="gap-1.5 px-3 py-1">
+              <Badge variant="outline" className="gap-1.5 px-3 py-1 bg-primary/5 text-primary border-primary/20">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Validación E.164 Activa
               </Badge>
