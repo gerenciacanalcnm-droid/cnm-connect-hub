@@ -68,12 +68,13 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { testSpecificWhatsAppConnection } from "@/lib/whatsapp-diagnostic.functions";
+import { testMetaConnection } from "@/lib/whatsapp-diagnostic.functions";
 
 export const Route = createFileRoute("/_admin/admin/whatsapp-inventory")({
   head: () => ({ meta: [{ title: "Inventario de Números WhatsApp — Super Admin" }] }),
   component: WhatsAppInventoryPage,
 });
+
 
 function WhatsAppInventoryPage() {
   const queryClient = useQueryClient();
