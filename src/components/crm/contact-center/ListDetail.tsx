@@ -190,6 +190,20 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
 
       {isLoading ? (
         <SkeletonTable rows={5} />
+      ) : error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            <p>No fue posible cargar los contactos de esta lista.</p>
+            <div className="mt-2 text-[10px] font-mono opacity-70">
+              <p>Función: listListMembers</p>
+              <p>ID de Lista: {list.id}</p>
+              <p>Tabla: contact_list_members</p>
+              <p>Error: {(error as Error)?.message || "Error desconocido"}</p>
+            </div>
+          </AlertDescription>
+        </Alert>
       ) : (
         <DataTable
           columns={columns}
