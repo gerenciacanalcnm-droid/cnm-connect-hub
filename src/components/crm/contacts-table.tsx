@@ -143,7 +143,7 @@ export function ContactsTable() {
       },
       {
         id: "actions",
-        header: "Acciones",
+        header: "Ver contacto",
         cell: ({ row }) => {
           const contact = row.original;
           return (
