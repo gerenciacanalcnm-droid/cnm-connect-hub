@@ -182,7 +182,7 @@ function WhatsAppInventoryPage() {
                           <span>ID: {n.phone_number_id || "—"}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{getStatusBadge(n.nova_status)}</TableCell>
+                      <TableCell>{getStatusBadge(n.nova_status || 'AVAILABLE')}</TableCell>
                       <TableCell>
                         {n.companies ? (
                           <div className="flex items-center gap-2">
