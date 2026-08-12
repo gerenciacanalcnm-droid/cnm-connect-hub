@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MessageSquare, MessageCircle, Mail, Inbox, Settings2, Send, FileText, Calendar, Smartphone } from "lucide-react";
+import { MessageSquare, MessageCircle, Mail, Inbox, Settings2, Send, FileText, Calendar, Smartphone, LayoutTemplate } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SendSms } from "@/components/comunicacion/send-sms";
 import { SmsHistory } from "@/components/comunicacion/sms-history";
 import { SendWhatsAppIndividual } from "@/components/comunicacion/send-whatsapp-individual";
 import { WhatsAppTemplates } from "@/components/comunicacion/whatsapp-templates";
+import { WhatsAppCampaigns } from "@/components/comunicacion/whatsapp-campaigns";
 import { WhatsAppSurveys } from "@/components/comunicacion/whatsapp-surveys";
 import { WhatsAppSchedules } from "@/components/comunicacion/whatsapp-schedules";
 import { EmailMarketing } from "@/components/comunicacion/email-marketing";
@@ -33,8 +34,6 @@ function ComunicacionPage() {
         description="Gestiona SMS, WhatsApp Business y Email desde un único centro omnicanal."
       />
 
-      {/* ChannelOverview removed to simplify UI as requested */}
-
       <Tabs defaultValue="enviar" className="w-full">
         <TabsList className="mb-6 flex overflow-x-auto h-auto w-full gap-1 p-1 bg-muted/50">
           <TabsTrigger value="enviar" className="gap-1.5 flex-1 min-w-[100px]">
@@ -45,6 +44,9 @@ function ComunicacionPage() {
           </TabsTrigger>
           <TabsTrigger value="whatsapp" className="gap-1.5 flex-1 min-w-[110px]">
             <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+          </TabsTrigger>
+          <TabsTrigger value="campanas" className="gap-1.5 flex-1 min-w-[110px]">
+            <LayoutTemplate className="h-3.5 w-3.5" /> Campañas WA
           </TabsTrigger>
           <TabsTrigger value="plantillas" className="gap-1.5 flex-1 min-w-[110px]">
             <FileText className="h-3.5 w-3.5" /> Plantillas WA
@@ -71,6 +73,9 @@ function ComunicacionPage() {
         </TabsContent>
         <TabsContent value="whatsapp">
           <SendWhatsAppIndividual />
+        </TabsContent>
+        <TabsContent value="campanas">
+          <WhatsAppCampaigns />
         </TabsContent>
         <TabsContent value="programacion-wa">
           <WhatsAppSchedules />

@@ -538,7 +538,7 @@ export function SendWhatsAppIndividual() {
                           </SelectItem>
                         ))}
                         {templates.length === 0 && (
-                          <div className="p-2 text-xs text-muted-foreground italic">Saldo insuficiente</div>
+                          <div className="p-2 text-xs text-muted-foreground italic">Saldo insuficiente para ejecutar esta campaña</div>
                         )}
                       </SelectContent>
                     </Select>
