@@ -215,7 +215,7 @@ export const exportListCsv = createServerFn({ method: "POST" })
   .inputValidator((v) => z.object({ list_id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     try {
-      console.log("[EXPORT_LIST_START] list_id:", data.list_id, "company_id:", CNM_COMPANY_ID);
+      console.log("[EXPORT_LIST] START", { list_id: data.list_id, company_id: CNM_COMPANY_ID });
       // Validate list ownership
       const { data: listExists, error: listError } = await (context.supabase as any)
         .from("contact_lists")
@@ -225,13 +225,14 @@ export const exportListCsv = createServerFn({ method: "POST" })
         .maybeSingle();
 
       if (listError) {
-        console.error("[EXPORT_LIST_OWNERSHIP_ERROR]", listError);
+        console.error("[EXPORT_LIST] OWNERSHIP_ERROR", listError);
         throw new Error(listError.message);
       }
       if (!listExists) {
-        console.error("[EXPORT_LIST_NOT_FOUND]");
+        console.error("[EXPORT_LIST] NOT_FOUND");
         throw new Error("La lista no existe o no pertenece a esta empresa.");
       }
+      console.log("[EXPORT_LIST] LIST_VALIDATED", listExists.name);
 
       const { data: members, error } = await (context.supabase as any)
         .from("contact_list_members")
@@ -250,17 +251,16 @@ export const exportListCsv = createServerFn({ method: "POST" })
         .eq("list_id", data.list_id);
       
       if (error) {
-        console.error("[EXPORT_LIST_QUERY_ERROR]", {
+        console.error("[EXPORT_LIST] QUERY_ERROR", {
           error,
           list_id: data.list_id,
-          company_id: CNM_COMPANY_ID,
-          table: "contact_list_members"
+          company_id: CNM_COMPANY_ID
         });
         throw new Error(`Error al exportar lista: ${error.message}`);
       }
 
       const rows = (members ?? []).map((m: any) => m.contact).filter(Boolean);
-      console.log("[EXPORT_LIST_CONTACTS] count:", rows.length);
+      console.log("[EXPORT_LIST] MEMBERS_FOUND", rows.length);
       
       if (!rows || rows.length === 0) {
         throw new Error("No hay contactos para exportar en esta lista.");
@@ -280,13 +280,14 @@ export const exportListCsv = createServerFn({ method: "POST" })
         ].join(","))
       ].join("\n");
 
-      console.log("[EXPORT_LIST_CSV_CREATED] rows:", rows.length, "bytes:", csv.length);
+      console.log("[EXPORT_LIST] CSV_CREATED", { rows: rows.length, bytes: csv.length });
       
       // Ensure we return a plain string and handle serialization safely
       if (typeof csv !== 'string') {
         throw new Error("El generador de CSV no devolvió una cadena de texto.");
       }
       
+      console.log("[EXPORT_LIST] RESPONSE_SENT");
       return csv;
     } catch (e: any) {
       console.error("Catch in exportListCsv:", e);
