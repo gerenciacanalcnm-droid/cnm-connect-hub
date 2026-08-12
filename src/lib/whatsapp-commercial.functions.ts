@@ -34,8 +34,8 @@ export const getCompanyWhatsAppProfile = createServerFn({ method: "GET" })
 
     if (accountsError) throw new Error(accountsError.message);
 
-    // 4. Fetch limits
-    const { data: limits, error: limitsError } = await context.supabase
+    // 4. Fetch limits (using casting to bypass initial type mismatch until types update)
+    const { data: limits } = await (context.supabase as any)
       .from("whatsapp_limits")
       .select("*")
       .eq("company_id", data.companyId)
@@ -44,21 +44,34 @@ export const getCompanyWhatsAppProfile = createServerFn({ method: "GET" })
     // 5. Aggregate basic message stats
     const { data: stats, error: statsError } = await context.supabase
       .from("whatsapp_messages")
-      .select("status", { count: 'exact', head: false })
+      .select("status, metadata")
       .eq("company_id", data.companyId);
 
     if (statsError) throw new Error(statsError.message);
 
     const sent = stats.length;
-    const successful = stats.filter(s => s.status === 'delivered' || s.status === 'read' || s.status === 'sent').length;
-    const failed = stats.filter(s => s.status === 'failed' || s.status === 'undelivered').length;
+    const successful = stats.filter(s => ['delivered', 'read', 'sent'].includes(s.status as string)).length;
+    const failed = stats.filter(s => ['failed', 'undelivered'].includes(s.status as string)).length;
 
-    // 6. Calculate total consumption (simplified sum of metadata cost if available)
-    const totalCost = stats.reduce((acc, curr: any) => acc + (curr.metadata?.cost || 0), 0);
+    // 6. Calculate total consumption
+    const totalCost = stats.reduce((acc, curr: any) => {
+      const metadata = typeof curr.metadata === 'string' ? JSON.parse(curr.metadata) : curr.metadata;
+      return acc + (metadata?.cost || 0);
+    }, 0);
 
     return {
-      company,
-      accounts: accounts || [],
+      company: {
+        id: company.id,
+        name: company.name,
+        balance: company.balance
+      },
+      accounts: (accounts || []).map(a => ({
+        id: a.id,
+        alias: a.alias,
+        phoneNumber: a.phone_number,
+        isDefault: a.is_default,
+        novaStatus: a.nova_status
+      })),
       limits: limits || { is_active: false },
       stats: {
         sent,
@@ -94,7 +107,7 @@ export const updateWhatsAppLimits = createServerFn({ method: "POST" })
     });
     if (!isAdmin) throw new Error("Unauthorized");
 
-    const { error } = await supabaseAdmin
+    const { error } = await (supabaseAdmin as any)
       .from("whatsapp_limits")
       .upsert({
         company_id: data.companyId,
@@ -122,7 +135,7 @@ export const getWhatsAppConsumptionStats = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     let query = context.supabase
       .from("whatsapp_messages")
-      .select("*")
+      .select("consumption_type, metadata, created_at")
       .eq("company_id", data.companyId);
 
     const now = new Date();
@@ -147,9 +160,14 @@ export const getWhatsAppConsumptionStats = createServerFn({ method: "GET" })
       automation: messages.filter((m: any) => m.consumption_type === 'automation').length,
     };
 
+    const cost = messages.reduce((acc, curr: any) => {
+      const metadata = typeof curr.metadata === 'string' ? JSON.parse(curr.metadata) : curr.metadata;
+      return acc + (metadata?.cost || 0);
+    }, 0);
+
     return {
       total: messages.length,
       byType,
-      cost: messages.reduce((acc, curr: any) => acc + (curr.metadata?.cost || 0), 0)
+      cost
     };
   });
