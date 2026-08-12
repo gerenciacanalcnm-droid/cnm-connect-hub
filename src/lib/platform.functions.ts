@@ -156,7 +156,81 @@ export const listContactLists = createServerFn({ method: "GET" })
   });
 
 
+
+export const listListMembers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ list_id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { data: members, error } = await (context.supabase as any)
+      .from("contact_list_members")
+      .select(`
+        contact:contacts(*)
+      `)
+      .eq("list_id", data.list_id)
+      .eq("company_id", CNM_COMPANY_ID);
+    
+    if (error) throw new Error(error.message);
+    return (members ?? []).map((m: any) => m.contact);
+  });
+
+export const removeMemberFromList = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ list_id: z.string().uuid(), contact_id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { error } = await (context.supabase as any)
+      .from("contact_list_members")
+      .delete()
+      .eq("list_id", data.list_id)
+      .eq("contact_id", data.contact_id)
+      .eq("company_id", CNM_COMPANY_ID);
+    
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
+
+export const exportListCsv = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ list_id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { data: members, error } = await (context.supabase as any)
+      .from("contact_list_members")
+      .select(`
+        contact:contacts(
+          first_name, 
+          last_name, 
+          phone, 
+          email, 
+          city,
+          preferred_channel,
+          tags,
+          status
+        )
+      `)
+      .eq("list_id", data.list_id)
+      .eq("company_id", CNM_COMPANY_ID);
+    
+    if (error) throw new Error(error.message);
+
+    const rows = (members ?? []).map((m: any) => m.contact);
+    const csv = [
+      ["nombre", "telefono", "email", "ciudad", "tipo_contacto", "listas", "etiquetas", "estado"].join(","),
+      ...rows.map((r: any) => [
+        `"${r.first_name} ${r.last_name || ''}"`,
+        `"${r.phone}"`,
+        `"${r.email || ''}"`,
+        `"${r.city || ''}"`,
+        `"${r.preferred_channel || ''}"`,
+        `""`, // Individual list view context, others lists omitted for simplicity in CSV if not easily joined here
+        `"${(r.tags || []).join(';')}"`,
+        `"${r.status || ''}"`
+      ].join(","))
+    ].join("\n");
+
+    return csv;
+  });
+
 export const upsertContactList = createServerFn({ method: "POST" })
+
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ id: z.string().uuid().optional(), name: z.string() }).parse(v))
   .handler(async ({ data, context }) => {

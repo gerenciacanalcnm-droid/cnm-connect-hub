@@ -1,24 +1,29 @@
 import React, { useState } from "react";
-import { Plus, Users, MoreVertical, Search, Download, Trash2, Edit } from "lucide-react";
+import { Plus, Users, Search, Download, Trash2, Edit } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { listContactLists, upsertContactList, deleteContactList } from "@/lib/platform.functions";
+import { listContactLists, upsertContactList, deleteContactList, exportListCsv } from "@/lib/platform.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ListDetail } from "./ListDetail";
+
 
 export function ContactListManager() {
   const listFn = useServerFn(listContactLists);
   const upsertFn = useServerFn(upsertContactList);
   const deleteFn = useServerFn(deleteContactList);
   const queryClient = useQueryClient();
+  const exportFn = useServerFn(exportListCsv);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingList, setEditingList] = useState<any>(null);
+  const [viewingList, setViewingList] = useState<any>(null);
   const [newName, setNewName] = useState("");
+
   
   const { data: lists, isLoading } = useQuery({
     queryKey: ["contact-lists"],
@@ -46,7 +51,20 @@ export function ContactListManager() {
       toast.error("Error al eliminar lista");
     }
   };
-
+  const handleExportList = async (list: any) => {
+    try {
+      const csv = await exportFn({ data: { list_id: list.id } });
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${list.name.toLowerCase().replace(/\s+/g, '_')}.csv`;
+      a.click();
+      toast.success("Exportación iniciada");
+    } catch {
+      toast.error("Error al exportar lista");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -57,8 +75,12 @@ export function ContactListManager() {
       </div>
     );
   }
+  if (viewingList) {
+    return <ListDetail list={viewingList} onBack={() => setViewingList(null)} />;
+  }
 
   return (
+
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="relative w-64">
@@ -118,10 +140,11 @@ export function ContactListManager() {
                 <span className="text-muted-foreground font-medium">{list.contact_count ?? 0} contactos</span>
               </div>
               <div className="mt-4 flex items-center gap-2">
-                <Button variant="outline" size="sm" className="w-full text-xs">
+                <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleExportList(list)}>
                   <Download className="mr-2 h-3 w-3" /> Exportar
                 </Button>
-                <Button size="sm" className="w-full text-xs">Ver lista</Button>
+                <Button size="sm" className="w-full text-xs" onClick={() => setViewingList(list)}>Ver lista</Button>
+
               </div>
             </CardContent>
           </Card>
