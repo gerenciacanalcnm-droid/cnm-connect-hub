@@ -43,9 +43,10 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
   const removeMember = useServerFn(removeMemberFromList);
   const exportFn = useServerFn(exportListCsv);
 
-  const { data: contacts, isLoading } = useQuery({
+  const { data: contacts, isLoading, error } = useQuery({
     queryKey: ["list-members", list.id],
     queryFn: () => getMembers({ data: { list_id: list.id } }),
+    retry: 1
   });
 
   const handleExport = async () => {
