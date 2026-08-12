@@ -223,7 +223,7 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            <p>Build OK</p>
+            <p>Error al cargar contactos</p>
             <div className="mt-2 text-[10px] font-mono opacity-70">
               <p>Función: listListMembers</p>
               <p>ID de Lista: {list.id}</p>
