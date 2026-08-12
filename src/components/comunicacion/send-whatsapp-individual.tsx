@@ -35,7 +35,7 @@ import { useWallets, useRateTiers, useMyWallet } from "@/hooks/use-commercial";
 import { formatCurrency } from "@/lib/format";
 import { useWhatsAppAccounts, useSendWhatsAppIndividual, useSendWhatsAppBulk, useWhatsAppTemplates, useSendWhatsAppTemplate, useCreateWhatsAppSchedule } from "@/hooks/use-whatsapp";
 import { useContacts } from "@/hooks/use-contacts";
-import { useContactGroups } from "@/hooks/use-platform";
+import { useContactLists } from "@/hooks/use-platform";
 import { supabase } from "@/integrations/supabase/client";
 
 
@@ -63,7 +63,7 @@ export function SendWhatsAppIndividual() {
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
 
   const { data: contactsData } = useContacts({ pageSize: 200 });
-  const { data: groupsData } = useContactGroups();
+  const { data: groupsData } = useContactLists();
   const { data: myWallet } = useMyWallet("whatsapp");
   const { data: tiersData } = useRateTiers();
   const { data: allAccounts = [] } = useWhatsAppAccounts();
