@@ -25,10 +25,12 @@ export function ContactListManager() {
   const [newName, setNewName] = useState("");
 
   
-  const { data: lists, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["contact-lists"],
     queryFn: () => listFn(),
   });
+
+  const lists: any[] = Array.isArray(data) ? (data as any[]) : [];
 
   const handleSaveList = async () => {
     try {
