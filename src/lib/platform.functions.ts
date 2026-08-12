@@ -215,6 +215,7 @@ export const exportListCsv = createServerFn({ method: "POST" })
   .inputValidator((v) => z.object({ list_id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     try {
+      console.log("[EXPORT_LIST_START] list_id:", data.list_id, "company_id:", CNM_COMPANY_ID);
       // Validate list ownership
       const { data: listExists, error: listError } = await (context.supabase as any)
         .from("contact_lists")
@@ -223,8 +224,14 @@ export const exportListCsv = createServerFn({ method: "POST" })
         .eq("company_id", CNM_COMPANY_ID)
         .maybeSingle();
 
-      if (listError) throw new Error(listError.message);
-      if (!listExists) throw new Error("La lista no existe o no pertenece a esta empresa.");
+      if (listError) {
+        console.error("[EXPORT_LIST_OWNERSHIP_ERROR]", listError);
+        throw new Error(listError.message);
+      }
+      if (!listExists) {
+        console.error("[EXPORT_LIST_NOT_FOUND]");
+        throw new Error("La lista no existe o no pertenece a esta empresa.");
+      }
 
       const { data: members, error } = await (context.supabase as any)
         .from("contact_list_members")
@@ -243,7 +250,7 @@ export const exportListCsv = createServerFn({ method: "POST" })
         .eq("list_id", data.list_id);
       
       if (error) {
-        console.error("Error in exportListCsv:", {
+        console.error("[EXPORT_LIST_QUERY_ERROR]", {
           error,
           list_id: data.list_id,
           company_id: CNM_COMPANY_ID,
@@ -253,6 +260,8 @@ export const exportListCsv = createServerFn({ method: "POST" })
       }
 
       const rows = (members ?? []).map((m: any) => m.contact).filter(Boolean);
+      console.log("[EXPORT_LIST_CONTACTS] count:", rows.length);
+      
       if (!rows || rows.length === 0) {
         throw new Error("No hay contactos para exportar en esta lista.");
       }
@@ -271,6 +280,7 @@ export const exportListCsv = createServerFn({ method: "POST" })
         ].join(","))
       ].join("\n");
 
+      console.log("[EXPORT_LIST_CSV_CREATED] rows:", rows.length, "bytes:", csv.length);
       return csv;
     } catch (e: any) {
       console.error("Catch in exportListCsv:", e);
