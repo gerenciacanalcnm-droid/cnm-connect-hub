@@ -5,7 +5,7 @@ import { Segments } from "@/components/crm/segments";
 import { Pipeline } from "@/components/crm/pipeline";
 import { UnifiedTimeline } from "@/components/crm/unified-timeline";
 
-export const Route = createFileRoute("/_app/crm/legacy")({
+export const Route = createFileRoute("/_app/crm")({
   head: () => ({
     meta: [
       { title: "CRM Comercial · SMS CNM" },
