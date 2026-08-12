@@ -6,6 +6,7 @@ import { DataTable } from "@/components/common/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Plus, 
   Upload, 
@@ -17,7 +18,8 @@ import {
   Eye,
   MessageCircle,
   Mail,
-  MessageSquare
+  MessageSquare,
+  AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import {
