@@ -35,6 +35,8 @@ type AccountRow = {
   created_at: string;
   updated_at: string;
   nova_status: string | null;
+  is_default: boolean | null;
+
 };
 
 function mapAccount(r: AccountRow): WhatsAppAccount {
