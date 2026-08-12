@@ -107,13 +107,15 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                 .eq('phone_number_id', value.metadata?.phone_number_id)
                 .maybeSingle();
 
-              if (!account) continue;
+              if (!account || !account.company_id) continue;
+
+              const companyId = account.company_id as string;
 
               // Identificar contacto
               const { data: contact } = await supabaseAdmin
                 .from('contacts')
                 .select('id')
-                .eq('company_id', account.company_id)
+                .eq('company_id', companyId)
                 .eq('phone', from)
                 .maybeSingle();
               
@@ -122,7 +124,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               const { data: conv } = await supabaseAdmin
                 .from('whatsapp_conversations')
                 .select('id, status, assigned_to')
-                .eq('company_id', account.company_id)
+                .eq('company_id', companyId)
                 .eq('contact_id', contact.id)
                 .maybeSingle();
               
@@ -131,7 +133,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                 const { data: newConv } = await supabaseAdmin
                   .from('whatsapp_conversations')
                   .insert({
-                    company_id: account.company_id,
+                    company_id: companyId,
                     contact_id: contact.id,
                     contact_phone: from,
                     last_message_preview: text,
@@ -205,7 +207,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
 
                     // 4. Disparar automatización de respuesta
                     await processAutomationTrigger(
-                      account.company_id,
+                      companyId,
                       'SURVEY_RESPONSE',
                       { 
                         phone: from, 
@@ -223,7 +225,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
 
               // Disparar automatizaciones estándar
               await processAutomationTrigger(
-                account.company_id,
+                companyId,
                 'whatsapp_message',
                 { phone: from, text: text, wamid, conversation_id: conversationId, contact_id: contact.id },
                 wamid
@@ -233,7 +235,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               const { data: settingsData } = await supabaseAdmin
                 .from('nova_settings' as any)
                 .select('status')
-                .eq('company_id', account.company_id)
+                .eq('company_id', companyId)
                 .maybeSingle();
 
               const isNovaActive = (settingsData as any)?.status === 'ACTIVO';
@@ -245,7 +247,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   // 1. Buscar Mapa Activo
                   const { data: activeMap } = await (supabaseAdmin.from as any)('conversation_maps')
                     .select('*')
-                    .eq('company_id', account.company_id)
+                    .eq('company_id', companyId)
                     .eq('status', 'ACTIVO')
                     .limit(1)
                     .maybeSingle();
@@ -257,7 +259,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                     // Ejecutar motor de mapa (simplificado para fase 4)
                     const { executeConversationMap } = await import('@/lib/nova-engine.server');
                     const mapResult = await executeConversationMap(
-                      account.company_id,
+                      companyId,
                       contact.id,
                       conversationId,
                       text,
@@ -267,7 +269,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   } else {
                     // Si no hay mapa, comportamiento estándar de Nova
                     const novaResp = await generateNovaResponse(
-                      account.company_id,
+                      companyId,
                       contact.id,
                       conversationId,
                       text
@@ -277,7 +279,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
 
                   if (responseText) {
                     await internalSendNovaResponse(
-                      account.company_id,
+                      companyId,
                       account.id,
                       from,
                       responseText,

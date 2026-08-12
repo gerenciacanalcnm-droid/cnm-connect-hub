@@ -29,7 +29,7 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
     const { data: account, error: accErr } = await context.supabase
       .from("whatsapp_accounts")
       .select("business_account_id, access_token")
-      .eq("company_id", template.company_id)
+      .eq("company_id", template.company_id as string)
       .eq("status", "connected")
       .limit(1)
       .maybeSingle();
