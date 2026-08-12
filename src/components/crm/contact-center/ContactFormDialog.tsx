@@ -24,8 +24,21 @@ const formSchema = z.object({
   email: z.string().email().optional().or(z.literal("")),
 });
 
-export function ContactFormDialog({ children, defaultValues }: { children: React.ReactNode, defaultValues?: any }) {
-  const [open, setOpen] = useState(false);
+export function ContactFormDialog({ 
+  children, 
+  defaultValues, 
+  open: externalOpen, 
+  setOpen: externalSetOpen 
+}: { 
+  children: React.ReactNode, 
+  defaultValues?: any,
+  open?: boolean,
+  setOpen?: (open: boolean) => void
+}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen ?? internalOpen;
+  const setOpen = externalSetOpen ?? setInternalOpen;
+
   const upsert = useServerFn(upsertContact);
   const queryClient = useQueryClient();
   const form = useForm({
