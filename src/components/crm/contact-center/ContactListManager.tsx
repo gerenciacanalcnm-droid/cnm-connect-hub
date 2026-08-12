@@ -174,6 +174,6 @@ export function ContactListManager() {
           </Card>
         ))}
       </div>
-    </div>
+      )}
   );
 }
