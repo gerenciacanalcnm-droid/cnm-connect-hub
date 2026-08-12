@@ -17,7 +17,6 @@ export const getInventoryNumbers = createServerFn({ method: "GET" })
     if (!isAdmin) throw new Error("Unauthorized: Only super admins can access inventory");
 
     // 2. Fetch inventory
-    // We join with companies to get the assigned company name
     const { data, error } = await context.supabase
       .from("whatsapp_accounts")
       .select(`
@@ -46,7 +45,6 @@ export const assignNumberToCompany = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     
-    // The RPC handle_whatsapp_assignment takes care of admin check, atomicity, and logging
     const { error } = await supabaseAdmin.rpc("assign_whatsapp_account", {
       _account_id: data.accountId,
       _company_id: data.companyId,
@@ -70,6 +68,70 @@ export const unassignNumber = createServerFn({ method: "POST" })
       _account_id: data.accountId,
       _admin_id: context.userId
     });
+
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
+
+/**
+ * Set a number as default for its company (Admin only).
+ */
+export const setNumberAsDefault = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ 
+    accountId: z.string().uuid(),
+    companyId: z.string().uuid()
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Check admin
+    const { data: isAdmin } = await context.supabase.rpc('has_role', { 
+      _user_id: context.userId, 
+      _role: 'super_admin' 
+    });
+    if (!isAdmin) throw new Error("Unauthorized");
+
+    // Atomic update: remove default from others in same company, set this one
+    const { error: resetError } = await supabaseAdmin
+      .from("whatsapp_accounts")
+      .update({ is_default: false })
+      .eq("company_id", data.companyId);
+
+    if (resetError) throw new Error(resetError.message);
+
+    const { error: setError } = await supabaseAdmin
+      .from("whatsapp_accounts")
+      .update({ is_default: true })
+      .eq("id", data.accountId);
+
+    if (setError) throw new Error(setError.message);
+
+    return { success: true };
+  });
+
+/**
+ * Update Nova status (Admin only).
+ */
+export const updateNovaStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ 
+    accountId: z.string().uuid(),
+    status: z.enum(["AVAILABLE", "ASSIGNED", "DISCONNECTED", "ERROR", "DISABLED"])
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: isAdmin } = await context.supabase.rpc('has_role', { 
+      _user_id: context.userId, 
+      _role: 'super_admin' 
+    });
+    if (!isAdmin) throw new Error("Unauthorized");
+
+    const { error } = await supabaseAdmin
+      .from("whatsapp_accounts")
+      .update({ nova_status: data.status })
+      .eq("id", data.accountId);
 
     if (error) throw new Error(error.message);
     return { success: true };
