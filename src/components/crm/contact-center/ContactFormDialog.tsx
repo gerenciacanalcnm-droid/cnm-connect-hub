@@ -75,8 +75,24 @@ export function ContactFormDialog({
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues || { first_name: "", last_name: "", phone: "", email: "" },
+    defaultValues: {
+      first_name: defaultValues?.first_name || "",
+      last_name: defaultValues?.last_name || "",
+      phone: defaultValues?.phone || "",
+      email: defaultValues?.email || "",
+    },
   });
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        first_name: defaultValues?.first_name || "",
+        last_name: defaultValues?.last_name || "",
+        phone: defaultValues?.phone || "",
+        email: defaultValues?.email || "",
+      });
+    }
+  }, [open, defaultValues, form]);
 
   const toggleTag = async (tagId: string) => {
     if (!defaultValues?.id) {
