@@ -218,7 +218,7 @@ export const exportListCsv = createServerFn({ method: "POST" })
       // Validate list ownership
       const { data: listExists, error: listError } = await (context.supabase as any)
         .from("contact_lists")
-        .select("id")
+        .select("id, name")
         .eq("id", data.list_id)
         .eq("company_id", CNM_COMPANY_ID)
         .maybeSingle();
@@ -258,15 +258,16 @@ export const exportListCsv = createServerFn({ method: "POST" })
       }
 
       const csv = [
-        ["nombre", "telefono", "email", "ciudad", "tipo_contacto", "etiquetas", "estado"].join(","),
+        ["nombre", "telefono", "email", "ciudad", "tipo_contacto", "listas", "etiquetas", "estado"].join(","),
         ...rows.map((r: any) => [
-          `"${r.first_name || ''} ${r.last_name || ''}"`.trim(),
-          `"${r.phone || ''}"`,
-          `"${r.email || ''}"`,
-          `"${r.city || ''}"`,
-          `"${r.preferred_channel || ''}"`,
-          `"${(r.tags || []).join(';')}"`,
-          `"${r.status || ''}"`
+          `"${(r.first_name || '').replace(/"/g, '""')} ${(r.last_name || '').replace(/"/g, '""')}"`.trim(),
+          `"${(r.phone || '').replace(/"/g, '""')}"`,
+          `"${(r.email || '').replace(/"/g, '""')}"`,
+          `"${(r.city || '').replace(/"/g, '""')}"`,
+          `"${(r.preferred_channel || '').replace(/"/g, '""')}"`,
+          `"${listExists.name.replace(/"/g, '""')}"`,
+          `"${(r.tags || []).join(';').replace(/"/g, '""')}"`,
+          `"${(r.status || '').replace(/"/g, '""')}"`
         ].join(","))
       ].join("\n");
 
