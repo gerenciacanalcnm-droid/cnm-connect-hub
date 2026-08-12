@@ -25,7 +25,6 @@ import { Route as AppNovaRouteImport } from './routes/_app.nova'
 import { Route as AppMiEmpresaRouteImport } from './routes/_app.mi-empresa'
 import { Route as AppFinanzasRouteImport } from './routes/_app.finanzas'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
-import { Route as AppCrmRouteImport } from './routes/_app.crm'
 import { Route as AppConfiguracionRouteImport } from './routes/_app.configuracion'
 import { Route as AppComunicacionRouteImport } from './routes/_app.comunicacion'
 import { Route as AppCentroDeContactosRouteImport } from './routes/_app.centro-de-contactos'
@@ -35,7 +34,6 @@ import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicSmsSchedulerRouteImport } from './routes/api/public/sms-scheduler'
 import { Route as AppNovaMapasRouteImport } from './routes/_app.nova.mapas'
-import { Route as AppCrmLegacyRouteImport } from './routes/_app.crm.legacy'
 import { Route as AdminAdminWhatsappInventoryRouteImport } from './routes/_admin.admin.whatsapp-inventory'
 import { Route as AdminAdminWalletRouteImport } from './routes/_admin.admin.wallet'
 import { Route as AdminAdminUsuariosRouteImport } from './routes/_admin.admin.usuarios'
@@ -144,11 +142,6 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
-const AppCrmRoute = AppCrmRouteImport.update({
-  id: '/crm',
-  path: '/crm',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppConfiguracionRoute = AppConfiguracionRouteImport.update({
   id: '/configuracion',
   path: '/configuracion',
@@ -194,11 +187,6 @@ const AppNovaMapasRoute = AppNovaMapasRouteImport.update({
   id: '/mapas',
   path: '/mapas',
   getParentRoute: () => AppNovaRoute,
-} as any)
-const AppCrmLegacyRoute = AppCrmLegacyRouteImport.update({
-  id: '/legacy',
-  path: '/legacy',
-  getParentRoute: () => AppCrmRoute,
 } as any)
 const AdminAdminWhatsappInventoryRoute =
   AdminAdminWhatsappInventoryRouteImport.update({
@@ -365,7 +353,6 @@ export interface FileRoutesByFullPath {
   '/centro-de-contactos': typeof AppCentroDeContactosRoute
   '/comunicacion': typeof AppComunicacionRouteWithChildren
   '/configuracion': typeof AppConfiguracionRoute
-  '/crm': typeof AppCrmRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/finanzas': typeof AppFinanzasRoute
   '/mi-empresa': typeof AppMiEmpresaRoute
@@ -405,7 +392,6 @@ export interface FileRoutesByFullPath {
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
   '/admin/whatsapp-inventory': typeof AdminAdminWhatsappInventoryRoute
-  '/crm/legacy': typeof AppCrmLegacyRoute
   '/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -421,7 +407,6 @@ export interface FileRoutesByTo {
   '/centro-de-contactos': typeof AppCentroDeContactosRoute
   '/comunicacion': typeof AppComunicacionRouteWithChildren
   '/configuracion': typeof AppConfiguracionRoute
-  '/crm': typeof AppCrmRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/finanzas': typeof AppFinanzasRoute
   '/mi-empresa': typeof AppMiEmpresaRoute
@@ -461,7 +446,6 @@ export interface FileRoutesByTo {
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
   '/admin/whatsapp-inventory': typeof AdminAdminWhatsappInventoryRoute
-  '/crm/legacy': typeof AppCrmLegacyRoute
   '/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -481,7 +465,6 @@ export interface FileRoutesById {
   '/_app/centro-de-contactos': typeof AppCentroDeContactosRoute
   '/_app/comunicacion': typeof AppComunicacionRouteWithChildren
   '/_app/configuracion': typeof AppConfiguracionRoute
-  '/_app/crm': typeof AppCrmRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/finanzas': typeof AppFinanzasRoute
   '/_app/mi-empresa': typeof AppMiEmpresaRoute
@@ -521,7 +504,6 @@ export interface FileRoutesById {
   '/_admin/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/_admin/admin/wallet': typeof AdminAdminWalletRoute
   '/_admin/admin/whatsapp-inventory': typeof AdminAdminWhatsappInventoryRoute
-  '/_app/crm/legacy': typeof AppCrmLegacyRoute
   '/_app/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -539,7 +521,6 @@ export interface FileRouteTypes {
     | '/centro-de-contactos'
     | '/comunicacion'
     | '/configuracion'
-    | '/crm'
     | '/dashboard'
     | '/finanzas'
     | '/mi-empresa'
@@ -579,7 +560,6 @@ export interface FileRouteTypes {
     | '/admin/usuarios'
     | '/admin/wallet'
     | '/admin/whatsapp-inventory'
-    | '/crm/legacy'
     | '/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
@@ -595,7 +575,6 @@ export interface FileRouteTypes {
     | '/centro-de-contactos'
     | '/comunicacion'
     | '/configuracion'
-    | '/crm'
     | '/dashboard'
     | '/finanzas'
     | '/mi-empresa'
@@ -635,7 +614,6 @@ export interface FileRouteTypes {
     | '/admin/usuarios'
     | '/admin/wallet'
     | '/admin/whatsapp-inventory'
-    | '/crm/legacy'
     | '/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
@@ -654,7 +632,6 @@ export interface FileRouteTypes {
     | '/_app/centro-de-contactos'
     | '/_app/comunicacion'
     | '/_app/configuracion'
-    | '/_app/crm'
     | '/_app/dashboard'
     | '/_app/finanzas'
     | '/_app/mi-empresa'
@@ -694,7 +671,6 @@ export interface FileRouteTypes {
     | '/_admin/admin/usuarios'
     | '/_admin/admin/wallet'
     | '/_admin/admin/whatsapp-inventory'
-    | '/_app/crm/legacy'
     | '/_app/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
@@ -827,13 +803,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/crm': {
-      id: '/_app/crm'
-      path: '/crm'
-      fullPath: '/crm'
-      preLoaderRoute: typeof AppCrmRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/configuracion': {
       id: '/_app/configuracion'
       path: '/configuracion'
@@ -896,13 +865,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/nova/mapas'
       preLoaderRoute: typeof AppNovaMapasRouteImport
       parentRoute: typeof AppNovaRoute
-    }
-    '/_app/crm/legacy': {
-      id: '/_app/crm/legacy'
-      path: '/legacy'
-      fullPath: '/crm/legacy'
-      preLoaderRoute: typeof AppCrmLegacyRouteImport
-      parentRoute: typeof AppCrmRoute
     }
     '/_admin/admin/whatsapp-inventory': {
       id: '/_admin/admin/whatsapp-inventory'
@@ -1203,17 +1165,6 @@ const AppComunicacionRouteWithChildren = AppComunicacionRoute._addFileChildren(
   AppComunicacionRouteChildren,
 )
 
-interface AppCrmRouteChildren {
-  AppCrmLegacyRoute: typeof AppCrmLegacyRoute
-}
-
-const AppCrmRouteChildren: AppCrmRouteChildren = {
-  AppCrmLegacyRoute: AppCrmLegacyRoute,
-}
-
-const AppCrmRouteWithChildren =
-  AppCrmRoute._addFileChildren(AppCrmRouteChildren)
-
 interface AppNovaRouteChildren {
   AppNovaMapasRoute: typeof AppNovaMapasRoute
 }
@@ -1232,7 +1183,6 @@ interface AppRouteChildren {
   AppCentroDeContactosRoute: typeof AppCentroDeContactosRoute
   AppComunicacionRoute: typeof AppComunicacionRouteWithChildren
   AppConfiguracionRoute: typeof AppConfiguracionRoute
-  AppCrmRoute: typeof AppCrmRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
   AppFinanzasRoute: typeof AppFinanzasRoute
   AppMiEmpresaRoute: typeof AppMiEmpresaRoute
@@ -1247,7 +1197,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppCentroDeContactosRoute: AppCentroDeContactosRoute,
   AppComunicacionRoute: AppComunicacionRouteWithChildren,
   AppConfiguracionRoute: AppConfiguracionRoute,
-  AppCrmRoute: AppCrmRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
   AppFinanzasRoute: AppFinanzasRoute,
   AppMiEmpresaRoute: AppMiEmpresaRoute,

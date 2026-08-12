@@ -9,7 +9,7 @@ import { ConversationCenter } from "@/components/comunicacion/conversation-cente
 import { ContactCenterHub } from "@/components/crm/contact-center/ContactCenterHub";
 
 
-export const Route = createFileRoute("/_app/crm")({
+export const Route = createFileRoute("/_app/centro-de-contactos")({
   head: () => ({
     meta: [
       { title: "CRM · SMS CNM" },
