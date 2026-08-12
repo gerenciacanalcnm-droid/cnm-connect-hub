@@ -12,8 +12,8 @@ import { ContactCenterHub } from "@/components/crm/contact-center/ContactCenterH
 export const Route = createFileRoute("/_app/centro-de-contactos")({
   head: () => ({
     meta: [
-      { title: "CRM · SMS CNM" },
-      { name: "description", content: "Contactos, segmentos y pipeline de oportunidades." },
+      { title: "Centro de Contactos · SMS CNM" },
+      { name: "description", content: "Gestión central de contactos, listas y segmentación multicanal." },
     ],
   }),
   component: ContactCenterPage,
