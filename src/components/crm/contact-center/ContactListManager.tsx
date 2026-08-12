@@ -143,7 +143,7 @@ export function ContactListManager() {
                 <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleExportList(list)}>
                   <Download className="mr-2 h-3 w-3" /> Exportar
                 </Button>
-                <Button size="sm" className="w-full text-xs" onClick={() => setViewingList(list)}>Ver lista</Button>
+                <Button size="sm" className="w-full text-xs" onClick={() => setViewingList(list)}>Build OK</Button>
 
               </div>
             </CardContent>
