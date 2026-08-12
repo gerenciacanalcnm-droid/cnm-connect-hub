@@ -700,7 +700,7 @@ export function SendWhatsAppIndividual() {
               {sendIndividualMutation.isPending || sendTemplateMutation.isPending ? (
                 "Procesando..."
               ) : (
-                mode === 'individual' ? 'Enviar Ahora' : mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'
+                mode === 'individual' ? 'Enviar' : mode === 'schedule' ? 'Programar WhatsApp' : 'Procesar Masivo'
               )}
             </Button>
             
