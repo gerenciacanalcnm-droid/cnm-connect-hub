@@ -17,6 +17,7 @@ import {
 import { useContacts } from "@/hooks/use-contacts";
 import type { Contact } from "@/types/contact";
 import { toast } from "sonner";
+import { ContactFormDialog } from "./contact-center/ContactFormDialog";
 
 function initials(c: Contact) {
   return `${c.firstName[0] ?? ""}${c.lastName?.[0] ?? ""}`.toUpperCase();
@@ -115,11 +116,13 @@ export function ContactsTable() {
         searchPlaceholder="Buscar por nombre, teléfono o email…"
         exportFilename="contactos"
         enableSelection
-        onRowClick={setSelected}
+        onRowClick={(row) => setSelected(row)}
         toolbar={
-          <Button className="gap-2" onClick={() => toast.info("Crear contacto en desarrollo")}>
-            <Plus className="h-4 w-4" /> Nuevo contacto
-          </Button>
+          <ContactFormDialog>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" /> Nuevo contacto
+            </Button>
+          </ContactFormDialog>
         }
       />
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
@@ -141,11 +144,19 @@ export function ContactsTable() {
               </SheetHeader>
               <div className="space-y-4 py-4">
                 <div className="flex gap-2">
-                  <Button size="sm" className="gap-1.5">
-                    <Phone className="h-3.5 w-3.5" /> Llamar
-                  </Button>
-                  <Button size="sm" variant="outline" className="gap-1.5">
-                    <Mail className="h-3.5 w-3.5" /> Email
+                  <ContactFormDialog defaultValues={{
+                    id: selected.id,
+                    first_name: selected.firstName,
+                    last_name: selected.lastName,
+                    phone: selected.phone,
+                    email: selected.email
+                  }}>
+                    <Button size="sm" className="gap-1.5">
+                      Editar contacto
+                    </Button>
+                  </ContactFormDialog>
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => window.location.href = `/crm?contactId=${selected.id}`}>
+                    Ver en CRM
                   </Button>
                 </div>
                 <div className="rounded-lg border border-border p-3 text-sm">

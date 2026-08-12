@@ -2,16 +2,37 @@ import React from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { ContactsTable } from "@/components/crm/contacts-table";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Download, Upload, Filter, Search, ShieldCheck, Mail } from "lucide-react";
+import { UserPlus, Download, Upload, Filter, Search, ShieldCheck, Mail, Plus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ContactListManager } from "./ContactListManager";
 import { Badge } from "@/components/ui/badge";
+import { ContactFormDialog } from "./ContactFormDialog";
+import { CSVImporter } from "./CSVImporter";
+import { useServerFn } from "@tanstack/react-start";
+import { exportContacts } from "@/lib/contacts.functions";
+import { toast } from "sonner";
 
 
 
 export function ContactCenterHub() {
+  const exportFn = useServerFn(exportContacts);
+
+  const handleExport = async () => {
+    try {
+      const csv = await exportFn();
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `contactos-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      toast.success("Exportación iniciada");
+    } catch {
+      toast.error("Error al exportar contactos");
+    }
+  };
   return (
     <div className="space-y-6">
       <PageHeader
@@ -19,18 +40,22 @@ export function ContactCenterHub() {
         description="Gestión centralizada de identidad y preferencias multicanal."
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="mr-2 h-4 w-4" />
               Exportar
             </Button>
-            <Button variant="outline" size="sm">
-              <Upload className="mr-2 h-4 w-4" />
-              Importar CSV
-            </Button>
-            <Button size="sm" className="bg-primary text-primary-foreground">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Nuevo Contacto
-            </Button>
+            <CSVImporter>
+              <Button variant="outline" size="sm">
+                <Upload className="mr-2 h-4 w-4" />
+                Importar CSV
+              </Button>
+            </CSVImporter>
+            <ContactFormDialog>
+              <Button size="sm" className="bg-primary text-primary-foreground">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Nuevo Contacto
+              </Button>
+            </ContactFormDialog>
           </div>
         }
       />
@@ -126,12 +151,17 @@ export function ContactCenterHub() {
               <CardDescription>Segmentación dinámica basada en comportamiento y atributos.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="rounded-full bg-muted p-3 mb-4">
-                  <Filter className="h-6 w-6 text-muted-foreground" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
+                  <Badge>Etiqueta = CLIENTE</Badge>
+                  <span className="text-xs text-muted-foreground">AND</span>
+                  <Badge variant="outline">Ciudad = Tunja</Badge>
+                  <Button size="sm" variant="ghost" className="ml-auto text-xs">Calcular</Button>
                 </div>
-                <h3 className="text-lg font-semibold">Módulo de Segmentos</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">En desarrollo: Filtros avanzados y audiencias dinámicas.</p>
+                <div className="flex flex-col items-center justify-center py-6 text-center border rounded-md border-dashed">
+                  <h3 className="text-sm font-semibold">Resultados del segmento</h3>
+                  <p className="text-xs text-muted-foreground mt-1">0 contactos cumplen los criterios seleccionados.</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -144,12 +174,18 @@ export function ContactCenterHub() {
               <CardDescription>Organiza tus contactos con etiquetas personalizadas.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Badge variant="outline" className="h-12 w-12 rounded-full flex items-center justify-center mb-4">
-                  #
-                </Badge>
-                <h3 className="text-lg font-semibold">Gestión de Etiquetas</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">En desarrollo: Editor centralizado de etiquetas multicanal.</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {["CLIENTE", "PROSPECTO", "VIP", "INACTIVO"].map(tag => (
+                  <div key={tag} className="flex items-center justify-between p-2 border rounded-md group">
+                    <span className="text-sm font-medium">{tag}</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Trash2 className="h-3 w-3 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" size="sm" className="border-dashed">
+                  <Plus className="h-4 w-4 mr-2" /> Nueva etiqueta
+                </Button>
               </div>
             </CardContent>
           </Card>
