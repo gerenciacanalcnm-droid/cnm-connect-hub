@@ -2259,7 +2259,7 @@ export type Database = {
           access_token: string | null
           alias: string
           business_account_id: string | null
-          company_id: string
+          company_id: string | null
           created_at: string
           created_by: string | null
           department: Database["public"]["Enums"]["wa_department"]
@@ -2268,6 +2268,10 @@ export type Database = {
           is_primary: boolean
           last_synced_at: string | null
           metadata: Json
+          nova_status:
+            | Database["public"]["Enums"]["whatsapp_assignment_status"]
+            | null
+          phone_number: string | null
           phone_number_id: string | null
           provider: string
           quality_rating: string | null
@@ -2276,6 +2280,7 @@ export type Database = {
           token_expires_at: string | null
           updated_at: string
           verified_name: string | null
+          waba_id: string | null
           waba_name: string | null
           webhook_secret: string | null
           webhook_url: string | null
@@ -2285,7 +2290,7 @@ export type Database = {
           access_token?: string | null
           alias: string
           business_account_id?: string | null
-          company_id: string
+          company_id?: string | null
           created_at?: string
           created_by?: string | null
           department?: Database["public"]["Enums"]["wa_department"]
@@ -2294,6 +2299,10 @@ export type Database = {
           is_primary?: boolean
           last_synced_at?: string | null
           metadata?: Json
+          nova_status?:
+            | Database["public"]["Enums"]["whatsapp_assignment_status"]
+            | null
+          phone_number?: string | null
           phone_number_id?: string | null
           provider?: string
           quality_rating?: string | null
@@ -2302,6 +2311,7 @@ export type Database = {
           token_expires_at?: string | null
           updated_at?: string
           verified_name?: string | null
+          waba_id?: string | null
           waba_name?: string | null
           webhook_secret?: string | null
           webhook_url?: string | null
@@ -2311,7 +2321,7 @@ export type Database = {
           access_token?: string | null
           alias?: string
           business_account_id?: string | null
-          company_id?: string
+          company_id?: string | null
           created_at?: string
           created_by?: string | null
           department?: Database["public"]["Enums"]["wa_department"]
@@ -2320,6 +2330,10 @@ export type Database = {
           is_primary?: boolean
           last_synced_at?: string | null
           metadata?: Json
+          nova_status?:
+            | Database["public"]["Enums"]["whatsapp_assignment_status"]
+            | null
+          phone_number?: string | null
           phone_number_id?: string | null
           provider?: string
           quality_rating?: string | null
@@ -2328,6 +2342,7 @@ export type Database = {
           token_expires_at?: string | null
           updated_at?: string
           verified_name?: string | null
+          waba_id?: string | null
           waba_name?: string | null
           webhook_secret?: string | null
           webhook_url?: string | null
@@ -2436,7 +2451,7 @@ export type Database = {
           account_id: string | null
           assigned_to: string | null
           channel: Database["public"]["Enums"]["message_channel"]
-          company_id: string
+          company_id: string | null
           contact_id: string | null
           contact_name: string | null
           contact_phone: string
@@ -2455,7 +2470,7 @@ export type Database = {
           account_id?: string | null
           assigned_to?: string | null
           channel?: Database["public"]["Enums"]["message_channel"]
-          company_id: string
+          company_id?: string | null
           contact_id?: string | null
           contact_name?: string | null
           contact_phone: string
@@ -2474,7 +2489,7 @@ export type Database = {
           account_id?: string | null
           assigned_to?: string | null
           channel?: Database["public"]["Enums"]["message_channel"]
-          company_id?: string
+          company_id?: string | null
           contact_id?: string | null
           contact_name?: string | null
           contact_phone?: string
@@ -2585,7 +2600,7 @@ export type Database = {
           account_id: string | null
           body: string | null
           campaign_id: string | null
-          company_id: string
+          company_id: string | null
           conversation_id: string | null
           cost: number
           created_at: string
@@ -2608,7 +2623,7 @@ export type Database = {
           account_id?: string | null
           body?: string | null
           campaign_id?: string | null
-          company_id: string
+          company_id?: string | null
           conversation_id?: string | null
           cost?: number
           created_at?: string
@@ -2631,7 +2646,7 @@ export type Database = {
           account_id?: string | null
           body?: string | null
           campaign_id?: string | null
-          company_id?: string
+          company_id?: string | null
           conversation_id?: string | null
           cost?: number
           created_at?: string
@@ -2745,7 +2760,7 @@ export type Database = {
           body: string
           buttons: Json
           category: string
-          company_id: string
+          company_id: string | null
           created_at: string
           created_by: string | null
           external_id: string | null
@@ -2766,7 +2781,7 @@ export type Database = {
           body: string
           buttons?: Json
           category?: string
-          company_id: string
+          company_id?: string | null
           created_at?: string
           created_by?: string | null
           external_id?: string | null
@@ -2787,7 +2802,7 @@ export type Database = {
           body?: string
           buttons?: Json
           category?: string
-          company_id?: string
+          company_id?: string | null
           created_at?: string
           created_by?: string | null
           external_id?: string | null
@@ -2953,6 +2968,11 @@ export type Database = {
         | "connected"
         | "error"
         | "suspended"
+      whatsapp_assignment_status:
+        | "AVAILABLE"
+        | "ASSIGNED"
+        | "DISCONNECTED"
+        | "ERROR"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3125,6 +3145,12 @@ export const Constants = {
         "connected",
         "error",
         "suspended",
+      ],
+      whatsapp_assignment_status: [
+        "AVAILABLE",
+        "ASSIGNED",
+        "DISCONNECTED",
+        "ERROR",
       ],
     },
   },

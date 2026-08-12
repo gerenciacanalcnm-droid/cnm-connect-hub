@@ -561,7 +561,7 @@ export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
         const variables = [...new Set(allVars)];
         
         const row = {
-          company_id: account.company_id,
+          company_id: account.company_id as string,
           account_id: data.accountId,
           external_id: t.id,
           name: t.name,
