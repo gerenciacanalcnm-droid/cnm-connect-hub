@@ -123,8 +123,15 @@ export function ContactListManager() {
         </Dialog>
       </div>
 
+      {lists.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-md border border-dashed py-12 text-center">
+          <Users className="mb-3 h-8 w-8 text-muted-foreground" />
+          <h3 className="text-sm font-semibold">No hay listas creadas</h3>
+          <p className="mt-1 text-xs text-muted-foreground">Crea tu primera lista para segmentar contactos.</p>
+        </div>
+      ) : (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {(lists as any[])?.map((list: any) => (
+        {lists.map((list: any) => (
           <Card key={list.id} className="overflow-hidden border-border/50 transition-all hover:border-primary/50 hover:shadow-md">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
