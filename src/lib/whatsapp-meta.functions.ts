@@ -76,7 +76,7 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
     if (variables.length > 0) {
       // Meta requiere que body_text sea un array de arrays de strings (uno por cada juego de variables)
       bodyComp.example = {
-        body_text: [variables.map((_, i) => `Ejemplo ${i + 1}`)]
+        body_text: [variables.map((_, i) => i === 0 ? "Laura" : `Ejemplo ${i + 1}`)]
       };
     }
     components.push(bodyComp);
@@ -119,27 +119,47 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
       components: payload.components
     });
 
-    // 3. Envío Real a Meta
-    const response = await fetch(
-      `https://graph.facebook.com/v20.0/${account.business_account_id}/message_templates`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${account.access_token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+    // 3. Envío Real a Meta con Lógica de Reintento para Error 1/99
+    const callMeta = async () => {
+      const response = await fetch(
+        `https://graph.facebook.com/v20.0/${account.business_account_id}/message_templates`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${account.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+      const result = await response.json();
+      return { ok: response.ok, status: response.status, result };
+    };
 
-    const result = await response.json();
+    // Espera inicial recomendada para que Meta procese handles
+    if (metadata.header_handle) {
+      console.log("Esperando 3 segundos para procesamiento de handle en Meta...");
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
 
-    if (!response.ok) {
+    let { ok, status, result } = await callMeta();
+
+    // Reintento único si falla con error 1/99
+    if (!ok && result.error?.code === 1 && result.error?.error_subcode === 99) {
+      console.log("Meta Error 1/99 detectado. Reintentando en 5 segundos...");
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      const retry = await callMeta();
+      ok = retry.ok;
+      status = retry.status;
+      result = retry.result;
+    }
+
+    if (!ok) {
       const metaError = result.error || {};
       const errorMessage = `META_API_ERROR
-HTTP STATUS: ${response.status}
+HTTP STATUS: ${status}
 META ERROR CODE: ${metaError.code || 'N/A'}
-META ERROR TYPE: ${metaError.type || 'N/A'}
+META ERROR SUBCODE: ${metaError.error_subcode || 'N/A'}
 META ERROR MESSAGE: ${metaError.message || 'Error desconocido'}
 FBTRACE_ID: ${metaError.fbtrace_id || 'N/A'}`;
       
