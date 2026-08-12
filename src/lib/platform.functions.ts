@@ -215,7 +215,7 @@ export const exportListCsv = createServerFn({ method: "POST" })
   .inputValidator((v) => z.object({ list_id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     try {
-      console.log("[EXPORT_LIST_START] list_id:", data.list_id, "company_id:", CNM_COMPANY_ID);
+      console.log("[EXPORT_LIST] START", { list_id: data.list_id, company_id: CNM_COMPANY_ID });
       // Validate list ownership
       const { data: listExists, error: listError } = await (context.supabase as any)
         .from("contact_lists")
