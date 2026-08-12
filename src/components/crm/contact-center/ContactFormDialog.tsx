@@ -140,7 +140,7 @@ export function ContactFormDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{defaultValues ? "Editar contacto" : "Nuevo contacto"}</DialogTitle>
+          <DialogTitle>{defaultValues?.id ? "Editar contacto" : "Nuevo contacto"}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
