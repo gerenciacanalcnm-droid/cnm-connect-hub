@@ -34,6 +34,7 @@ import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicSmsSchedulerRouteImport } from './routes/api/public/sms-scheduler'
 import { Route as AppNovaMapasRouteImport } from './routes/_app.nova.mapas'
+import { Route as AppCrmLegacyRouteImport } from './routes/_app.crm.legacy'
 import { Route as AdminAdminWhatsappInventoryRouteImport } from './routes/_admin.admin.whatsapp-inventory'
 import { Route as AdminAdminWalletRouteImport } from './routes/_admin.admin.wallet'
 import { Route as AdminAdminUsuariosRouteImport } from './routes/_admin.admin.usuarios'
@@ -187,6 +188,11 @@ const AppNovaMapasRoute = AppNovaMapasRouteImport.update({
   id: '/mapas',
   path: '/mapas',
   getParentRoute: () => AppNovaRoute,
+} as any)
+const AppCrmLegacyRoute = AppCrmLegacyRouteImport.update({
+  id: '/crm/legacy',
+  path: '/crm/legacy',
+  getParentRoute: () => AppRoute,
 } as any)
 const AdminAdminWhatsappInventoryRoute =
   AdminAdminWhatsappInventoryRouteImport.update({
@@ -392,6 +398,7 @@ export interface FileRoutesByFullPath {
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
   '/admin/whatsapp-inventory': typeof AdminAdminWhatsappInventoryRoute
+  '/crm/legacy': typeof AppCrmLegacyRoute
   '/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -446,6 +453,7 @@ export interface FileRoutesByTo {
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
   '/admin/whatsapp-inventory': typeof AdminAdminWhatsappInventoryRoute
+  '/crm/legacy': typeof AppCrmLegacyRoute
   '/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -504,6 +512,7 @@ export interface FileRoutesById {
   '/_admin/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/_admin/admin/wallet': typeof AdminAdminWalletRoute
   '/_admin/admin/whatsapp-inventory': typeof AdminAdminWhatsappInventoryRoute
+  '/_app/crm/legacy': typeof AppCrmLegacyRoute
   '/_app/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -560,6 +569,7 @@ export interface FileRouteTypes {
     | '/admin/usuarios'
     | '/admin/wallet'
     | '/admin/whatsapp-inventory'
+    | '/crm/legacy'
     | '/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
@@ -614,6 +624,7 @@ export interface FileRouteTypes {
     | '/admin/usuarios'
     | '/admin/wallet'
     | '/admin/whatsapp-inventory'
+    | '/crm/legacy'
     | '/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
@@ -671,6 +682,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/usuarios'
     | '/_admin/admin/wallet'
     | '/_admin/admin/whatsapp-inventory'
+    | '/_app/crm/legacy'
     | '/_app/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
@@ -865,6 +877,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/nova/mapas'
       preLoaderRoute: typeof AppNovaMapasRouteImport
       parentRoute: typeof AppNovaRoute
+    }
+    '/_app/crm/legacy': {
+      id: '/_app/crm/legacy'
+      path: '/crm/legacy'
+      fullPath: '/crm/legacy'
+      preLoaderRoute: typeof AppCrmLegacyRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_admin/admin/whatsapp-inventory': {
       id: '/_admin/admin/whatsapp-inventory'
@@ -1188,6 +1207,7 @@ interface AppRouteChildren {
   AppMiEmpresaRoute: typeof AppMiEmpresaRoute
   AppNovaRoute: typeof AppNovaRouteWithChildren
   AppSoporteRoute: typeof AppSoporteRoute
+  AppCrmLegacyRoute: typeof AppCrmLegacyRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -1202,6 +1222,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMiEmpresaRoute: AppMiEmpresaRoute,
   AppNovaRoute: AppNovaRouteWithChildren,
   AppSoporteRoute: AppSoporteRoute,
+  AppCrmLegacyRoute: AppCrmLegacyRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
