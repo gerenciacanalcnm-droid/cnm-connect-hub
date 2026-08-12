@@ -26,14 +26,20 @@ import {
   Building2, 
   Phone, 
   Activity,
-  History
+  History,
+  Star,
+  ShieldCheck,
+  ShieldAlert,
+  MoreVertical
 } from "lucide-react";
 import { toast } from "sonner";
 import { 
   getInventoryNumbers, 
   assignNumberToCompany, 
   unassignNumber,
-  getAssignmentAudit
+  getAssignmentAudit,
+  setNumberAsDefault,
+  updateNovaStatus
 } from "@/lib/whatsapp-inventory.functions";
 import {
   Dialog,
@@ -50,10 +56,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { testSpecificWhatsAppConnection } from "@/lib/whatsapp-diagnostic.functions";
 
 export const Route = createFileRoute("/_admin/admin/whatsapp-inventory")({
   head: () => ({ meta: [{ title: "Inventario de Números WhatsApp — Super Admin" }] }),
@@ -107,6 +122,34 @@ function WhatsAppInventoryPage() {
     onError: (err: any) => toast.error(err.message),
   });
 
+  const setDefaultMutation = useMutation({
+    mutationFn: (data: { accountId: string; companyId: string }) => setNumberAsDefault({ data }),
+    onSuccess: () => {
+      toast.success("Número establecido como principal");
+      queryClient.invalidateQueries({ queryKey: ["whatsapp-inventory"] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: (data: { accountId: string; status: any }) => updateNovaStatus({ data }),
+    onSuccess: () => {
+      toast.success("Estado actualizado correctamente");
+      queryClient.invalidateQueries({ queryKey: ["whatsapp-inventory"] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const handleDiagnostic = async (accountId: string) => {
+    toast.promise(testSpecificWhatsAppConnection({ data: { accountId } }), {
+      loading: "Ejecutando diagnóstico Meta...",
+      success: (res) => {
+        return `Diagnóstico: ${res.basic.PHONE_NUMBER === 'OK' ? 'Conexión Exitosa' : 'Error en Meta'}`;
+      },
+      error: "Error al conectar con Meta API",
+    });
+  };
+
   const handleAssign = () => {
     if (!selectedAccount || !selectedCompanyId) return;
     assignMutation.mutate({
@@ -121,6 +164,8 @@ function WhatsAppInventoryPage() {
         return <Badge className="bg-blue-500/10 text-blue-600 border-blue-200">Asignado</Badge>;
       case "AVAILABLE":
         return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-200">Disponible</Badge>;
+      case "DISABLED":
+        return <Badge className="bg-slate-500/10 text-slate-600 border-slate-200">Desactivado</Badge>;
       case "DISCONNECTED":
         return <Badge variant="secondary">Desconectado</Badge>;
       case "ERROR":
@@ -128,6 +173,16 @@ function WhatsAppInventoryPage() {
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+
+  const getMetaStatusBadge = (status: string) => {
+    const isConnected = status === 'connected';
+    return (
+      <div className="flex items-center gap-1.5">
+        <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+        <span className="text-[10px] uppercase font-bold text-muted-foreground">{status || 'unknown'}</span>
+      </div>
+    );
   };
 
   return (
@@ -152,7 +207,7 @@ function WhatsAppInventoryPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Número / Alias</TableHead>
-                  <TableHead>WABA / Phone ID</TableHead>
+                  <TableHead>Estado Meta</TableHead>
                   <TableHead>Estado Nova</TableHead>
                   <TableHead>Empresa Asignada</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
@@ -171,23 +226,30 @@ function WhatsAppInventoryPage() {
                   numbers.map((n) => (
                     <TableRow key={n.id}>
                       <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{n.phone_number || n.display_phone || "Sin número"}</span>
-                          <span className="text-xs text-muted-foreground">{n.alias}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{n.phone_number || n.display_phone || "Sin número"}</span>
+                              {n.is_default && (
+                                <Badge variant="secondary" className="h-5 px-1 bg-amber-50 text-amber-600 border-amber-200">
+                                  <Star className="h-3 w-3 fill-current mr-1" /> Principal
+                                </Badge>
+                              )}
+                            </div>
+                            <span className="text-xs text-muted-foreground">{n.alias}</span>
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col text-xs text-muted-foreground">
-                          <span>WABA: {n.waba_id || n.business_account_id || "—"}</span>
-                          <span>ID: {n.phone_number_id || "—"}</span>
-                        </div>
-                      </TableCell>
+                      <TableCell>{getMetaStatusBadge(n.status)}</TableCell>
                       <TableCell>{getStatusBadge(n.nova_status || 'AVAILABLE')}</TableCell>
                       <TableCell>
                         {n.companies ? (
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                            <span className="text-sm font-medium">{n.companies.name}</span>
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-2 text-sm font-medium">
+                              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                              {n.companies.name}
+                            </div>
+                            <span className="text-[10px] text-muted-foreground uppercase font-mono mt-0.5">ID: {n.company_id.split('-')[0]}...</span>
                           </div>
                         ) : (
                           <span className="text-xs text-muted-foreground italic">No asignado</span>
@@ -206,34 +268,63 @@ function WhatsAppInventoryPage() {
                           >
                             <History className="h-4 w-4" />
                           </Button>
-                          
-                          {n.nova_status === "AVAILABLE" ? (
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="h-8 gap-1.5"
-                              onClick={() => {
-                                setSelectedAccount(n);
-                                setIsAssignOpen(true);
-                              }}
-                            >
-                              <Link className="h-3.5 w-3.5" /> Asignar
-                            </Button>
-                          ) : (
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-8 gap-1.5 text-destructive hover:bg-destructive/10"
-                              onClick={() => {
-                                if (confirm(`¿Deseas quitar este número de la empresa ${n.companies?.name}?`)) {
-                                  unassignMutation.mutate({ accountId: n.id });
-                                }
-                              }}
-                              disabled={unassignMutation.isPending}
-                            >
-                              <Unlink className="h-3.5 w-3.5" /> Desasignar
-                            </Button>
-                          )}
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56">
+                              <DropdownMenuLabel>Operaciones Nova</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              
+                              {n.nova_status === "AVAILABLE" ? (
+                                <DropdownMenuItem onClick={() => {
+                                  setSelectedAccount(n);
+                                  setIsAssignOpen(true);
+                                }}>
+                                  <Link className="mr-2 h-4 w-4" /> Asignar a Empresa
+                                </DropdownMenuItem>
+                              ) : (
+                                <>
+                                  <DropdownMenuItem 
+                                    onClick={() => setDefaultMutation.mutate({ accountId: n.id, companyId: n.company_id })}
+                                    disabled={n.is_default || setDefaultMutation.isPending}
+                                  >
+                                    <Star className="mr-2 h-4 w-4 text-amber-500" /> Establecer como Principal
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuItem onClick={() => handleDiagnostic(n.id)}>
+                                    <Activity className="mr-2 h-4 w-4 text-blue-500" /> Diagnóstico Meta
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuSeparator />
+                                  
+                                  {n.nova_status === 'DISABLED' ? (
+                                    <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ accountId: n.id, status: 'ASSIGNED' })}>
+                                      <ShieldCheck className="mr-2 h-4 w-4 text-emerald-500" /> Activar Número
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ accountId: n.id, status: 'DISABLED' })}>
+                                      <ShieldAlert className="mr-2 h-4 w-4 text-amber-500" /> Desactivar Número
+                                    </DropdownMenuItem>
+                                  )}
+
+                                  <DropdownMenuItem 
+                                    className="text-destructive focus:text-destructive"
+                                    onClick={() => {
+                                      if (confirm(`¿Deseas quitar este número de la empresa ${n.companies?.name}?`)) {
+                                        unassignMutation.mutate({ accountId: n.id });
+                                      }
+                                    }}
+                                  >
+                                    <Unlink className="mr-2 h-4 w-4" /> Desasignar de Empresa
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -261,10 +352,10 @@ function WhatsAppInventoryPage() {
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                   <Phone className="h-5 w-5" />
                 </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{(selectedAccount?.phone_number || selectedAccount?.display_phone) ?? "—"}</span>
-                          <span className="text-xs text-muted-foreground">{selectedAccount?.alias}</span>
-                        </div>
+                <div className="flex flex-col">
+                  <span className="font-medium">{(selectedAccount?.phone_number || selectedAccount?.display_phone) ?? "—"}</span>
+                  <span className="text-xs text-muted-foreground">{selectedAccount?.alias}</span>
+                </div>
               </div>
 
               <div className="space-y-2">
