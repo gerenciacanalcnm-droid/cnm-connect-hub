@@ -236,7 +236,7 @@ export function WhatsAppChannelConfig() {
                   <Alert className="mt-4 border-emerald-500/20 bg-emerald-500/5 py-2">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                     <AlertDescription className="text-[11px] text-emerald-600">
-                      Webhook configurado y activo para recibir eventos.
+                      Webhook configurado pero sin eventos reales recibidos
                     </AlertDescription>
                   </Alert>
                 )}
