@@ -76,7 +76,7 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
     if (variables.length > 0) {
       // Meta requiere que body_text sea un array de arrays de strings (uno por cada juego de variables)
       bodyComp.example = {
-        body_text: [variables.map((_, i) => `Ejemplo ${i + 1}`)]
+        body_text: [variables.map((_, i) => i === 0 ? "Laura" : `Ejemplo ${i + 1}`)]
       };
     }
     components.push(bodyComp);
