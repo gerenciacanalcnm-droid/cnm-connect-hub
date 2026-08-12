@@ -333,12 +333,13 @@ export function SendWhatsAppIndividual() {
             {limitError && (
               <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Límite Alcanzado</Divider>
+                <AlertTitle>Límite Alcanzado</AlertTitle>
                 <AlertDescription className="text-xs">
                   {limitError}
                 </AlertDescription>
               </Alert>
             )}
+
 
             {mode === "schedule" && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-emerald-50/30 rounded-lg border border-emerald-100">
