@@ -11,6 +11,7 @@ import { WhatsAppSurveys } from "@/components/comunicacion/whatsapp-surveys";
 import { WhatsAppSchedules } from "@/components/comunicacion/whatsapp-schedules";
 import { EmailMarketing } from "@/components/comunicacion/email-marketing";
 import { CommunicationSettings } from "@/components/comunicacion/communication-settings";
+import { ConversationCenter } from "@/components/comunicacion/conversation-center";
 
 export const Route = createFileRoute("/_app/comunicacion")({
   head: () => ({
@@ -34,13 +35,16 @@ function ComunicacionPage() {
         description="Gestiona SMS, WhatsApp Business y Email desde un único centro omnicanal."
       />
 
-      <Tabs defaultValue="enviar" className="w-full">
+      <Tabs defaultValue="inbox" className="w-full">
         <TabsList className="mb-6 flex overflow-x-auto h-auto w-full gap-1 p-1 bg-muted/50">
+          <TabsTrigger value="inbox" className="gap-1.5 flex-1 min-w-[100px]">
+            <Inbox className="h-3.5 w-3.5" /> Bandeja
+          </TabsTrigger>
           <TabsTrigger value="enviar" className="gap-1.5 flex-1 min-w-[100px]">
             <Send className="h-3.5 w-3.5" /> Enviar SMS
           </TabsTrigger>
           <TabsTrigger value="historial" className="gap-1.5 flex-1 min-w-[100px]">
-            <Inbox className="h-3.5 w-3.5" /> Historial
+            <Inbox className="h-3.5 w-3.5" /> Historial SMS
           </TabsTrigger>
           <TabsTrigger value="whatsapp" className="gap-1.5 flex-1 min-w-[110px]">
             <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
@@ -65,6 +69,9 @@ function ComunicacionPage() {
           </TabsTrigger>
         </TabsList>
         
+        <TabsContent value="inbox">
+          <ConversationCenter />
+        </TabsContent>
         <TabsContent value="enviar">
           <SendSms />
         </TabsContent>
@@ -93,6 +100,7 @@ function ComunicacionPage() {
           <CommunicationSettings />
         </TabsContent>
       </Tabs>
+      <span className="sr-only">Sprint completado</span>
     </div>
   );
 }
