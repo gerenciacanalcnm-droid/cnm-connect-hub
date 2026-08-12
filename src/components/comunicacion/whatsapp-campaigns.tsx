@@ -209,36 +209,46 @@ export function WhatsAppCampaigns() {
             
             <div className="grid gap-6 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Nombre de la campaña</Label>
+                <Label htmlFor="name" className="text-slate-700 font-bold">Nombre de la campaña</Label>
                 <Input 
                   id="name" 
-                  placeholder="Ej: Ofertas de Verano 2024" 
+                  placeholder="Ej: TEST_CAMPAIGN_5" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  className="border-slate-200"
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label>Cuenta de envío</Label>
+                <Label className="text-slate-700 font-bold">Cuenta de envío (WABA + Phone ID)</Label>
                 <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un número de WhatsApp" />
+                  <SelectTrigger className="border-slate-200">
+                    <SelectValue placeholder="Selecciona un número CONNECTED" />
                   </SelectTrigger>
                   <SelectContent>
-                    {accounts.filter((a: any) => a.nova_status === 'ASSIGNED').map((acc: any) => (
+                    {accounts.filter((a: any) => a.nova_status === 'ASSIGNED' && a.status === 'connected').map((acc: any) => (
                       <SelectItem key={acc.id} value={acc.id}>
-                        {acc.alias} ({acc.displayPhone || acc.phoneNumberId})
+                        <div className="flex flex-col">
+                          <span className="font-bold">{acc.alias}</span>
+                          <span className="text-[10px] text-slate-500">{acc.displayPhone || acc.phoneNumberId}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedAccount && (
+                  <div className="px-3 py-2 bg-slate-50 rounded-lg text-[10px] text-slate-500 border border-slate-100 flex flex-col gap-0.5">
+                    <span>WABA ID: {selectedAccount.business_account_id}</span>
+                    <span>Phone ID: {selectedAccount.phone_number_id}</span>
+                  </div>
+                )}
               </div>
 
               <div className="grid gap-2">
-                <Label>Plantilla</Label>
+                <Label className="text-slate-700 font-bold">Plantilla (APPROVED)</Label>
                 <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una plantilla aprobada" />
+                  <SelectTrigger className="border-slate-200">
+                    <SelectValue placeholder="Selecciona una plantilla validada" />
                   </SelectTrigger>
                   <SelectContent>
                     {approvedTemplates.map((tpl: any) => (
@@ -254,7 +264,7 @@ export function WhatsAppCampaigns() {
                   </SelectContent>
                 </Select>
                 {selectedTemplate && (
-                  <div className="mt-2 p-3 bg-slate-50 rounded-lg border border-dashed text-xs text-slate-600 italic">
+                  <div className="mt-1 p-2 bg-blue-50/50 border border-blue-100 rounded-lg text-[10px] text-blue-700 font-medium italic">
                     <p>{selectedTemplate.body}</p>
                   </div>
                 )}
@@ -262,58 +272,95 @@ export function WhatsAppCampaigns() {
 
               <div className="grid gap-2">
                 <div className="flex justify-between items-center">
-                  <Label>Destinatarios</Label>
-                  <Badge variant="outline" className="text-[10px]">
-                    {manualPhones.split(/[\n,]/).filter(p => p.trim().length > 5).length} números
+                  <Label className="text-slate-700 font-bold">Destinatarios</Label>
+                  <Badge variant="outline" className="text-[10px] bg-slate-50">
+                    {recipientStats.total} ingresados
                   </Badge>
                 </div>
                 <Textarea 
-                  placeholder="Pega aquí los números de teléfono (uno por línea o separados por coma)..."
-                  className="min-h-[120px] font-mono text-sm"
+                  placeholder="Escribe o pega números (uno por línea)..."
+                  className="min-h-[100px] font-mono text-sm border-slate-200 focus-visible:ring-emerald-500"
                   value={manualPhones}
                   onChange={(e) => setManualPhones(e.target.value)}
                 />
-                <p className="text-[10px] text-slate-400">
-                  Formato internacional recomendado: +573001234567
-                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200 text-[9px] gap-1">
+                    <Check className="h-2.5 w-2.5" /> {recipientStats.valid} válidos
+                  </Badge>
+                  {recipientStats.duplicates > 0 && (
+                    <Badge variant="outline" className="text-amber-600 border-amber-200 text-[9px] gap-1 bg-amber-50">
+                      <Zap className="h-2.5 w-2.5" /> {recipientStats.duplicates} duplicados
+                    </Badge>
+                  )}
+                  {recipientStats.invalid > 0 && (
+                    <Badge variant="destructive" className="text-[9px] gap-1 px-1.5 py-0">
+                      <AlertTriangle className="h-2.5 w-2.5" /> {recipientStats.invalid} inválidos
+                    </Badge>
+                  )}
+                </div>
               </div>
 
-              <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-sm font-bold text-emerald-900">Resumen de Campaña</h4>
-                  <p className="text-xs text-emerald-700 mt-1">
-                    Costo estimado: <span className="font-bold">{formatCurrency((manualPhones.split(/[\n,]/).filter(p => p.trim().length > 5).length) * 0.05)}</span>
-                  </p>
-                  <p className="text-[10px] text-emerald-600 mt-1">
-                    Tu saldo actual en Wallet: {formatCurrency(myWallet?.balance || 0)}
-                  </p>
+              <div className="p-4 bg-slate-900 rounded-xl border border-slate-800 text-white shadow-lg space-y-3">
+                <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                  <BarChart3 className="h-4 w-4 text-emerald-400" />
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Validación Pre-Envío</h4>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-y-2 text-[11px]">
+                  <div className="text-slate-400">Destinatarios finales:</div>
+                  <div className="text-right font-bold text-white">{recipientStats.valid}</div>
+                  
+                  <div className="text-slate-400">Costo Estimado:</div>
+                  <div className="text-right font-bold text-emerald-400">{formatCurrency(costData.cost)}</div>
+                  
+                  <div className="text-slate-400">Saldo Actual:</div>
+                  <div className="text-right font-medium text-slate-300">{formatCurrency(costData.currentBalance)}</div>
+                  
+                  <div className="text-slate-400 border-t border-white/5 pt-1">Saldo Proyectado:</div>
+                  <div className={`text-right font-bold border-t border-white/5 pt-1 ${costData.isOverBalance ? 'text-red-400' : 'text-slate-200'}`}>
+                    {formatCurrency(costData.projectedBalance)}
+                  </div>
+                </div>
+
+                {costData.isOverBalance && (
+                  <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 py-2">
+                    <AlertTriangle className="h-3 w-3 text-red-500" />
+                    <AlertDescription className="text-[10px] text-red-400 font-bold ml-1">
+                      Saldo insuficiente para ejecutar esta campaña
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                <div className="flex items-start gap-2 text-[9px] text-slate-500 bg-black/20 p-2 rounded-lg italic">
+                  <Info className="h-3 w-3 shrink-0" />
+                  <span>El envío se procesará en segundo plano (Server-side Jobs). No es necesario mantener esta ventana abierta.</span>
                 </div>
               </div>
             </div>
 
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsNewDialogOpen(false)}>
+            <DialogFooter className="bg-slate-50/50 p-4 -mx-6 -mb-6 border-t rounded-b-lg">
+              <Button variant="outline" onClick={() => setIsNewDialogOpen(false)} disabled={isValidating}>
                 Cancelar
               </Button>
               <Button 
                 onClick={handleCreate} 
-                disabled={createCampaign.isPending}
-                className="bg-emerald-600 hover:bg-emerald-700"
+                disabled={createCampaign.isPending || startCampaign.isPending || costData.isOverBalance || recipientStats.valid === 0}
+                className="bg-slate-900 hover:bg-black text-white px-8"
               >
-                {createCampaign.isPending ? (
+                {createCampaign.isPending || startCampaign.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Encolando...
+                    Validando...
                   </>
                 ) : (
                   <>
-                    <Send className="mr-2 h-4 w-4" />
-                    Lanzar Campaña
+                    <Play className="mr-2 h-4 w-4 fill-current" />
+                    Iniciar Campaña Real
                   </>
                 )}
               </Button>
             </DialogFooter>
+
           </DialogContent>
         </Dialog>
       </div>
