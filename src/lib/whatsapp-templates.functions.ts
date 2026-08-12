@@ -12,6 +12,7 @@ export const saveWhatsAppTemplateDraft = createServerFn({ method: "POST" })
   .inputValidator((v) =>
     z.object({
       id: z.string().uuid().optional(),
+      accountId: z.string().uuid(),
       name: z.string().min(1),
       category: z.string(),
       language: z.string(),
@@ -19,6 +20,7 @@ export const saveWhatsAppTemplateDraft = createServerFn({ method: "POST" })
       body: z.string().min(1),
       footer: z.string().optional(),
       buttons: z.array(z.any()).optional(),
+      metadata: z.any().optional(),
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
