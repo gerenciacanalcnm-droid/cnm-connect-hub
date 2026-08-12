@@ -62,7 +62,7 @@ export function ContactFormDialog({
       if (!defaultValues?.id) return [];
       return getContactTagsFn({ data: { contact_id: defaultValues.id } });
     },
-    enabled: !!defaultValues?.id && open,
+    enabled: Boolean(defaultValues?.id) && open,
   });
 
   useEffect(() => {

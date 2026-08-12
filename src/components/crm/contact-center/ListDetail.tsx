@@ -213,7 +213,7 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
             Etiquetas
           </Badge>
           <span className="text-xs text-muted-foreground italic">
-            No utilizar: Build OK o Typecheck OK como prueba de funcionamiento. La prueba debe realizarse con la lista real y sus 19 contactos.
+            No utilizar: Build OK como prueba de funcionamiento. La prueba debe realizarse con la lista real y sus 19 contactos.
           </span>
         </div>
       </div>
