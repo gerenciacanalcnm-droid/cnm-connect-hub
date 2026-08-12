@@ -172,3 +172,23 @@ export const getWhatsAppConsumptionStats = createServerFn({ method: "GET" })
       cost
     };
   });
+
+/**
+ * Check WhatsApp limits for a company (Server-side, respects RLS/Auth).
+ */
+export const checkWhatsAppLimits = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ companyId: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    // Note: The RPC check_whatsapp_limits is SECURITY DEFINER but we restricted EXECUTE to service_role.
+    // Here we use supabaseAdmin to call it securely from the server.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    
+    const { data: limitCheck, error: rpcError } = await (supabaseAdmin as any).rpc('check_whatsapp_limits', {
+      _company_id: data.companyId
+    });
+
+    if (rpcError) throw new Error(rpcError.message);
+    return limitCheck;
+  });
+
