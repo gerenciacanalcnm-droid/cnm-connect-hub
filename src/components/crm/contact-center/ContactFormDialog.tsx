@@ -150,30 +150,36 @@ export function ContactFormDialog({
     }
   }, [open, defaultValues, form, editingContact]);
 
+  // PRUEBA DE DIAGNÓSTICO 4: Reintroducir únicamente listContactTags (sin vinculación a contacto)
   if (editingContact !== null) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>PRUEBA 3 — EFECTOS DE SINCRONIZACIÓN</DialogTitle>
+            <DialogTitle>PRUEBA 4 — CARGA GLOBAL DE ETIQUETAS</DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form className="space-y-4">
               <FormField control={form.control} name="first_name" render={({ field }) => (
                 <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
               )} />
-              <FormField control={form.control} name="last_name" render={({ field }) => (
-                <FormItem><FormLabel>Apellido</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
-              <FormField control={form.control} name="phone" render={({ field }) => (
-                <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
-              <FormField control={form.control} name="email" render={({ field }) => (
-                <FormItem><FormLabel>Email</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
+              {/* Otros campos omitidos para brevedad en esta vista de prueba */}
+              
+              <div className="space-y-2">
+                <FormLabel>Etiquetas Globales (TanStack Query)</FormLabel>
+                <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/20">
+                  {allTags?.length === 0 && <span className="text-xs text-muted-foreground">No hay etiquetas creadas.</span>}
+                  {allTags?.map((tag: any) => (
+                    <Badge key={tag.id} variant="outline">
+                      {tag.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
               <div className="p-2 bg-muted text-xs rounded text-center">
-                DIAGNÓSTICO: useEffect de sincronización ACTIVO (Prueba 3)
+                DIAGNÓSTICO: listContactTags (allTags) ACTIVO (Prueba 4)
               </div>
             </form>
           </Form>
