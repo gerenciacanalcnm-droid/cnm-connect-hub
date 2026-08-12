@@ -34,6 +34,7 @@ import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicSmsSchedulerRouteImport } from './routes/api/public/sms-scheduler'
 import { Route as AppNovaMapasRouteImport } from './routes/_app.nova.mapas'
+import { Route as AdminAdminWhatsappInventoryRouteImport } from './routes/_admin.admin.whatsapp-inventory'
 import { Route as AdminAdminWalletRouteImport } from './routes/_admin.admin.wallet'
 import { Route as AdminAdminUsuariosRouteImport } from './routes/_admin.admin.usuarios'
 import { Route as AdminAdminTarifasRouteImport } from './routes/_admin.admin.tarifas'
@@ -185,6 +186,12 @@ const AppNovaMapasRoute = AppNovaMapasRouteImport.update({
   path: '/mapas',
   getParentRoute: () => AppNovaRoute,
 } as any)
+const AdminAdminWhatsappInventoryRoute =
+  AdminAdminWhatsappInventoryRouteImport.update({
+    id: '/admin/whatsapp-inventory',
+    path: '/admin/whatsapp-inventory',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminAdminWalletRoute = AdminAdminWalletRouteImport.update({
   id: '/admin/wallet',
   path: '/admin/wallet',
@@ -370,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
+  '/admin/whatsapp-inventory': typeof AdminAdminWhatsappInventoryRoute
   '/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -421,6 +429,7 @@ export interface FileRoutesByTo {
   '/admin/tarifas': typeof AdminAdminTarifasRoute
   '/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/admin/wallet': typeof AdminAdminWalletRoute
+  '/admin/whatsapp-inventory': typeof AdminAdminWhatsappInventoryRoute
   '/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -476,6 +485,7 @@ export interface FileRoutesById {
   '/_admin/admin/tarifas': typeof AdminAdminTarifasRoute
   '/_admin/admin/usuarios': typeof AdminAdminUsuariosRoute
   '/_admin/admin/wallet': typeof AdminAdminWalletRoute
+  '/_admin/admin/whatsapp-inventory': typeof AdminAdminWhatsappInventoryRoute
   '/_app/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -529,6 +539,7 @@ export interface FileRouteTypes {
     | '/admin/tarifas'
     | '/admin/usuarios'
     | '/admin/wallet'
+    | '/admin/whatsapp-inventory'
     | '/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
@@ -580,6 +591,7 @@ export interface FileRouteTypes {
     | '/admin/tarifas'
     | '/admin/usuarios'
     | '/admin/wallet'
+    | '/admin/whatsapp-inventory'
     | '/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
@@ -634,6 +646,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/tarifas'
     | '/_admin/admin/usuarios'
     | '/_admin/admin/wallet'
+    | '/_admin/admin/whatsapp-inventory'
     | '/_app/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
@@ -826,6 +839,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/nova/mapas'
       preLoaderRoute: typeof AppNovaMapasRouteImport
       parentRoute: typeof AppNovaRoute
+    }
+    '/_admin/admin/whatsapp-inventory': {
+      id: '/_admin/admin/whatsapp-inventory'
+      path: '/admin/whatsapp-inventory'
+      fullPath: '/admin/whatsapp-inventory'
+      preLoaderRoute: typeof AdminAdminWhatsappInventoryRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_admin/admin/wallet': {
       id: '/_admin/admin/wallet'
@@ -1046,6 +1066,7 @@ interface AdminRouteChildren {
   AdminAdminTarifasRoute: typeof AdminAdminTarifasRoute
   AdminAdminUsuariosRoute: typeof AdminAdminUsuariosRoute
   AdminAdminWalletRoute: typeof AdminAdminWalletRoute
+  AdminAdminWhatsappInventoryRoute: typeof AdminAdminWhatsappInventoryRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -1075,6 +1096,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAdminTarifasRoute: AdminAdminTarifasRoute,
   AdminAdminUsuariosRoute: AdminAdminUsuariosRoute,
   AdminAdminWalletRoute: AdminAdminWalletRoute,
+  AdminAdminWhatsappInventoryRoute: AdminAdminWhatsappInventoryRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

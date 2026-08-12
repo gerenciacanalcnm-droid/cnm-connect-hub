@@ -24,7 +24,7 @@ export const listWhatsAppAccounts = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("whatsapp_accounts")
       .select(
-        "id, company_id, alias, department, display_phone, status, is_primary, provider, business_account_id, phone_number_id, waba_name, quality_rating, verified_name, webhook_url, last_synced_at, created_at, updated_at",
+        "id, company_id, alias, department, display_phone, status, is_primary, provider, business_account_id, phone_number_id, waba_name, quality_rating, verified_name, webhook_url, last_synced_at, created_at, updated_at, nova_status",
       )
       .order("is_primary", { ascending: false })
       .order("created_at", { ascending: true });

@@ -19,6 +19,12 @@ export type WhatsAppAccountStatus =
   | "error"
   | "suspended";
 
+export type WhatsAppAssignmentStatus = 
+  | "AVAILABLE"
+  | "ASSIGNED"
+  | "DISCONNECTED"
+  | "ERROR";
+
 export type WhatsAppDepartment = "ventas" | "soporte" | "cobranza" | "marketing" | "general";
 
 export const DEPARTMENT_LABEL: Record<WhatsAppDepartment, string> = {
@@ -37,7 +43,7 @@ export const DEPARTMENT_LABEL: Record<WhatsAppDepartment, string> = {
  */
 export interface WhatsAppAccount {
   id: ID;
-  companyId: ID;
+  companyId?: ID;
   alias: string;
   department: WhatsAppDepartment;
   displayPhone?: string;
@@ -53,6 +59,7 @@ export interface WhatsAppAccount {
   lastSyncedAt?: string;
   createdAt: string;
   updatedAt: string;
+  novaStatus?: WhatsAppAssignmentStatus;
 }
 
 export interface WhatsAppAccountInput {

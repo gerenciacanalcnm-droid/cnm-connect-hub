@@ -18,7 +18,7 @@ import {
 
 type AccountRow = {
   id: string;
-  company_id: string;
+  company_id: string | null;
   alias: string;
   department: string;
   display_phone: string | null;
@@ -34,12 +34,13 @@ type AccountRow = {
   last_synced_at: string | null;
   created_at: string;
   updated_at: string;
+  nova_status: string | null;
 };
 
 function mapAccount(r: AccountRow): WhatsAppAccount {
   return {
     id: r.id,
-    companyId: r.company_id,
+    companyId: r.company_id ?? undefined,
     alias: r.alias,
     department: r.department as WhatsAppAccount["department"],
     displayPhone: r.display_phone ?? undefined,
@@ -55,6 +56,7 @@ function mapAccount(r: AccountRow): WhatsAppAccount {
     lastSyncedAt: r.last_synced_at ?? undefined,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
+    novaStatus: (r.nova_status as WhatsAppAccount["novaStatus"]) ?? 'AVAILABLE',
   };
 }
 

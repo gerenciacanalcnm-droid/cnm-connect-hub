@@ -2358,6 +2358,61 @@ export type Database = {
           },
         ]
       }
+      whatsapp_assignment_audit: {
+        Row: {
+          account_id: string
+          action: string
+          admin_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          new_company_id: string | null
+          old_company_id: string | null
+        }
+        Insert: {
+          account_id: string
+          action: string
+          admin_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_company_id?: string | null
+          old_company_id?: string | null
+        }
+        Update: {
+          account_id?: string
+          action?: string
+          admin_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_company_id?: string | null
+          old_company_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_assignment_audit_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_assignment_audit_new_company_id_fkey"
+            columns: ["new_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_assignment_audit_old_company_id_fkey"
+            columns: ["old_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_campaigns: {
         Row: {
           account_id: string | null
@@ -2891,6 +2946,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_whatsapp_account: {
+        Args: { _account_id: string; _admin_id: string; _company_id: string }
+        Returns: undefined
+      }
       has_company_role: {
         Args: {
           _company_id: string
@@ -2923,6 +2982,10 @@ export type Database = {
           id: string
           similarity: number
         }[]
+      }
+      unassign_whatsapp_account: {
+        Args: { _account_id: string; _admin_id: string }
+        Returns: undefined
       }
     }
     Enums: {
