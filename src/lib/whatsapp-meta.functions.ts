@@ -53,12 +53,14 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
       if (headerType === "TEXT") {
         headerComp.text = metadata.header_text || template.header;
       } else {
-        // Para Media (IMAGE, VIDEO, DOCUMENT) Meta requiere un handle de ejemplo
-        // El handle debe ser el devuelto por la API de subida de Meta
-        const mediaHandle = metadata.header_handle || metadata.media_id;
-        headerComp.example = { 
-          header_handle: [mediaHandle || "4_IMAGE_HANDLE_PLACEHOLDER"] 
-        };
+        // Media (IMAGE, VIDEO, DOCUMENT): Meta exige el handle devuelto por la Resumable Upload API
+        const mediaHandle = metadata.header_handle;
+        if (!mediaHandle || /^(blob:|http)/i.test(String(mediaHandle))) {
+          throw new Error(
+            "META_HEADER_HANDLE_MISSING: La plantilla con encabezado multimedia requiere un header_handle válido de Meta. Carga la imagen antes de enviar."
+          );
+        }
+        headerComp.example = { header_handle: [String(mediaHandle)] };
       }
       components.push(headerComp);
     }
