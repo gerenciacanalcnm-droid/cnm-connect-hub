@@ -218,7 +218,7 @@ export const exportListCsv = createServerFn({ method: "POST" })
       // Validate list ownership
       const { data: listExists, error: listError } = await (context.supabase as any)
         .from("contact_lists")
-        .select("id")
+        .select("id, name")
         .eq("id", data.list_id)
         .eq("company_id", CNM_COMPANY_ID)
         .maybeSingle();
