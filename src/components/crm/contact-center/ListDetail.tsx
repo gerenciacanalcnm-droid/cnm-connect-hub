@@ -196,7 +196,7 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
             <Upload className="h-4 w-4" /> Importar CSV
           </Button>
           <Button variant="outline" size="sm" className="gap-2" onClick={handleExport}>
-            <Download className="h-4 w-4" /> nueva lista
+            <Download className="h-4 w-4" /> Exportar
           </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <Edit className="h-4 w-4" /> Editar lista
