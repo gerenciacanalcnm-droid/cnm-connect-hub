@@ -18,7 +18,9 @@ import {
   Zap,
   Check,
   AlertTriangle,
-  Info
+  Info,
+  Activity,
+  Clock
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,6 +53,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useWhatsAppCampaigns, useCreateWhatsAppCampaign, useStartWhatsAppCampaign, useWhatsAppCampaignDetails } from "@/hooks/use-whatsapp-campaigns";
 import { useWhatsAppAccounts, useWhatsAppTemplates } from "@/hooks/use-whatsapp";
 import { useMyWallet } from "@/hooks/use-commercial";
+import { useWebhookDiagnostic } from "@/hooks/use-whatsapp-webhooks";
 import { formatCurrency } from "@/lib/format";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
