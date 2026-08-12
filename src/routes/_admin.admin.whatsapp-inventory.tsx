@@ -261,10 +261,10 @@ function WhatsAppInventoryPage() {
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                   <Phone className="h-5 w-5" />
                 </div>
-                <div>
-                  <p className="text-sm font-medium">{selectedAccount.phone_number || selectedAccount.display_phone}</p>
-                  <p className="text-xs text-muted-foreground">{selectedAccount.alias}</p>
-                </div>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{(selectedAccount?.phone_number || selectedAccount?.display_phone) ?? "—"}</span>
+                          <span className="text-xs text-muted-foreground">{selectedAccount?.alias}</span>
+                        </div>
               </div>
 
               <div className="space-y-2">
@@ -302,7 +302,7 @@ function WhatsAppInventoryPage() {
               <History className="h-5 w-5" /> Historial de Asignaciones
             </DialogTitle>
             <DialogDescription>
-              Trazabilidad de cambios para {selectedAccount?.phone_number || selectedAccount?.alias}.
+              Trazabilidad de cambios para {(selectedAccount?.phone_number || selectedAccount?.alias) ?? "—"}.
             </DialogDescription>
           </DialogHeader>
 
