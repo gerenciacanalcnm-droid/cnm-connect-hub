@@ -48,6 +48,7 @@ export function WhatsAppTemplates() {
   const [selectedComponent, setSelectedComponent] = useState<'HEADER' | 'BODY' | 'FOOTER' | 'BUTTONS' | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Cargar plantillas
@@ -86,7 +87,18 @@ export function WhatsAppTemplates() {
       toast.success(`Plantilla enviada a Meta. Estado: ${res.status}`);
       setIsEditorOpen(false);
     },
-    onError: (err: any) => toast.error(err.message)
+    onError: (err: any) => {
+      // El error ya viene con el formato detallado desde el server function
+      toast.error(
+        <div className="flex flex-col gap-1 max-w-[400px]">
+          <span className="font-bold text-red-600">Error de Meta Cloud API</span>
+          <pre className="text-[10px] bg-slate-50 p-2 rounded border border-slate-200 overflow-x-auto whitespace-pre-wrap">
+            {err.message}
+          </pre>
+        </div>,
+        { duration: 8000 }
+      );
+    }
   });
 
   const syncMutation = useMutation({
@@ -162,6 +174,7 @@ export function WhatsAppTemplates() {
       setBody("");
       setHeaderType("NONE");
       setHeaderText("");
+      setLocalPreviewUrl(null);
       setFooter("");
       setButtons([]);
     }
@@ -173,6 +186,10 @@ export function WhatsAppTemplates() {
 
     setIsUploading(true);
     try {
+      // 1. Crear preview local inmediata
+      const objectUrl = URL.createObjectURL(file);
+      setLocalPreviewUrl(objectUrl);
+
       const reader = new FileReader();
       reader.onload = async () => {
         const base64 = reader.result as string;
@@ -186,8 +203,8 @@ export function WhatsAppTemplates() {
         });
         
         setHeaderType(res.type as any);
-        setHeaderText(res.url);
-        toast.success("Archivo cargado correctamente");
+        setHeaderText(res.url); // En un flujo real esto sería el handle/ID
+        toast.success("Archivo procesado correctamente");
       };
       reader.readAsDataURL(file);
     } catch (error) {
@@ -350,7 +367,11 @@ export function WhatsAppTemplates() {
 
             {headerType === "IMAGE" && (
               <div className="w-full aspect-video bg-slate-200 rounded-md flex items-center justify-center overflow-hidden border border-slate-300">
-                {headerText ? <img src={headerText} alt="Preview" className="w-full h-full object-cover" /> : <span className="text-[10px] text-slate-500 font-bold uppercase">Vista previa de imagen</span>}
+                {(localPreviewUrl || headerText) ? (
+                  <img src={localPreviewUrl || headerText} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[10px] text-slate-500 font-bold uppercase">Vista previa de imagen</span>
+                )}
               </div>
             )}
 
@@ -660,7 +681,7 @@ export function WhatsAppTemplates() {
                   accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
                   header: headerType === 'TEXT' ? headerText : headerType,
-                  metadata: { header_type: headerType, header_text: headerText, status: 'DRAFT' }
+                  metadata: { header_type: headerType, header_text: headerText, status: 'DRAFT', header_handle: headerText }
                 } 
               });
             }}
@@ -689,7 +710,7 @@ export function WhatsAppTemplates() {
                   accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
                   header: headerType === 'TEXT' ? headerText : headerType,
-                  metadata: { header_type: headerType, header_text: headerText }
+                  metadata: { header_type: headerType, header_text: headerText, header_handle: headerText }
                 } 
               });
               
