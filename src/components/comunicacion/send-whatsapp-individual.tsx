@@ -641,7 +641,7 @@ export function SendWhatsAppIndividual() {
               <Alert variant="destructive" className="py-2 px-3 bg-blue-50 border-blue-200">
                 <Info className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-xs text-blue-800 font-bold">
-                  Completa todas las variables de la plantilla.
+                  Saldo insuficiente para ejecutar esta campaña
                 </AlertDescription>
               </Alert>
             )}
