@@ -31,8 +31,10 @@ const formSchema = z.object({
     message: "El nombre debe tener al menos 2 caracteres.",
   }),
   description: z.string().optional(),
-  color: z.string().optional().default("#3b82f6"),
+  color: z.string().min(1, "El color es requerido"),
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface TagFormDialogProps {
   open: boolean;
@@ -45,33 +47,35 @@ export function TagFormDialog({ open, onOpenChange, tag }: TagFormDialogProps) {
   const createTagFn = useServerFn(createContactTag);
   const updateTagFn = useServerFn(updateContactTag);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: tag?.name || "",
-      description: tag?.description || "",
-      color: tag?.color || "#3b82f6",
+      name: "",
+      description: "",
+      color: "#3b82f6",
     },
   });
 
   // Update form when tag changes (for editing)
   React.useEffect(() => {
-    if (tag) {
-      form.reset({
-        name: tag.name,
-        description: tag.description || "",
-        color: tag.color || "#3b82f6",
-      });
-    } else {
-      form.reset({
-        name: "",
-        description: "",
-        color: "#3b82f6",
-      });
+    if (open) {
+      if (tag) {
+        form.reset({
+          name: tag.name || "",
+          description: tag.description || "",
+          color: tag.color || "#3b82f6",
+        });
+      } else {
+        form.reset({
+          name: "",
+          description: "",
+          color: "#3b82f6",
+        });
+      }
     }
-  }, [tag, form]);
+  }, [tag, open, form]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     try {
       if (tag) {
         await updateTagFn({ data: { ...values, id: tag.id } });

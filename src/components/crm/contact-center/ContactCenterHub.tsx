@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { ContactsTable } from "@/components/crm/contacts-table";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Download, Upload, Filter, Search, ShieldCheck, Mail, Plus, Trash2 } from "lucide-react";
+import { UserPlus, Download, Upload, Filter, Search, ShieldCheck, Mail, Plus, Trash2, Edit2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -10,14 +10,28 @@ import { ContactListManager } from "./ContactListManager";
 import { Badge } from "@/components/ui/badge";
 import { ContactFormDialog } from "./ContactFormDialog";
 import { CSVImporter } from "./CSVImporter";
+import { TagFormDialog } from "./TagFormDialog";
 import { useServerFn } from "@tanstack/react-start";
 import { exportContacts } from "@/lib/contacts.functions";
+import { listContactTags, deleteContactTag } from "@/lib/tags.functions";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 
 
 export function ContactCenterHub() {
+  const queryClient = useQueryClient();
   const exportFn = useServerFn(exportContacts);
+  const getTagsFn = useServerFn(listContactTags);
+  const deleteTagFn = useServerFn(deleteContactTag);
+
+  const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<any>(null);
+
+  const { data: tags, isLoading: tagsLoading } = useQuery({
+    queryKey: ["contact-tags"],
+    queryFn: () => getTagsFn(),
+  });
 
   const handleExport = async () => {
     try {
@@ -31,6 +45,27 @@ export function ContactCenterHub() {
       toast.success("Exportación iniciada");
     } catch {
       toast.error("Error al exportar contactos");
+    }
+  };
+
+  const handleEditTag = (tag: any) => {
+    setSelectedTag(tag);
+    setIsTagDialogOpen(true);
+  };
+
+  const handleNewTag = () => {
+    setSelectedTag(null);
+    setIsTagDialogOpen(true);
+  };
+
+  const handleDeleteTag = async (id: string) => {
+    if (!confirm("¿Estás seguro de eliminar esta etiqueta?")) return;
+    try {
+      await deleteTagFn({ data: { id } });
+      toast.success("Etiqueta eliminada");
+      queryClient.invalidateQueries({ queryKey: ["contact-tags"] });
+    } catch (error: any) {
+      toast.error(error.message || "Error al eliminar etiqueta");
     }
   };
   return (
@@ -175,20 +210,38 @@ export function ContactCenterHub() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {["CLIENTE", "PROSPECTO", "VIP", "INACTIVO"].map(tag => (
-                  <div key={tag} className="flex items-center justify-between p-2 border rounded-md group">
-                    <span className="text-sm font-medium">{tag}</span>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
+                {tags?.map((tag: any) => (
+                  <div 
+                    key={tag.id} 
+                    className="flex items-center justify-between p-2 border rounded-md group hover:bg-accent transition-colors"
+                    style={{ borderLeft: `4px solid ${tag.color || '#3b82f6'}` }}
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{tag.name}</span>
+                      {tag.description && <span className="text-[10px] text-muted-foreground line-clamp-1">{tag.description}</span>}
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditTag(tag)}>
+                        <Edit2 className="h-3 w-3" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleDeleteTag(tag.id)}>
+                        <Trash2 className="h-3 w-3 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
-                <Button variant="outline" size="sm" className="border-dashed">
+                <Button variant="outline" size="sm" className="border-dashed h-auto py-4" onClick={handleNewTag}>
                   <Plus className="h-4 w-4 mr-2" /> Nueva etiqueta
                 </Button>
               </div>
             </CardContent>
           </Card>
+          
+          <TagFormDialog 
+            open={isTagDialogOpen} 
+            onOpenChange={setIsTagDialogOpen} 
+            tag={selectedTag} 
+          />
         </TabsContent>
 
         <TabsContent value="sms" className="mt-0">
