@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus, Mail, Phone, MessageCircle, MessageSquare } from "lucide-react";
+import { Plus, Mail, Phone, MessageCircle, MessageSquare, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import type { ColumnDef } from "@/components/common/data-table";
 import { DataTable } from "@/components/common/data-table";
 import { SkeletonTable } from "@/components/common/skeleton-table";
@@ -14,10 +14,32 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useContacts } from "@/hooks/use-contacts";
 import type { Contact } from "@/types/contact";
 import { toast } from "sonner";
 import { ContactFormDialog } from "./contact-center/ContactFormDialog";
+import { deleteContact } from "@/lib/contacts.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
+
 
 function initials(c: Contact) {
   return `${c.firstName[0] ?? ""}${c.lastName?.[0] ?? ""}`.toUpperCase();
@@ -26,9 +48,27 @@ function initials(c: Contact) {
 export function ContactsTable() {
   const { data, isLoading, error, refetch } = useContacts({ pageSize: 200 });
   const [selected, setSelected] = useState<Contact | null>(null);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [deletingContact, setDeletingContact] = useState<Contact | null>(null);
+  
+  const queryClient = useQueryClient();
+  const removeContact = useServerFn(deleteContact);
+
+  const handleDelete = async () => {
+    if (!deletingContact) return;
+    try {
+      await removeContact({ data: { id: deletingContact.id } });
+      toast.success("Contacto eliminado correctamente");
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      setDeletingContact(null);
+    } catch (err) {
+      toast.error("Error al eliminar contacto");
+    }
+  };
 
   const columns = useMemo<ColumnDef<Contact>[]>(
     () => [
+
       {
         id: "name",
         header: "Contacto",
@@ -101,9 +141,43 @@ export function ContactsTable() {
         header: "Alta",
         cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString("es-MX"),
       },
+      {
+        id: "actions",
+        header: "Ver contacto",
+        cell: ({ row }) => {
+          const contact = row.original;
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Abrir menú</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setSelected(contact)}>
+                  <Eye className="mr-2 h-4 w-4" /> Ver contacto
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setEditingContact(contact)}>
+                  <Edit className="mr-2 h-4 w-4" /> Editar
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setDeletingContact(contact)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
     ],
     [],
   );
+
 
   if (isLoading) return <SkeletonTable rows={8} />;
   if (error) return <ErrorState onRetry={() => refetch()} />;
@@ -125,6 +199,45 @@ export function ContactsTable() {
           </ContactFormDialog>
         }
       />
+
+      {/* Modal de Edición */}
+      {editingContact && (
+        <ContactFormDialog 
+          open={!!editingContact} 
+          setOpen={(o) => !o && setEditingContact(null)}
+          defaultValues={{
+            id: editingContact.id,
+            first_name: editingContact.firstName,
+            last_name: editingContact.lastName,
+            phone: editingContact.phone,
+            email: editingContact.email
+          }}
+        >
+          <span className="hidden" />
+        </ContactFormDialog>
+      )}
+
+      {/* Diálogo de Confirmación de Eliminación */}
+      <AlertDialog open={!!deletingContact} onOpenChange={(o) => !o && setDeletingContact(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este contacto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará el contacto de tus listas y dejará de estar disponible para futuras campañas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar contacto
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <SheetContent className="w-full sm:max-w-md">
           {selected && (
@@ -144,17 +257,16 @@ export function ContactsTable() {
               </SheetHeader>
               <div className="space-y-4 py-4">
                 <div className="flex gap-2">
-                  <ContactFormDialog defaultValues={{
-                    id: selected.id,
-                    first_name: selected.firstName,
-                    last_name: selected.lastName,
-                    phone: selected.phone,
-                    email: selected.email
-                  }}>
-                    <Button size="sm" className="gap-1.5">
-                      Editar contacto
-                    </Button>
-                  </ContactFormDialog>
+                  <Button 
+                    size="sm" 
+                    className="gap-1.5" 
+                    onClick={() => {
+                      setSelected(null);
+                      setEditingContact(selected);
+                    }}
+                  >
+                    Editar contacto
+                  </Button>
                   <Button size="sm" variant="outline" className="gap-1.5" onClick={() => window.location.href = `/crm?contactId=${selected.id}`}>
                     Ver en CRM
                   </Button>
@@ -181,3 +293,4 @@ export function ContactsTable() {
     </>
   );
 }
+

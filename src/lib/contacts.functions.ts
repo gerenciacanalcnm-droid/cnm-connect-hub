@@ -28,6 +28,25 @@ export const upsertContact = createServerFn({ method: "POST" })
     return result;
   });
 
+export const deleteContact = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({
+    id: z.string().uuid()
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    // RLS in Supabase will handle company_id isolation if policies are correct,
+    // but we explicitly filter by company_id for extra safety as per policy.
+    const { error } = await (context.supabase as any)
+      .from("contacts")
+      .delete()
+      .eq("id", data.id)
+      .eq("company_id", CNM_COMPANY_ID);
+    
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
+
+
 export const exportContacts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
