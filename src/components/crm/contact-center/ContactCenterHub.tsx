@@ -119,7 +119,6 @@ export function ContactCenterHub() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
         <TabsContent value="segmentos" className="mt-0">
           <Card className="border-border/50">
             <CardHeader>
