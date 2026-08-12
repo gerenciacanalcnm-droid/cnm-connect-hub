@@ -66,8 +66,8 @@ export function ContactFormDialog({
   });
 
   useEffect(() => {
-    if (contactTags) {
-      setSelectedTagIds(contactTags.map((t: any) => t.id));
+    if (contactTags && Array.isArray(contactTags)) {
+      setSelectedTagIds(contactTags.filter((t: any) => t && t.id).map((t: any) => t.id));
     } else {
       setSelectedTagIds([]);
     }
