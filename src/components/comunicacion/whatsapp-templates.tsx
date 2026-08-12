@@ -212,7 +212,7 @@ export function WhatsAppTemplates() {
               disabled={syncMutation.isPending || !account}
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
-              typecheck correcto
+              Sincronizar con Meta
             </Button>
             <Button onClick={() => { setEditingTemplate(null); setIsEditorOpen(true); }} className="bg-emerald-600 hover:bg-emerald-700">
               <Plus className="h-4 w-4 mr-2" /> Crear plantilla
@@ -274,7 +274,7 @@ export function WhatsAppTemplates() {
           <Button variant="ghost" size="icon" onClick={() => setIsEditorOpen(false)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="font-semibold text-slate-900">completado</span>
+          <span className="font-semibold text-slate-900">{editingTemplate ? 'Editar Plantilla' : 'Nueva Plantilla'}</span>
         </div>
         
         <div className="space-y-4">
@@ -320,7 +320,7 @@ export function WhatsAppTemplates() {
       <div className="flex-1 p-12 flex items-center justify-center overflow-y-auto">
         <div className="w-full max-w-sm">
           <div className="bg-white/50 p-4 rounded-xl mb-4 text-center border border-dashed border-slate-300">
-            <span className="text-xs text-slate-400 font-mono uppercase tracking-wider">completado</span>
+            <span className="text-xs text-slate-400 font-mono uppercase tracking-wider">Vista Previa</span>
           </div>
           
           <div className="bg-[#E7FFDB] rounded-lg shadow-md w-full p-4 relative space-y-3 border border-slate-200">
