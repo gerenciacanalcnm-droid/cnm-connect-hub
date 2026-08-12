@@ -24,6 +24,7 @@ export function ContactCenterHub() {
   const exportFn = useServerFn(exportContacts);
   const getTagsFn = useServerFn(listContactTags);
   const deleteTagFn = useServerFn(deleteContactTag);
+  const statsFn = useServerFn(getContactCenterStats);
 
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<any>(null);
