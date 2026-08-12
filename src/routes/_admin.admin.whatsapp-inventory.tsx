@@ -293,9 +293,14 @@ function WhatsAppInventoryPage() {
                               ) : (
                                 <>
                                   <DropdownMenuItem 
-                                    onClick={() => setDefaultMutation.mutate({ accountId: n.id, companyId: n.company_id })}
+                                    onClick={() => {
+                                      if (n.company_id) {
+                                        setDefaultMutation.mutate({ accountId: n.id, companyId: n.company_id });
+                                      }
+                                    }}
                                     disabled={n.is_default || setDefaultMutation.isPending}
                                   >
+
                                     <Star className="mr-2 h-4 w-4 text-amber-500" /> Establecer como Principal
                                   </DropdownMenuItem>
 
