@@ -578,7 +578,7 @@ export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
 
         const { error: upsertErr } = await context.supabase
           .from("whatsapp_templates")
-          .upsert(row, { onConflict: "account_id, external_id, language" });
+          .upsert(row, { onConflict: "account_id, external_id" });
 
         if (upsertErr) {
           console.error(`[sync] Error al upsertar ${t.name}:`, upsertErr.message);

@@ -12,6 +12,7 @@ export const saveWhatsAppTemplateDraft = createServerFn({ method: "POST" })
   .inputValidator((v) =>
     z.object({
       id: z.string().uuid().optional(),
+      accountId: z.string().uuid(),
       name: z.string().min(1),
       category: z.string(),
       language: z.string(),
@@ -19,18 +20,21 @@ export const saveWhatsAppTemplateDraft = createServerFn({ method: "POST" })
       body: z.string().min(1),
       footer: z.string().optional(),
       buttons: z.array(z.any()).optional(),
+      metadata: z.any().optional(),
     }).parse(v)
   )
   .handler(async ({ data, context }) => {
     const row = {
       company_id: CNM_COMPANY_ID,
+      account_id: data.accountId,
       name: data.name,
       category: data.category,
       language: data.language,
       body: data.body,
       footer: data.footer || null,
       buttons: data.buttons || [],
-      header: data.header ? JSON.stringify(data.header) : null,
+      header: data.header ? (typeof data.header === 'string' ? data.header : JSON.stringify(data.header)) : null,
+      metadata: data.metadata || {},
       status: "DRAFT",
       updated_at: new Date().toISOString(),
     };
