@@ -43,10 +43,16 @@ export const primaryNavigation: NavSection[] = [
         description: "SMS, WhatsApp y Email",
       },
       {
-        title: "CRM",
+        title: "Centro de Contactos",
         to: "/crm",
         icon: Users,
-        description: "Contactos y conversaciones",
+        description: "Gestión central de contactos",
+      },
+      {
+        title: "CRM",
+        to: "/crm/legacy", // Placeholder or adjusting existing
+        icon: Users,
+        description: "Conversaciones y tratos",
       },
       {
         title: "Automatizaciones",
