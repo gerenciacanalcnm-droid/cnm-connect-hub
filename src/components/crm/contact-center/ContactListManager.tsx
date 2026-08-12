@@ -77,6 +77,21 @@ export function ContactListManager() {
       </div>
     );
   }
+
+  if (isError) {
+    return (
+      <Card className="border-destructive/40">
+        <CardHeader>
+          <CardTitle className="text-base text-destructive">No se pudieron cargar las listas</CardTitle>
+          <CardDescription>{(error as any)?.message || "Error desconocido al consultar las listas de contactos."}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>Reintentar</Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (viewingList) {
     return <ListDetail list={viewingList} onBack={() => setViewingList(null)} />;
   }
