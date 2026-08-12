@@ -182,7 +182,8 @@ export function SendWhatsAppIndividual() {
     // Check limits via server function before sending
     try {
       const { checkWhatsAppLimits } = await import("@/lib/whatsapp-commercial.functions");
-      const check = await checkWhatsAppLimits({ companyId: connectedAccount.companyId }) as any;
+      const check = await checkWhatsAppLimits({ data: { companyId: connectedAccount.companyId } }) as any;
+
 
       if (check && !check.allowed) {
         const msg = "Has alcanzado el límite de mensajes configurado para tu empresa";
