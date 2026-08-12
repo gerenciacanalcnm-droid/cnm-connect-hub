@@ -201,7 +201,7 @@ export function SendWhatsAppIndividual() {
     if (stats.valid === 0) return toast.error("Sin destinatarios válidos.");
     if (isInsufficient) {
       return toast.error(
-        `Saldo insuficiente. Disponible: ${formatCurrency(balance)}, Requerido: ${formatCurrency(totalCost)}, Faltante: ${formatCurrency(totalCost - balance)}`
+        `Saldo insuficiente`
       );
     }
 
@@ -622,7 +622,7 @@ export function SendWhatsAppIndividual() {
               <Alert variant="destructive" className="py-2 px-3">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-xs font-bold uppercase">
-                  Saldo insuficiente. Necesitas {formatCurrency(totalCost)} para realizar este envío.
+                  Saldo insuficiente
                 </AlertDescription>
               </Alert>
             )}
