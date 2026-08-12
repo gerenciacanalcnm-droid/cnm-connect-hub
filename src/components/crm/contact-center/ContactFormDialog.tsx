@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-import { X, Check, Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 
 const formSchema = z.object({
   first_name: z.string().min(1, "Nombre es requerido"),
@@ -32,13 +32,11 @@ export function ContactFormDialog({
   defaultValues, 
   open: externalOpen, 
   setOpen: externalSetOpen,
-  editingContact = null // Nueva prop para aislamiento
 }: { 
   children: React.ReactNode, 
   defaultValues?: any,
   open?: boolean,
   setOpen?: (open: boolean) => void,
-  editingContact?: any
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen ?? internalOpen;
@@ -56,6 +54,7 @@ export function ContactFormDialog({
   const { data: allTags } = useQuery({
     queryKey: ["contact-tags"],
     queryFn: () => getTagsFn(),
+    enabled: open,
   });
 
   const { data: contactTags } = useQuery({
@@ -70,10 +69,10 @@ export function ContactFormDialog({
   useEffect(() => {
     if (contactTags && Array.isArray(contactTags)) {
       setSelectedTagIds(contactTags.filter((t: any) => t && t.id).map((t: any) => t.id));
-    } else {
+    } else if (!defaultValues?.id) {
       setSelectedTagIds([]);
     }
-  }, [contactTags]);
+  }, [contactTags, defaultValues?.id]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -136,70 +135,6 @@ export function ContactFormDialog({
       toast.error("Error al guardar contacto");
     }
   };
-
-  // PRUEBA DE DIAGNÓSTICO 3: Reintroducir useEffect de sincronización
-  useEffect(() => {
-    if (open && editingContact) {
-      console.log("DIAGNÓSTICO PRUEBA 3: Ejecutando reset de formulario");
-      form.reset({
-        first_name: defaultValues?.first_name || "",
-        last_name: defaultValues?.last_name || "",
-        phone: defaultValues?.phone || "",
-        email: defaultValues?.email || "",
-      });
-    }
-  }, [open, defaultValues, form, editingContact]);
-
-  // PRUEBA DE DIAGNÓSTICO 5: Reintroducir únicamente listContactTagsForContact (contactTags) sin el useEffect de mapeo
-  if (editingContact !== null) {
-    return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>PRUEBA 5 — CARGA DE ETIQUETAS DEL CONTACTO</DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form className="space-y-4">
-              <FormField control={form.control} name="first_name" render={({ field }) => (
-                <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
-              
-              <div className="space-y-2">
-                <FormLabel>Etiquetas Globales (TanStack Query)</FormLabel>
-                <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/20">
-                  {allTags?.length === 0 && <span className="text-xs text-muted-foreground">No hay etiquetas creadas.</span>}
-                  {allTags?.map((tag: any) => (
-                    <Badge key={tag.id} variant="outline">
-                      {tag.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <FormLabel>Etiquetas del Contacto (useQuery específico)</FormLabel>
-                <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/20 border-primary/20">
-                  {!defaultValues?.id && <span className="text-xs text-muted-foreground">No es flujo de edición.</span>}
-                  {defaultValues?.id && !contactTags && <span className="text-xs text-muted-foreground animate-pulse">Cargando...</span>}
-                  {contactTags?.length === 0 && <span className="text-xs text-muted-foreground">El contacto no tiene etiquetas.</span>}
-                  {contactTags?.map((tag: any) => (
-                    <Badge key={tag.id} variant="default">
-                      {tag.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div className="p-2 bg-muted text-xs rounded text-center">
-                DIAGNÓSTICO: listContactTagsForContact (contactTags) ACTIVO (Prueba 5)
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
