@@ -2451,7 +2451,7 @@ export type Database = {
           account_id: string | null
           assigned_to: string | null
           channel: Database["public"]["Enums"]["message_channel"]
-          company_id: string
+          company_id: string | null
           contact_id: string | null
           contact_name: string | null
           contact_phone: string
@@ -2470,7 +2470,7 @@ export type Database = {
           account_id?: string | null
           assigned_to?: string | null
           channel?: Database["public"]["Enums"]["message_channel"]
-          company_id: string
+          company_id?: string | null
           contact_id?: string | null
           contact_name?: string | null
           contact_phone: string
@@ -2489,7 +2489,7 @@ export type Database = {
           account_id?: string | null
           assigned_to?: string | null
           channel?: Database["public"]["Enums"]["message_channel"]
-          company_id?: string
+          company_id?: string | null
           contact_id?: string | null
           contact_name?: string | null
           contact_phone?: string
@@ -2600,7 +2600,7 @@ export type Database = {
           account_id: string | null
           body: string | null
           campaign_id: string | null
-          company_id: string
+          company_id: string | null
           conversation_id: string | null
           cost: number
           created_at: string
@@ -2623,7 +2623,7 @@ export type Database = {
           account_id?: string | null
           body?: string | null
           campaign_id?: string | null
-          company_id: string
+          company_id?: string | null
           conversation_id?: string | null
           cost?: number
           created_at?: string
@@ -2646,7 +2646,7 @@ export type Database = {
           account_id?: string | null
           body?: string | null
           campaign_id?: string | null
-          company_id?: string
+          company_id?: string | null
           conversation_id?: string | null
           cost?: number
           created_at?: string
@@ -2760,7 +2760,7 @@ export type Database = {
           body: string
           buttons: Json
           category: string
-          company_id: string
+          company_id: string | null
           created_at: string
           created_by: string | null
           external_id: string | null
@@ -2781,7 +2781,7 @@ export type Database = {
           body: string
           buttons?: Json
           category?: string
-          company_id: string
+          company_id?: string | null
           created_at?: string
           created_by?: string | null
           external_id?: string | null
@@ -2802,7 +2802,7 @@ export type Database = {
           body?: string
           buttons?: Json
           category?: string
-          company_id?: string
+          company_id?: string | null
           created_at?: string
           created_by?: string | null
           external_id?: string | null
