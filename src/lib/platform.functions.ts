@@ -225,13 +225,14 @@ export const exportListCsv = createServerFn({ method: "POST" })
         .maybeSingle();
 
       if (listError) {
-        console.error("[EXPORT_LIST_OWNERSHIP_ERROR]", listError);
+        console.error("[EXPORT_LIST] OWNERSHIP_ERROR", listError);
         throw new Error(listError.message);
       }
       if (!listExists) {
-        console.error("[EXPORT_LIST_NOT_FOUND]");
+        console.error("[EXPORT_LIST] NOT_FOUND");
         throw new Error("La lista no existe o no pertenece a esta empresa.");
       }
+      console.log("[EXPORT_LIST] LIST_VALIDATED", listExists.name);
 
       const { data: members, error } = await (context.supabase as any)
         .from("contact_list_members")
