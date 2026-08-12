@@ -254,6 +254,7 @@ export function WhatsAppCampaigns() {
       toast.success("Campaña iniciada correctamente");
       setIsNewDialogOpen(false);
       setIsValidating(false);
+      setMonitoringCampaignId(campaign.id);
       // Reset form
       setName("");
       setSelectedTemplateId("");
