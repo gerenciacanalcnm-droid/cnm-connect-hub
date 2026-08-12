@@ -44,7 +44,7 @@ export const createWhatsAppCampaign = createServerFn({ method: "POST" })
         account_id: data.accountId,
         template_id: data.templateId,
         name: data.name,
-        status: data.scheduledAt ? 'SCHEDULED' : 'QUEUED',
+        status: data.scheduledAt ? 'scheduled' : 'draft',
         scheduled_at: data.scheduledAt,
         total_recipients: data.recipients.length,
         estimated_cost: data.estimatedCost,
