@@ -33,6 +33,11 @@ export function ContactCenterHub() {
     queryFn: () => getTagsFn(),
   });
 
+  const { data: stats, isLoading: statsLoading, isError: statsError } = useQuery({
+    queryKey: ["contact-center-stats"],
+    queryFn: () => statsFn(),
+  });
+
   const handleExport = async () => {
     try {
       const csv = await exportFn();
