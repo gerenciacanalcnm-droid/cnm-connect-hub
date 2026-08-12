@@ -2753,6 +2753,7 @@ export type Database = {
           header: string | null
           id: string
           language: string
+          metadata: Json | null
           name: string
           rejected_reason: string | null
           status: string
@@ -2773,6 +2774,7 @@ export type Database = {
           header?: string | null
           id?: string
           language?: string
+          metadata?: Json | null
           name: string
           rejected_reason?: string | null
           status?: string
@@ -2793,6 +2795,7 @@ export type Database = {
           header?: string | null
           id?: string
           language?: string
+          metadata?: Json | null
           name?: string
           rejected_reason?: string | null
           status?: string
