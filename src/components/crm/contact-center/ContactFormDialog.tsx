@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-import { X, Check, Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 
 const formSchema = z.object({
   first_name: z.string().min(1, "Nombre es requerido"),
@@ -32,13 +32,11 @@ export function ContactFormDialog({
   defaultValues, 
   open: externalOpen, 
   setOpen: externalSetOpen,
-  editingContact = null // Nueva prop para aislamiento
 }: { 
   children: React.ReactNode, 
   defaultValues?: any,
   open?: boolean,
   setOpen?: (open: boolean) => void,
-  editingContact?: any
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen ?? internalOpen;
@@ -56,6 +54,7 @@ export function ContactFormDialog({
   const { data: allTags } = useQuery({
     queryKey: ["contact-tags"],
     queryFn: () => getTagsFn(),
+    enabled: open,
   });
 
   const { data: contactTags } = useQuery({
@@ -70,10 +69,10 @@ export function ContactFormDialog({
   useEffect(() => {
     if (contactTags && Array.isArray(contactTags)) {
       setSelectedTagIds(contactTags.filter((t: any) => t && t.id).map((t: any) => t.id));
-    } else {
+    } else if (!defaultValues?.id) {
       setSelectedTagIds([]);
     }
-  }, [contactTags]);
+  }, [contactTags, defaultValues?.id]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -136,110 +135,6 @@ export function ContactFormDialog({
       toast.error("Error al guardar contacto");
     }
   };
-
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{defaultValues?.id ? "Editar Contacto" : "Nuevo Contacto"}</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="first_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nombre" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="last_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Apellido</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Apellido" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Teléfono</FormLabel>
-                  <FormControl>
-                    <Input placeholder="+52..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="email@ejemplo.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="space-y-2">
-              <FormLabel>Etiquetas</FormLabel>
-              <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/20">
-                {allTags?.map((tag: any) => {
-                  const isSelected = selectedTagIds.includes(tag.id);
-                  return (
-                    <Badge 
-                      key={tag.id}
-                      variant={isSelected ? "default" : "outline"}
-                      className="cursor-pointer transition-colors"
-                      onClick={() => toggleTag(tag.id)}
-                      style={isSelected && tag.color ? { backgroundColor: tag.color } : {}}
-                    >
-                      {tag.name}
-                      {isSelected ? (
-                        <Check className="ml-1 h-3 w-3" />
-                      ) : (
-                        <Plus className="ml-1 h-3 w-3" />
-                      )}
-                    </Badge>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit">
-                Guardar
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-
-    );
-  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
