@@ -2265,6 +2265,7 @@ export type Database = {
           department: Database["public"]["Enums"]["wa_department"]
           display_phone: string | null
           id: string
+          is_default: boolean | null
           is_primary: boolean
           last_synced_at: string | null
           metadata: Json
@@ -2296,6 +2297,7 @@ export type Database = {
           department?: Database["public"]["Enums"]["wa_department"]
           display_phone?: string | null
           id?: string
+          is_default?: boolean | null
           is_primary?: boolean
           last_synced_at?: string | null
           metadata?: Json
@@ -2327,6 +2329,7 @@ export type Database = {
           department?: Database["public"]["Enums"]["wa_department"]
           display_phone?: string | null
           id?: string
+          is_default?: boolean | null
           is_primary?: boolean
           last_synced_at?: string | null
           metadata?: Json
@@ -3036,6 +3039,7 @@ export type Database = {
         | "ASSIGNED"
         | "DISCONNECTED"
         | "ERROR"
+        | "DISABLED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3214,6 +3218,7 @@ export const Constants = {
         "ASSIGNED",
         "DISCONNECTED",
         "ERROR",
+        "DISABLED",
       ],
     },
   },

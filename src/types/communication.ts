@@ -60,7 +60,9 @@ export interface WhatsAppAccount {
   createdAt: string;
   updatedAt: string;
   novaStatus?: WhatsAppAssignmentStatus;
+  isDefault: boolean;
 }
+
 
 export interface WhatsAppAccountInput {
   alias: string;

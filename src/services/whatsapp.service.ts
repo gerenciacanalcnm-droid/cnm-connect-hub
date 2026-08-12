@@ -35,6 +35,8 @@ type AccountRow = {
   created_at: string;
   updated_at: string;
   nova_status: string | null;
+  is_default: boolean | null;
+
 };
 
 function mapAccount(r: AccountRow): WhatsAppAccount {
@@ -46,6 +48,7 @@ function mapAccount(r: AccountRow): WhatsAppAccount {
     displayPhone: r.display_phone ?? undefined,
     status: r.status as WhatsAppAccount["status"],
     isPrimary: r.is_primary,
+    isDefault: !!r.is_default,
     provider: r.provider,
     businessAccountId: r.business_account_id ?? undefined,
     phoneNumberId: r.phone_number_id ?? undefined,
@@ -59,6 +62,7 @@ function mapAccount(r: AccountRow): WhatsAppAccount {
     novaStatus: (r.nova_status as WhatsAppAccount["novaStatus"]) ?? 'AVAILABLE',
   };
 }
+
 
 type TemplateRow = {
   id: string;

@@ -68,6 +68,7 @@ export function SendWhatsAppIndividual() {
     return allAccounts.filter(a => a.novaStatus === 'ASSIGNED');
   }, [allAccounts]);
 
+
   const { data: allTemplates = [] } = useWhatsAppTemplates();
   
   const sendIndividualMutation = useSendWhatsAppIndividual();
@@ -82,8 +83,9 @@ export function SendWhatsAppIndividual() {
   
   const connectedAccount = useMemo(() => {
     if (selectedAccountId) return accounts.find(a => a.id === selectedAccountId);
-    return accounts.find(a => a.isPrimary) || accounts.find(a => a.status === 'connected');
+    return accounts.find(a => a.isDefault) || accounts.find(a => a.isPrimary) || accounts.find(a => a.status === 'connected');
   }, [accounts, selectedAccountId]);
+
 
   useEffect(() => {
     if (connectedAccount && !selectedAccountId) {
