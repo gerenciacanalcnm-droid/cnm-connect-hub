@@ -109,6 +109,20 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
       components
     };
 
+    // Log del payload sanitizado (sin tokens)
+    console.log("META_PAYLOAD_SANITTIZED:", {
+      name: payload.name,
+      language: payload.language,
+      category: payload.category,
+      components: payload.components.map(c => ({
+        type: c.type,
+        format: c.format,
+        has_header_handle: !!c.example?.header_handle,
+        variables_count: c.text?.match(/\{\{(\d+)\}\}/g)?.length || 0,
+        has_example: !!c.example
+      }))
+    });
+
     // 3. Envío Real a Meta
     const response = await fetch(
       `https://graph.facebook.com/v20.0/${account.business_account_id}/message_templates`,

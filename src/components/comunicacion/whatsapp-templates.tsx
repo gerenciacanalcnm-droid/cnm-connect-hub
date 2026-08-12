@@ -77,21 +77,21 @@ export function WhatsAppTemplates() {
       queryClient.invalidateQueries({ queryKey: ['whatsapp_templates'] });
       toast.success("Borrador guardado localmente");
     },
-    onError: (err: any) => toast.error(err.message)
+    onError: (err: any) => toast.error(String(err.message))
   });
 
   const sendToMetaMutation = useMutation({
     mutationFn: submitWhatsAppTemplateToMeta,
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['whatsapp_templates'] });
-      toast.success(`Plantilla enviada a Meta. Estado: ${res.status}`);
+      toast.success(`Plantilla enviada a Meta. Estado: ${String(res.status)}`);
       setIsEditorOpen(false);
     },
     onError: (err: any) => {
       // El error ya viene con el formato detallado desde el server function
       // Para evitar problemas de compilación JSX en algunos entornos de transformación,
       // nos aseguramos de que el mensaje sea procesado correctamente
-      toast.error(err.message, { 
+      toast.error(String(String(err.message)), { 
         duration: 10000,
         description: "Error detallado de Meta Cloud API" 
       });
@@ -106,12 +106,12 @@ export function WhatsAppTemplates() {
       const hasErrors = res.errors > 0;
       const details = res.details || [];
       
-      toast(`Sincronización completada: ${res.updated} actualizadas, ${res.errors} errores`, {
+      toast(String(String(`Sincronización completada: ${res.updated} actualizadas, ${res.errors} errores`)), {
         duration: hasErrors ? 10000 : 4000,
         description: hasErrors ? "Revisa el detalle en los logs de la cuenta" : undefined
       });
     },
-    onError: (err: any) => toast.error(err.message)
+    onError: (err: any) => toast.error(String(err.message))
   });
 
   useEffect(() => {
@@ -212,7 +212,7 @@ export function WhatsAppTemplates() {
               disabled={syncMutation.isPending || !account}
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
-              typecheck correcto
+              Sincronizar con Meta
             </Button>
             <Button onClick={() => { setEditingTemplate(null); setIsEditorOpen(true); }} className="bg-emerald-600 hover:bg-emerald-700">
               <Plus className="h-4 w-4 mr-2" /> Crear plantilla
@@ -274,7 +274,7 @@ export function WhatsAppTemplates() {
           <Button variant="ghost" size="icon" onClick={() => setIsEditorOpen(false)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="font-semibold text-slate-900">completado</span>
+          <span className="font-semibold text-slate-900">{editingTemplate ? 'Editar Plantilla' : 'Nueva Plantilla'}</span>
         </div>
         
         <div className="space-y-4">
@@ -320,7 +320,7 @@ export function WhatsAppTemplates() {
       <div className="flex-1 p-12 flex items-center justify-center overflow-y-auto">
         <div className="w-full max-w-sm">
           <div className="bg-white/50 p-4 rounded-xl mb-4 text-center border border-dashed border-slate-300">
-            <span className="text-xs text-slate-400 font-mono uppercase tracking-wider">completado</span>
+            <span className="text-xs text-slate-400 font-mono uppercase tracking-wider">Vista Previa</span>
           </div>
           
           <div className="bg-[#E7FFDB] rounded-lg shadow-md w-full p-4 relative space-y-3 border border-slate-200">
@@ -685,7 +685,7 @@ export function WhatsAppTemplates() {
             }}
           >
             <Send className="h-4 w-4 mr-2" />
-            Invalid parameter
+            Enviar a Meta para aprobación
           </Button>
           
           <Button variant="ghost" className="w-full text-xs text-slate-400" onClick={() => setIsEditorOpen(false)}>
