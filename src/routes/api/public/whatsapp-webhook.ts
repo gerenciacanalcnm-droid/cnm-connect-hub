@@ -197,7 +197,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   .update({ 
                     last_message_preview: text || '[Mensaje]', 
                     last_message_at: new Date().toISOString(),
-                    unread_count: (conv.unread_count || 0) + 1,
+                    unread_count: (conv?.unread_count || 0) + 1,
                     updated_at: new Date().toISOString() 
                   })
                   .eq('id', conversationId);
