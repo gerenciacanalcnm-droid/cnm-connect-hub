@@ -54,20 +54,24 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
     try {
       const csv = await exportFn({ data: { list_id: list.id } });
       
+      console.log("[EXPORT_LIST_RESULT_TYPE]", typeof csv);
+      
       if (!csv || typeof csv !== 'string') {
-        console.error("[EXPORT_LIST_RESPONSE_ERROR] Invalid CSV format received:", typeof csv);
-        throw new Error("Formato de CSV inválido");
+        console.error("[EXPORT_LIST_RESPONSE_ERROR] Invalid CSV format received:", typeof csv, csv);
+        throw new Error(`Formato de CSV inválido (recibido: ${typeof csv})`);
       }
 
+      console.log("[EXPORT_LIST_BLOB_START] Size:", csv.length);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
+      a.style.display = 'none';
       a.href = url;
       a.download = `${list.name.toLowerCase().replace(/\s+/g, '_')}.csv`;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
       
       toast.success("Exportación iniciada");
     } catch (err: any) {
@@ -192,7 +196,7 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
             <Upload className="h-4 w-4" /> Importar CSV
           </Button>
           <Button variant="outline" size="sm" className="gap-2" onClick={handleExport}>
-            <Download className="h-4 w-4" /> nueva lista
+            <Download className="h-4 w-4" /> Build OK
           </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <Edit className="h-4 w-4" /> Editar lista

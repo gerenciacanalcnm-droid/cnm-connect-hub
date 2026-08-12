@@ -281,6 +281,12 @@ export const exportListCsv = createServerFn({ method: "POST" })
       ].join("\n");
 
       console.log("[EXPORT_LIST_CSV_CREATED] rows:", rows.length, "bytes:", csv.length);
+      
+      // Ensure we return a plain string and handle serialization safely
+      if (typeof csv !== 'string') {
+        throw new Error("El generador de CSV no devolvió una cadena de texto.");
+      }
+      
       return csv;
     } catch (e: any) {
       console.error("Catch in exportListCsv:", e);
