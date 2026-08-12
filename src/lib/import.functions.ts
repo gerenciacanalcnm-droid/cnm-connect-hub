@@ -22,13 +22,17 @@ export const processContactImportBatch = createServerFn({ method: "POST" })
     for (const contact of contacts) {
       try {
         // 1. Upsert contact (idempotency by company_id, phone)
+        // We ensure we get the ID whether it's new or existing.
         const { data: upsertedContact, error: upsertError } = await (context.supabase as any)
           .from("contacts")
           .upsert({
             ...contact,
             company_id: CNM_COMPANY_ID,
             updated_at: new Date().toISOString()
-          }, { onConflict: "company_id, phone" })
+          }, { 
+            onConflict: "company_id, phone",
+            ignoreDuplicates: false // We want to update existing ones
+          })
           .select("id")
           .single();
         
@@ -40,6 +44,7 @@ export const processContactImportBatch = createServerFn({ method: "POST" })
 
         // 2. Associate with list (contact_list_members)
         if (upsertedContact) {
+          // Idempotent association using UPSERT on the unique constraint (list_id, contact_id)
           const { error: memberError } = await (context.supabase as any)
             .from("contact_list_members")
             .upsert({
@@ -49,9 +54,8 @@ export const processContactImportBatch = createServerFn({ method: "POST" })
           
           if (memberError) {
             console.error("Association error:", memberError);
-            // We don't increment errors here because the contact was imported/updated, 
-            // but the association failed. However, for a complete import result, 
-            // we should probably track this.
+            // Even if association fails, the contact might have been created/updated.
+            // But for the user, this is a failure in the requested context.
           }
         }
         
