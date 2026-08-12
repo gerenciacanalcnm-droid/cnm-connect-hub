@@ -205,17 +205,14 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
 
         metaTemplate.components.forEach((comp: any) => {
           if (comp.type === "BODY" || comp.type === "HEADER") {
-            // Meta exige que los parámetros estén en el mismo orden que las variables
-            // Las variables en Meta son {{1}}, {{2}}, etc.
             const text = comp.text || "";
             const matches = text.match(/{{(\d+)}}/g) || [];
             
-            // Usamos un set para obtener los índices únicos en orden de aparición
-            const uniqueVarIndices = Array.from(new Set(matches.map(m => m.replace(/[{}]/g, ''))));
+            const uniqueVarIndices = Array.from(new Set(matches.map((m: string) => m.replace(/[{}]/g, ''))));
 
             if (uniqueVarIndices.length > 0) {
               const parameters: any[] = [];
-              uniqueVarIndices.forEach((idx) => {
+              uniqueVarIndices.forEach((idx: string) => {
                 const val = data.variables?.[idx];
                 if (val !== undefined) {
                   parameters.push({ type: "text", text: val });
