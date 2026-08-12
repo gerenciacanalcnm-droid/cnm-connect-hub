@@ -66,10 +66,13 @@ export function ContactCenterHub() {
       <Tabs defaultValue="all" className="w-full">
         <div className="flex items-center justify-between mb-4">
           <TabsList>
-            <TabsTrigger value="all">TEST CONTACTOS</TabsTrigger>
-            <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
-            <TabsTrigger value="sms">SMS</TabsTrigger>
-            <TabsTrigger value="lists">Listas de Envío</TabsTrigger>
+            <TabsTrigger value="all">Contactos</TabsTrigger>
+            <TabsTrigger value="lists">Listas</TabsTrigger>
+            <TabsTrigger value="segmentos">Segmentos</TabsTrigger>
+            <TabsTrigger value="etiquetas">Etiquetas</TabsTrigger>
+            <TabsTrigger value="whatsapp">Preferencias WhatsApp</TabsTrigger>
+            <TabsTrigger value="sms">Preferencias SMS</TabsTrigger>
+            <TabsTrigger value="email">Preferencias Email</TabsTrigger>
           </TabsList>
           
           <div className="flex items-center gap-2">
