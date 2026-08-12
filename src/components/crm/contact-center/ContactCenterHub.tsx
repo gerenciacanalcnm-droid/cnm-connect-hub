@@ -184,7 +184,7 @@ export function ContactCenterHub() {
                   </div>
                 ))}
                 <Button variant="outline" size="sm" className="border-dashed">
-                  <Plus className="h-4 w-4 mr-2" /> PRUEBA VIP
+                  <Plus className="h-4 w-4 mr-2" /> Nueva etiqueta
                 </Button>
               </div>
             </CardContent>
