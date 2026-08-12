@@ -86,11 +86,13 @@ export function ConversationCenter() {
     }),
     [channel, status, search],
   );
-
-  const { data: conversations = [], isLoading } = useConversations(filters);
+  
+  const conversationsQuery = useConversations(filters);
+  const conversations = conversationsQuery.data ?? [];
+  const isLoading = conversationsQuery.isLoading;
 
   const filteredConversations = useMemo(() => {
-    let list = conversations;
+    let list = conversations as Conversation[];
     if (status === "mis_conversaciones" && currentUser) {
       list = list.filter(c => c.assignedTo === currentUser.id);
     } else if (status === "sin_asignar_filter") {
@@ -98,7 +100,10 @@ export function ConversationCenter() {
     }
     return list;
   }, [conversations, status, currentUser]);
-  const { data: messages = [] } = useConversationMessages(activeId);
+
+  const messagesQuery = useConversationMessages(activeId);
+  const messages = messagesQuery.data ?? [];
+
   const updateConv = useUpdateConversation();
   const sendWhatsApp = useSendWhatsApp();
   const { data: commSettings } = useCommunicationSettings();

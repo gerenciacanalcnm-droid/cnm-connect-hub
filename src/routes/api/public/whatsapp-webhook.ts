@@ -139,20 +139,37 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
 
               const companyId = account.company_id as string;
 
-              // Identificar contacto
-              const { data: contact } = await supabaseAdmin
+              // 2. Identificar o crear contacto
+              let { data: contact } = await supabaseAdmin
                 .from('contacts')
                 .select('id')
                 .eq('company_id', companyId)
                 .eq('phone', from)
                 .maybeSingle();
               
+              if (!contact) {
+                const { data: newContact } = await supabaseAdmin
+                  .from('contacts')
+                  .insert({
+                    company_id: companyId,
+                    phone: from,
+                    whatsapp_phone: from,
+                    status: 'active',
+                    preferred_channel: 'whatsapp'
+                  })
+                  .select('id')
+                  .single();
+                contact = newContact;
+              }
+
               if (!contact) continue;
 
+              // 3. Identificar o crear conversación (Aislada por cuenta/número)
               const { data: conv } = await supabaseAdmin
                 .from('whatsapp_conversations')
-                .select('id, status, assigned_to')
+                .select('id, status, assigned_to, unread_count')
                 .eq('company_id', companyId)
+                .eq('account_id', account.id) // Aislamiento por número
                 .eq('contact_id', contact.id)
                 .maybeSingle();
               
@@ -162,11 +179,14 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                   .from('whatsapp_conversations')
                   .insert({
                     company_id: companyId,
+                    account_id: account.id,
                     contact_id: contact.id,
                     contact_phone: from,
-                    last_message_preview: text,
+                    last_message_preview: text || '[Mensaje]',
+                    last_message_at: new Date().toISOString(),
                     status: 'open',
-                    channel: 'whatsapp'
+                    channel: 'whatsapp',
+                    unread_count: 1
                   })
                   .select('id')
                   .single();
@@ -174,7 +194,12 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               } else {
                 await supabaseAdmin
                   .from('whatsapp_conversations')
-                  .update({ last_message_preview: text, updated_at: new Date().toISOString() })
+                  .update({ 
+                    last_message_preview: text || '[Mensaje]', 
+                    last_message_at: new Date().toISOString(),
+                    unread_count: (conv?.unread_count || 0) + 1,
+                    updated_at: new Date().toISOString() 
+                  })
                   .eq('id', conversationId);
               }
 
