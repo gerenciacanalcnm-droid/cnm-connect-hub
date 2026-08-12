@@ -58,6 +58,92 @@ import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+function CampaignValidationDialog({ campaignId, isOpen, onOpenChange }: { campaignId: string, isOpen: boolean, onOpenChange: (open: boolean) => void }) {
+  const { data } = useWhatsAppCampaignDetails(campaignId);
+  const campaign = data?.campaign;
+  const results = data?.results || [];
+
+  const stats = useMemo(() => {
+    return {
+      total: campaign?.total_recipients || 0,
+      sent: results.filter(r => r.wamid).length,
+      failed: results.filter(r => r.status === 'failed').length,
+      queued: results.filter(r => r.status === 'queued').length
+    };
+  }, [campaign, results]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-emerald-500" />
+            Monitoreo de Campaña Real
+          </DialogTitle>
+          <DialogDescription>
+            Validación de idempotencia y trazabilidad Meta Cloud API.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="bg-slate-50 border-none">
+              <CardContent className="pt-4 pb-2">
+                <p className="text-[10px] text-slate-500 uppercase font-bold">Estado Actual</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className={`h-2 w-2 rounded-full animate-pulse ${campaign?.status === 'processing' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+                  <span className="text-sm font-bold capitalize">{campaign?.status}</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-slate-50 border-none">
+              <CardContent className="pt-4 pb-2">
+                <p className="text-[10px] text-slate-500 uppercase font-bold">Progreso Meta</p>
+                <p className="text-xl font-bold mt-1">{stats.sent} / {stats.total}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs font-bold text-slate-700">Trazabilidad de Destinatarios (Muestra)</Label>
+            <ScrollArea className="h-[200px] w-full rounded-md border border-slate-100 bg-slate-50/50 p-2">
+              <div className="space-y-1.5">
+                {results.map((r) => (
+                  <div key={r.id} className="flex items-center justify-between text-[10px] bg-white p-2 rounded border border-slate-50">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-slate-900">{r.phone}</span>
+                      <span className="text-[8px] text-slate-400 font-mono truncate max-w-[150px]">{r.wamid || 'Esperando WAMID...'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className={`h-4 text-[8px] px-1 ${r.wamid ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400'}`}>
+                        {r.wamid ? 'SENT' : r.status.toUpperCase()}
+                      </Badge>
+                      <span className="text-[8px] text-slate-400">Intento: {r.attempt_count || 1}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+
+          <Alert className="bg-blue-50 border-blue-100 py-2">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-[10px] text-blue-800 italic">
+              Idempotencia garantizada: campaign_id + phone no producirá duplicados.
+            </AlertDescription>
+          </Alert>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={() => onOpenChange(false)} className="w-full bg-slate-900 text-white">
+            Cerrar y Continuar en Segundo Plano
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function WhatsAppCampaigns() {
   const { data: myWallet } = useMyWallet("whatsapp");
   const companyId = myWallet?.company_id;
