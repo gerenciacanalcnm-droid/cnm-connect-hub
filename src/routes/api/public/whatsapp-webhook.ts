@@ -58,36 +58,64 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
               const newStatus = statusUpdate.status as MessageStatus;
               const timestamp = statusUpdate.timestamp;
               
+              // Map Meta status to our Priority system to prevent regressions
+              const statusPriority: Record<string, number> = {
+                'sent': 1,
+                'delivered': 2,
+                'read': 3,
+                'failed': 4
+              };
+
+              // 1. Update Campaign Results (Massive)
+              const { data: campaignResult } = await supabaseAdmin
+                .from('whatsapp_campaign_results')
+                .select('id, status, wamid')
+                .eq('wamid', remoteId)
+                .maybeSingle();
+
+              if (campaignResult) {
+                const currentPriority = statusPriority[campaignResult.status.toLowerCase()] || 0;
+                const newPriority = statusPriority[newStatus.toLowerCase()] || 0;
+
+                // Only update if priority increases or if it's a failure
+                if (newStatus === 'failed' || newPriority > currentPriority) {
+                  await supabaseAdmin
+                    .from('whatsapp_campaign_results')
+                    .update({ 
+                      status: newStatus.toLowerCase(),
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('id', campaignResult.id);
+                }
+              }
+
+              // 2. Update Individual Messages
               const { data: msg } = await supabaseAdmin
                 .from('whatsapp_messages')
                 .select('id, status')
                 .eq('external_id', remoteId)
                 .maybeSingle();
 
-              if (!msg) continue;
+              if (msg) {
+                const currentPriority = statusPriority[msg.status] || 0;
+                const newPriority = statusPriority[newStatus] || 0;
 
-              const statusPriority: Record<string, number> = {
-                'queued': 0, 'sending': 1, 'sent': 2, 'delivered': 3, 'read': 4, 'failed': 5
-              };
+                if (newStatus === 'failed' || newPriority > currentPriority) {
+                  const updateData: any = {
+                    status: newStatus,
+                    updated_at: new Date().toISOString()
+                  };
 
-              const currentPriority = statusPriority[msg.status] || 0;
-              const newPriority = statusPriority[newStatus] || 0;
+                  if (newStatus === 'failed') {
+                    const error = statusUpdate.errors?.[0];
+                    updateData.error_code = error?.code?.toString();
+                  }
 
-              if (newStatus === 'failed' || newPriority > currentPriority) {
-                const updateData: any = {
-                  status: newStatus,
-                  updated_at: new Date().toISOString()
-                };
+                  if (newStatus === 'delivered') updateData.delivered_at = new Date(parseInt(timestamp) * 1000).toISOString();
+                  if (newStatus === 'read') updateData.read_at = new Date(parseInt(timestamp) * 1000).toISOString();
 
-                if (newStatus === 'failed') {
-                  const error = statusUpdate.errors?.[0];
-                  updateData.error_code = error?.code?.toString();
+                  await supabaseAdmin.from('whatsapp_messages').update(updateData).eq('id', msg.id);
                 }
-
-                if (newStatus === 'delivered') updateData.delivered_at = new Date(parseInt(timestamp) * 1000).toISOString();
-                if (newStatus === 'read') updateData.read_at = new Date(parseInt(timestamp) * 1000).toISOString();
-
-                await supabaseAdmin.from('whatsapp_messages').update(updateData).eq('id', msg.id);
               }
             }
           }
