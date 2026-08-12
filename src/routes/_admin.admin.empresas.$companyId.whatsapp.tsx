@@ -21,8 +21,11 @@ import {
   Calendar,
   Settings2,
   Clock,
-  Layers
+  Layers,
+  Activity,
+  Star
 } from "lucide-react";
+
 import { formatCurrency } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -233,6 +236,7 @@ function CompanyWhatsAppProfilePage() {
                   />
                   <p className="text-[10px] text-muted-foreground">Protección contra ráfagas de envío.</p>
                 </div>
+
               </div>
             </CardContent>
             <Separator />

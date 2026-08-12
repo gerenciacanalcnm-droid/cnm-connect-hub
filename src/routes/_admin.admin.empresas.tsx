@@ -5,7 +5,8 @@ import { AdminPage } from "@/components/admin/admin-page";
 import { DataTable, type ColumnDef } from "@/components/common/data-table";
 import { StatusBadge } from "@/components/common/status-badge";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, MessageCircle } from "lucide-react";
+
 import { listCompanies } from "@/lib/platform.functions";
 import { formatCurrency } from "@/lib/format";
 import { toast } from "sonner";
@@ -60,9 +61,27 @@ function EmpresasPage() {
         header: "Estado",
         cell: (c) => <StatusBadge status={c.row.original.status} />,
       },
+      {
+        id: "actions",
+        cell: (c) => (
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+            >
+              <a href={`/admin/empresas/${c.row.original.id}/whatsapp`}>
+                <MessageCircle className="mr-1.5 h-4 w-4 text-emerald-500" />
+                WhatsApp
+              </a>
+            </Button>
+          </div>
+        ),
+      },
     ],
     [],
   );
+
 
   return (
     <AdminPage
