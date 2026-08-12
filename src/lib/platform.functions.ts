@@ -161,16 +161,40 @@ export const listListMembers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ list_id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
-    const { data: members, error } = await (context.supabase as any)
-      .from("contact_list_members")
-      .select(`
-        contact:contacts(*)
-      `)
-      .eq("list_id", data.list_id)
-      .eq("company_id", CNM_COMPANY_ID);
-    
-    if (error) throw new Error(error.message);
-    return (members ?? []).map((m: any) => m.contact);
+    try {
+      // First, ensure the list belongs to the company
+      const { data: listExists, error: listError } = await (context.supabase as any)
+        .from("contact_lists")
+        .select("id")
+        .eq("id", data.list_id)
+        .eq("company_id", CNM_COMPANY_ID)
+        .maybeSingle();
+
+      if (listError) throw new Error(listError.message);
+      if (!listExists) throw new Error("La lista no existe o no pertenece a esta empresa.");
+
+      const { data: members, error } = await (context.supabase as any)
+        .from("contact_list_members")
+        .select(`
+          contact:contacts(*)
+        `)
+        .eq("list_id", data.list_id)
+        .eq("company_id", CNM_COMPANY_ID);
+      
+      if (error) {
+        console.error("Error in listListMembers:", {
+          error,
+          list_id: data.list_id,
+          company_id: CNM_COMPANY_ID,
+          table: "contact_list_members"
+        });
+        throw new Error(`No fue posible cargar los contactos de esta lista: ${error.message}`);
+      }
+      return (members ?? []).map((m: any) => m.contact).filter(Boolean);
+    } catch (e: any) {
+      console.error("Catch in listListMembers:", e);
+      throw new Error(e.message || "Error desconocido al listar miembros");
+    }
   });
 
 export const removeMemberFromList = createServerFn({ method: "POST" })
@@ -192,41 +216,68 @@ export const exportListCsv = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ list_id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
-    const { data: members, error } = await (context.supabase as any)
-      .from("contact_list_members")
-      .select(`
-        contact:contacts(
-          first_name, 
-          last_name, 
-          phone, 
-          email, 
-          city,
-          preferred_channel,
-          tags,
-          status
-        )
-      `)
-      .eq("list_id", data.list_id)
-      .eq("company_id", CNM_COMPANY_ID);
-    
-    if (error) throw new Error(error.message);
+    try {
+      // Validate list ownership
+      const { data: listExists, error: listError } = await (context.supabase as any)
+        .from("contact_lists")
+        .select("id")
+        .eq("id", data.list_id)
+        .eq("company_id", CNM_COMPANY_ID)
+        .maybeSingle();
 
-    const rows = (members ?? []).map((m: any) => m.contact);
-    const csv = [
-      ["nombre", "telefono", "email", "ciudad", "tipo_contacto", "listas", "etiquetas", "estado"].join(","),
-      ...rows.map((r: any) => [
-        `"${r.first_name} ${r.last_name || ''}"`,
-        `"${r.phone}"`,
-        `"${r.email || ''}"`,
-        `"${r.city || ''}"`,
-        `"${r.preferred_channel || ''}"`,
-        `""`, // Individual list view context, others lists omitted for simplicity in CSV if not easily joined here
-        `"${(r.tags || []).join(';')}"`,
-        `"${r.status || ''}"`
-      ].join(","))
-    ].join("\n");
+      if (listError) throw new Error(listError.message);
+      if (!listExists) throw new Error("La lista no existe o no pertenece a esta empresa.");
 
-    return csv;
+      const { data: members, error } = await (context.supabase as any)
+        .from("contact_list_members")
+        .select(`
+          contact:contacts(
+            first_name, 
+            last_name, 
+            phone, 
+            email, 
+            city,
+            preferred_channel,
+            tags,
+            status
+          )
+        `)
+        .eq("list_id", data.list_id)
+        .eq("company_id", CNM_COMPANY_ID);
+      
+      if (error) {
+        console.error("Error in exportListCsv:", {
+          error,
+          list_id: data.list_id,
+          company_id: CNM_COMPANY_ID,
+          table: "contact_list_members"
+        });
+        throw new Error(`Error al exportar lista: ${error.message}`);
+      }
+
+      const rows = (members ?? []).map((m: any) => m.contact).filter(Boolean);
+      if (!rows || rows.length === 0) {
+        throw new Error("No hay contactos para exportar en esta lista.");
+      }
+
+      const csv = [
+        ["nombre", "telefono", "email", "ciudad", "tipo_contacto", "etiquetas", "estado"].join(","),
+        ...rows.map((r: any) => [
+          `"${r.first_name || ''} ${r.last_name || ''}"`.trim(),
+          `"${r.phone || ''}"`,
+          `"${r.email || ''}"`,
+          `"${r.city || ''}"`,
+          `"${r.preferred_channel || ''}"`,
+          `"${(r.tags || []).join(';')}"`,
+          `"${r.status || ''}"`
+        ].join(","))
+      ].join("\n");
+
+      return csv;
+    } catch (e: any) {
+      console.error("Catch in exportListCsv:", e);
+      throw new Error(e.message || "Error al exportar lista");
+    }
   });
 
 export const upsertContactList = createServerFn({ method: "POST" })

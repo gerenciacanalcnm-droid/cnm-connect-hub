@@ -6,6 +6,7 @@ import { DataTable } from "@/components/common/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Plus, 
   Upload, 
@@ -17,7 +18,8 @@ import {
   Eye,
   MessageCircle,
   Mail,
-  MessageSquare
+  MessageSquare,
+  AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -41,9 +43,10 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
   const removeMember = useServerFn(removeMemberFromList);
   const exportFn = useServerFn(exportListCsv);
 
-  const { data: contacts, isLoading } = useQuery({
+  const { data: contacts, isLoading, error } = useQuery({
     queryKey: ["list-members", list.id],
     queryFn: () => getMembers({ data: { list_id: list.id } }),
+    retry: 1
   });
 
   const handleExport = async () => {
@@ -187,6 +190,20 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
 
       {isLoading ? (
         <SkeletonTable rows={5} />
+      ) : error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            <p>No fue posible cargar los contactos de esta lista.</p>
+            <div className="mt-2 text-[10px] font-mono opacity-70">
+              <p>Función: listListMembers</p>
+              <p>ID de Lista: {list.id}</p>
+              <p>Tabla: contact_list_members</p>
+              <p>Error: {(error as Error)?.message || "Error desconocido"}</p>
+            </div>
+          </AlertDescription>
+        </Alert>
       ) : (
         <DataTable
           columns={columns}
