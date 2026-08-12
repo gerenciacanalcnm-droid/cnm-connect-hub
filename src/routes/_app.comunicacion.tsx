@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MessageSquare, MessageCircle, Mail, Inbox, Settings2, Send, FileText, Calendar, Smartphone, LayoutTemplate } from "lucide-react";
+import { MessageSquare, MessageCircle, Mail, Inbox, Settings2, Send, FileText, Calendar, Smartphone, LayoutTemplate, Users } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SendSms } from "@/components/comunicacion/send-sms";
@@ -12,6 +12,7 @@ import { WhatsAppSchedules } from "@/components/comunicacion/whatsapp-schedules"
 import { EmailMarketing } from "@/components/comunicacion/email-marketing";
 import { CommunicationSettings } from "@/components/comunicacion/communication-settings";
 import { ConversationCenter } from "@/components/comunicacion/conversation-center";
+import { ContactsTable } from "@/components/crm/contacts-table";
 
 export const Route = createFileRoute("/_app/comunicacion")({
   head: () => ({
@@ -55,6 +56,9 @@ function ComunicacionPage() {
           <TabsTrigger value="plantillas" className="gap-1.5 flex-1 min-w-[110px]">
             <FileText className="h-3.5 w-3.5" /> Plantillas WA
           </TabsTrigger>
+          <TabsTrigger value="contactos" className="gap-1.5 flex-1 min-w-[110px]">
+            <Users className="h-3.5 w-3.5" /> Contactos WA
+          </TabsTrigger>
           <TabsTrigger value="encuestas" className="gap-1.5 flex-1 min-w-[110px]">
             <Smartphone className="h-3.5 w-3.5" /> Encuestas
           </TabsTrigger>
@@ -90,6 +94,9 @@ function ComunicacionPage() {
         <TabsContent value="plantillas">
           <WhatsAppTemplates />
         </TabsContent>
+        <TabsContent value="contactos">
+          <ContactsTable />
+        </TabsContent>
         <TabsContent value="encuestas">
           <WhatsAppSurveys />
         </TabsContent>
@@ -100,7 +107,13 @@ function ComunicacionPage() {
           <CommunicationSettings />
         </TabsContent>
       </Tabs>
-      <span className="sr-only">Sprint completado</span>
+      <div className="mt-8 border-t border-border pt-6">
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Sprint completado
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

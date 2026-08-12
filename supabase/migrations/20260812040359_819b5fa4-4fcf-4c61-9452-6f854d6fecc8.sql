@@ -1,0 +1,1 @@
+UPDATE public.contact_groups SET name = 'Clientes Boyacá' WHERE name = 'Clientes';
