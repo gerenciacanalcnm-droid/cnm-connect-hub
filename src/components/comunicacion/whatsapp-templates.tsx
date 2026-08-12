@@ -670,6 +670,16 @@ export function WhatsAppTemplates() {
           </Button>
           
           <Button 
+            variant="outline"
+            className="w-full text-slate-600 border-emerald-100 hover:bg-emerald-50"
+            disabled={isUploading || !account}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+            Cargar imagen
+          </Button>
+          
+          <Button 
             className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" 
             disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending || (headerType !== 'NONE' && headerType !== 'TEXT' && !headerText)}
             onClick={async () => {
@@ -689,7 +699,7 @@ export function WhatsAppTemplates() {
             }}
           >
             <Send className="h-4 w-4 mr-2" />
-            Cargar imagen
+            Enviar a Meta para aprobación
           </Button>
           
           <Button variant="ghost" className="w-full text-xs text-slate-400" onClick={() => setIsEditorOpen(false)}>
