@@ -50,7 +50,7 @@ export const primaryNavigation: NavSection[] = [
       },
       {
         title: "CRM",
-        to: "/crm/legacy", // Placeholder or adjusting existing
+        to: "/crm/legacy",
         icon: Users,
         description: "Conversaciones y tratos",
       },
