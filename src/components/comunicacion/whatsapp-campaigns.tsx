@@ -238,8 +238,8 @@ export function WhatsAppCampaigns() {
                 </Select>
                 {selectedAccount && (
                   <div className="px-3 py-2 bg-slate-50 rounded-lg text-[10px] text-slate-500 border border-slate-100 flex flex-col gap-0.5">
-                    <span>WABA ID: {selectedAccount.business_account_id}</span>
-                    <span>Phone ID: {selectedAccount.phone_number_id}</span>
+                    <span>WABA ID: {selectedAccount.businessAccountId || (selectedAccount as any).business_account_id}</span>
+                    <span>Phone ID: {selectedAccount.phoneNumberId || (selectedAccount as any).phone_number_id}</span>
                   </div>
                 )}
               </div>
