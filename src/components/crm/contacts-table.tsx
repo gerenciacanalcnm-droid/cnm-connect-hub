@@ -117,7 +117,7 @@ export function ContactsTable() {
         enableSelection
         onRowClick={setSelected}
         toolbar={
-          <Button className="gap-2" onClick={() => toast.info("Crear contacto próximamente")}>
+          <Button className="gap-2" onClick={() => toast.info("Crear contacto en desarrollo")}>
             <Plus className="h-4 w-4" /> Nuevo contacto
           </Button>
         }
