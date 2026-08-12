@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ContactListManager } from "./ContactListManager";
 import { Badge } from "@/components/ui/badge";
+import { ContactFormDialog } from "./ContactFormDialog";
+import { CSVImporter } from "./CSVImporter";
 
 
 
@@ -23,14 +25,18 @@ export function ContactCenterHub() {
               <Download className="mr-2 h-4 w-4" />
               Exportar
             </Button>
-            <Button variant="outline" size="sm">
-              <Upload className="mr-2 h-4 w-4" />
-              Importar CSV
-            </Button>
-            <Button size="sm" className="bg-primary text-primary-foreground">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Nuevo Contacto
-            </Button>
+            <CSVImporter>
+              <Button variant="outline" size="sm">
+                <Upload className="mr-2 h-4 w-4" />
+                Importar CSV
+              </Button>
+            </CSVImporter>
+            <ContactFormDialog>
+              <Button size="sm" className="bg-primary text-primary-foreground">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Nuevo Contacto
+              </Button>
+            </ContactFormDialog>
           </div>
         }
       />

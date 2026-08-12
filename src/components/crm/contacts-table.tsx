@@ -17,6 +17,7 @@ import {
 import { useContacts } from "@/hooks/use-contacts";
 import type { Contact } from "@/types/contact";
 import { toast } from "sonner";
+import { ContactFormDialog } from "./contact-center/ContactFormDialog";
 
 function initials(c: Contact) {
   return `${c.firstName[0] ?? ""}${c.lastName?.[0] ?? ""}`.toUpperCase();
@@ -117,9 +118,11 @@ export function ContactsTable() {
         enableSelection
         onRowClick={setSelected}
         toolbar={
-          <Button className="gap-2" onClick={() => toast.info("Crear contacto en desarrollo")}>
-            <Plus className="h-4 w-4" /> Nuevo contacto
-          </Button>
+          <ContactFormDialog>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" /> Nuevo contacto
+            </Button>
+          </ContactFormDialog>
         }
       />
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
