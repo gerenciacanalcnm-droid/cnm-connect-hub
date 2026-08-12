@@ -210,9 +210,11 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
       <div className="mt-4 p-4 border rounded-lg bg-muted/20 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">
-            CSV corregido
+            BUILD
           </Badge>
-          <span className="text-xs text-muted-foreground italic">Validación de esquema y relaciones completada.</span>
+          <span className="text-xs text-muted-foreground italic">
+            No utilizar: Build OK o Typecheck OK como prueba de funcionamiento. La prueba debe realizarse con la lista real y sus 19 contactos.
+          </span>
         </div>
       </div>
 
