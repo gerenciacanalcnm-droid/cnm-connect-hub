@@ -2,7 +2,7 @@ import React from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { ContactsTable } from "@/components/crm/contacts-table";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Download, Upload, Filter, Search, ShieldCheck } from "lucide-react";
+import { UserPlus, Download, Upload, Filter, Search, ShieldCheck, Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
