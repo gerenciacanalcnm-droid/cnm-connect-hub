@@ -28,7 +28,7 @@ function CrmPage() {
       />
       <Tabs defaultValue="contactos" className="w-full">
         <TabsList className="mb-6">
-          <TabsTrigger value="contactos">Centro de Contactos</TabsTrigger>
+          <TabsTrigger value="contactos">Conversaciones</TabsTrigger>
           <TabsTrigger value="conversaciones">Conversaciones</TabsTrigger>
           <TabsTrigger value="segmentos">Segmentos</TabsTrigger>
           <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
