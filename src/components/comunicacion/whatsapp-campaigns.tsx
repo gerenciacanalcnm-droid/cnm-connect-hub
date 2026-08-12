@@ -536,7 +536,14 @@ export function WhatsAppCampaigns() {
             <div className="py-24 text-center">
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-50 mb-4 border border-slate-100">
                 <LayoutTemplate className="h-10 w-10 text-slate-200" />
-              </div>
+      {monitoringCampaignId && (
+        <CampaignValidationDialog 
+          campaignId={monitoringCampaignId} 
+          isOpen={!!monitoringCampaignId} 
+          onOpenChange={(open) => !open && setMonitoringCampaignId(null)} 
+        />
+      )}
+    </div>
               <h3 className="text-lg font-semibold text-slate-900">Sin campañas activas</h3>
               <p className="text-sm text-slate-500 max-w-xs mx-auto mt-2">
                 Comienza a enviar mensajes masivos a tus clientes creando tu primera campaña.
