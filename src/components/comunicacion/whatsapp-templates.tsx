@@ -49,6 +49,15 @@ export function WhatsAppTemplates() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [mediaId, setMediaId] = useState<string | null>(null);
+  const [headerHandle, setHeaderHandle] = useState<string | null>(null);
+  const [uploadDiagnostic, setUploadDiagnostic] = useState<{
+    selected: boolean;
+    preview: boolean;
+    upload: boolean | null;
+    handle: boolean | null;
+    error: string | null;
+  }>({ selected: false, preview: false, upload: null, handle: null, error: null });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Cargar plantillas
@@ -155,35 +164,47 @@ export function WhatsAppTemplates() {
     if (!file || !account) return;
 
     setIsUploading(true);
-    try {
-      // 1. Crear preview local inmediata
-      const objectUrl = URL.createObjectURL(file);
-      setLocalPreviewUrl(objectUrl);
+    setUploadDiagnostic({ selected: true, preview: false, upload: null, handle: null, error: null });
 
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64 = reader.result as string;
-        const res = await uploadWhatsAppMedia({
-          data: {
-            fileBase64: base64,
-            fileName: file.name,
-            fileType: file.type,
-            companyId: account.company_id
-          }
-        });
-        
-        setHeaderType(res.type as any);
-        setHeaderText(res.url); // En un flujo real esto sería el handle/ID
-        toast.success("Archivo procesado correctamente");
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Error al cargar el archivo");
+    // 1. Preview local inmediata (SOLO para la UI, nunca se envía a Meta)
+    const objectUrl = URL.createObjectURL(file);
+    setLocalPreviewUrl(objectUrl);
+    setHeaderType(file.type.startsWith("video") ? "VIDEO" : file.type.startsWith("image") ? "IMAGE" : "DOCUMENT");
+    setUploadDiagnostic((d) => ({ ...d, preview: true }));
+
+    try {
+      const base64: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
+        reader.readAsDataURL(file);
+      });
+
+      const res = await uploadWhatsAppMedia({
+        data: {
+          fileBase64: base64,
+          fileName: file.name,
+          fileType: file.type,
+          accountId: account.id,
+        },
+      });
+
+      setMediaId(res.mediaId);
+      setHeaderHandle(res.headerHandle);
+      setHeaderType(res.type as any);
+      setUploadDiagnostic((d) => ({ ...d, upload: true, handle: !!res.headerHandle }));
+      toast.success("Imagen subida a Meta correctamente");
+    } catch (error: any) {
+      setMediaId(null);
+      setHeaderHandle(null);
+      const msg = String(error?.message || "Error al subir el archivo a Meta");
+      setUploadDiagnostic((d) => ({ ...d, upload: false, handle: false, error: msg }));
+      toast.error(msg, { duration: 10000 });
     } finally {
       setIsUploading(false);
     }
   };
+
 
   const renderPreviewBody = () => {
     if (!body) return "Hola mundo";
