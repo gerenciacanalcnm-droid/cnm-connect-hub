@@ -107,7 +107,7 @@ export function ContactListManager() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {lists?.map((list: any) => (
+        {(lists as any[])?.map((list: any) => (
           <Card key={list.id} className="overflow-hidden border-border/50 transition-all hover:border-primary/50 hover:shadow-md">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
