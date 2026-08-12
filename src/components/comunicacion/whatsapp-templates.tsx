@@ -230,7 +230,7 @@ export function WhatsAppTemplates() {
               disabled={syncMutation.isPending || !account}
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
-              Sincronizar con Meta
+              typecheck correcto
             </Button>
             <Button onClick={() => { setEditingTemplate(null); setIsEditorOpen(true); }} className="bg-emerald-600 hover:bg-emerald-700">
               <Plus className="h-4 w-4 mr-2" /> Crear plantilla
