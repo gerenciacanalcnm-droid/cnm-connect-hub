@@ -1,43 +1,36 @@
-# Plan: WhatsApp Template System Fix - Database Integrity & Sync
-
-We need to fix the WhatsApp template duplication issue by ensuring a real UNIQUE constraint exists in PostgreSQL and updating the sync logic to use it correctly.
-
-## Objectives
-1. Audit and fix the database schema (`whatsapp_templates`).
-2. Deduplicate existing records based on the new identity rule.
-3. Update server functions to use the correct `ON CONFLICT` clause.
-4. Improve UI to handle multi-account views and clear template states.
-5. Fix template creation flow (DRAFT -> PENDING -> APPROVED).
+---
+title: WhatsApp Templates Multimedia and Meta Sync Fix
+description: Fix broken image previews and "Invalid parameter" errors in WhatsApp template creation by implementing real media handles and detailed Meta API error reporting.
+---
 
 ## Technical Details
 
-### 1. Database Remediation
-- **Migration**: 
-  - Delete duplicate rows based on `(account_id, external_id)`.
-  - Add a formal `UNIQUE` constraint: `ALTER TABLE whatsapp_templates ADD CONSTRAINT whatsapp_templates_account_external_unique UNIQUE (account_id, external_id)`.
-  - Ensure RLS and GRANTs are correctly applied.
+### 1. Multimedia & Previews
+- **Local Preview**: Use `URL.createObjectURL` to show a real image preview immediately after selection in `src/components/comunicacion/whatsapp-templates.tsx`.
+- **Media Upload**: Update `src/lib/whatsapp-assets.functions.ts` to (optionally/mock) handle real byte uploads and ensure `src/components/comunicacion/whatsapp-templates.tsx` stores the `header_handle` returned by Meta's Resumable Upload API (if applicable) or a valid ID.
+- **State Management**: Clearly separate `localPreviewUrl` from the persistent `headerText` (which will store the Meta handle).
 
-### 2. Backend Logic Update
-- **`src/lib/whatsapp.functions.ts`**:
-  - Update `syncWhatsAppTemplates` to use `ON CONFLICT (account_id, external_id)`.
-  - Ensure it updates existing records instead of creating new ones when the combination matches.
-  - Correctly map Meta's `id` to `external_id`.
-  - Report sync details: New, Updated, Errors.
+### 2. Meta Cloud API Integration (`submitWhatsAppTemplateToMeta`)
+- **Detailed Diagnostics**: Wrap the Meta fetch call in a block that captures full response details (HTTP status, error code, subcode, fbtrace_id, message) instead of throwing a generic "Invalid parameter".
+- **Payload Construction**: Ensure the `HEADER` component uses `format: "IMAGE"` and includes the `example.header_handle` as a list of strings, as required by the Graph API for templates with media.
+- **Variable Validation**: Automatically generate `example.body_text` for body components containing `{{n}}` placeholders, ensuring the number of examples matches the number of variables.
 
-### 3. Frontend Improvements
-- **`src/components/comunicacion/whatsapp-templates.tsx`**:
-  - Display one card per `(account_id, external_id)`.
-  - Add account labels/badges if multiple accounts are present.
-  - Update status logic:
-    - `DRAFT`: Local only, not yet sent.
-    - `PENDING`: Sent to Meta, awaiting approval (uses Meta's `PENDING` status).
-    - `APPROVED`/`REJECTED`: Final Meta states.
-  - Distinguish between "Guardar Borrador" (Local) and "Enviar a Meta" (API call + Status update).
+### 3. Database & Workflow
+- **Idempotency**: Maintain the `(account_id, external_id)` unique constraint.
+- **State Transitions**: `DRAFT` only moves to `PENDING` upon successful Meta API response (200 OK with an ID).
+- **Error Display**: Render the detailed Meta error in the UI toast or a dedicated error area in the editor.
 
-### 4. Media & Components Fix
-- Ensure the "Cargar imagen" button works and updates the template's `header` and `metadata`.
-- Correctly format the payload for Meta API in `submitWhatsAppTemplateToMeta`.
+## Proposed Changes
 
-## User Review Required
-- Does the `(account_id, external_id)` identity cover all use cases? (e.g. same name in different WABAs is allowed).
-- Should we delete duplicates automatically or flag them for review? (Plan assumes automatic deletion of older records).
+### Frontend (`src/components/comunicacion/whatsapp-templates.tsx`)
+- Add `localPreviewUrl` state.
+- Update `handleFileUpload` to set the preview URL and call a server function that returns a Meta media handle.
+- Update the preview <img> to use `localPreviewUrl || headerText`.
+- Enhance the `sendToMetaMutation` error handler to display detailed diagnostics.
+
+### Backend (`src/lib/whatsapp-meta.functions.ts`)
+- Refactor `submitWhatsAppTemplateToMeta` to be more robust and verbose.
+- Correct the `components` payload structure for `MARKETING` templates with media.
+
+### Assets (`src/lib/whatsapp-assets.functions.ts`)
+- Update to support returning a `header_handle` or mock it realistically for the flow.
