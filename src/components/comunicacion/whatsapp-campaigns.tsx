@@ -65,9 +65,11 @@ export function WhatsAppCampaigns() {
   const { data: accounts = [] } = useWhatsAppAccounts();
   const { data: allTemplates = [] } = useWhatsAppTemplates();
   const createCampaign = useCreateWhatsAppCampaign();
+  const startCampaign = useStartWhatsAppCampaign();
   
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   
   // Form State
   const [name, setName] = useState("");
@@ -83,9 +85,43 @@ export function WhatsAppCampaigns() {
     approvedTemplates.find((t: any) => t.id === selectedTemplateId),
   [approvedTemplates, selectedTemplateId]);
 
+  const selectedAccount = useMemo(() => 
+    accounts.find((a: any) => a.id === selectedAccountId),
+  [accounts, selectedAccountId]);
+
   const filteredCampaigns = campaigns?.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const recipientStats = useMemo(() => {
+    const raw = manualPhones.split(/[\n,]/).map(p => p.trim()).filter(p => p.length > 0);
+    const valid = raw.filter(p => p.length > 5 && /^\+?[1-9]\d{1,14}$/.test(p.replace(/\D/g, '')));
+    const invalid = raw.filter(p => !valid.includes(p));
+    const unique = Array.from(new Set(valid.map(p => p.replace(/\D/g, ''))));
+    const duplicates = valid.length - unique.length;
+    
+    return {
+      total: raw.length,
+      valid: unique.length,
+      invalid: invalid.length,
+      duplicates,
+      uniqueList: unique
+    };
+  }, [manualPhones]);
+
+  const costData = useMemo(() => {
+    const cost = recipientStats.valid * 0.05;
+    const currentBalance = myWallet?.balance || 0;
+    const projectedBalance = currentBalance - cost;
+    const isOverBalance = cost > currentBalance;
+    
+    return {
+      cost,
+      currentBalance,
+      projectedBalance,
+      isOverBalance
+    };
+  }, [recipientStats.valid, myWallet]);
 
   const handleCreate = async () => {
     if (!companyId) return;
@@ -94,48 +130,60 @@ export function WhatsAppCampaigns() {
       return;
     }
 
-    const phones = manualPhones
-      .split(/[\n,]/)
-      .map(p => p.trim())
-      .filter(p => p.length > 5);
-
-    if (phones.length === 0) {
+    if (recipientStats.valid === 0) {
       toast.error("Ingresa al menos un número de teléfono válido");
       return;
     }
 
+    if (costData.isOverBalance) {
+      toast.error("Saldo insuficiente para ejecutar esta campaña");
+      return;
+    }
+
+    setIsValidating(true);
+    
     try {
-      await createCampaign.mutateAsync({
+      // Step 1: Create Campaign (DRAFT)
+      const campaign = await createCampaign.mutateAsync({
         companyId,
         accountId: selectedAccountId,
         templateId: selectedTemplateId,
         name,
-        recipients: phones.map(phone => ({ phone })),
-        estimatedCost: phones.length * 0.05 // Mock cost calculation
+        recipients: recipientStats.uniqueList.map(phone => ({ phone })),
+        estimatedCost: costData.cost
       });
       
-      toast.success("Campaña encolada correctamente");
+      // Step 2: Start Campaign flow (DRAFT -> VALIDATING -> READY -> QUEUED)
+      await startCampaign.mutateAsync(campaign.id);
+      
+      toast.success("Campaña iniciada correctamente");
       setIsNewDialogOpen(false);
+      setIsValidating(false);
       // Reset form
       setName("");
       setSelectedTemplateId("");
+      setSelectedAccountId("");
       setManualPhones("");
     } catch (error: any) {
-      toast.error(error.message || "Error al crear la campaña");
+      setIsValidating(false);
+      toast.error(error.message || "Error al procesar la campaña");
     }
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'draft': return <Badge variant="secondary">Borrador</Badge>;
+      case 'validating': return <Badge variant="outline" className="text-blue-500 border-blue-200 bg-blue-50 animate-pulse">Validando</Badge>;
+      case 'ready': return <Badge variant="outline" className="text-indigo-600 border-indigo-200 bg-indigo-50">Listo</Badge>;
       case 'scheduled': return <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">Programada</Badge>;
       case 'queued': return <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">En cola</Badge>;
-      case 'processing': return <Badge className="bg-emerald-500 animate-pulse">Procesando</Badge>;
-      case 'completed': return <Badge className="bg-blue-600">Completada</Badge>;
+      case 'processing': return <Badge className="bg-emerald-500 animate-pulse">Enviando</Badge>;
+      case 'completed': return <Badge className="bg-blue-600">Finalizada</Badge>;
       case 'failed': return <Badge variant="destructive">Fallida</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
   };
+
 
   return (
     <div className="space-y-6">
