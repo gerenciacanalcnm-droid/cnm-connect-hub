@@ -62,6 +62,7 @@ import { Route as AdminAdminConfigApiRouteImport } from './routes/_admin.admin.c
 import { Route as AdminAdminCommunicationRouteImport } from './routes/_admin.admin.communication'
 import { Route as AdminAdminAuditoriaRouteImport } from './routes/_admin.admin.auditoria'
 import { Route as ApiPublicWebhooksWompiRouteImport } from './routes/api/public/webhooks/wompi'
+import { Route as AppComunicacionWhatsappContactosRouteImport } from './routes/_app.comunicacion.whatsapp.contactos'
 import { Route as AdminAdminEmpresasCompanyIdWhatsappRouteImport } from './routes/_admin.admin.empresas.$companyId.whatsapp'
 
 const AuthRoute = AuthRouteImport.update({
@@ -331,6 +332,12 @@ const ApiPublicWebhooksWompiRoute = ApiPublicWebhooksWompiRouteImport.update({
   path: '/api/public/webhooks/wompi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppComunicacionWhatsappContactosRoute =
+  AppComunicacionWhatsappContactosRouteImport.update({
+    id: '/whatsapp/contactos',
+    path: '/whatsapp/contactos',
+    getParentRoute: () => AppComunicacionRoute,
+  } as any)
 const AdminAdminEmpresasCompanyIdWhatsappRoute =
   AdminAdminEmpresasCompanyIdWhatsappRouteImport.update({
     id: '/$companyId/whatsapp',
@@ -343,7 +350,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AppAnalyticsRoute
   '/api': typeof AppApiRoute
   '/automatizaciones': typeof AppAutomatizacionesRoute
-  '/comunicacion': typeof AppComunicacionRoute
+  '/comunicacion': typeof AppComunicacionRouteWithChildren
   '/configuracion': typeof AppConfiguracionRoute
   '/crm': typeof AppCrmRoute
   '/dashboard': typeof AppDashboardRoute
@@ -388,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
+  '/comunicacion/whatsapp/contactos': typeof AppComunicacionWhatsappContactosRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
   '/admin/empresas/$companyId/whatsapp': typeof AdminAdminEmpresasCompanyIdWhatsappRoute
 }
@@ -396,7 +404,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AppAnalyticsRoute
   '/api': typeof AppApiRoute
   '/automatizaciones': typeof AppAutomatizacionesRoute
-  '/comunicacion': typeof AppComunicacionRoute
+  '/comunicacion': typeof AppComunicacionRouteWithChildren
   '/configuracion': typeof AppConfiguracionRoute
   '/crm': typeof AppCrmRoute
   '/dashboard': typeof AppDashboardRoute
@@ -441,6 +449,7 @@ export interface FileRoutesByTo {
   '/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
+  '/comunicacion/whatsapp/contactos': typeof AppComunicacionWhatsappContactosRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
   '/admin/empresas/$companyId/whatsapp': typeof AdminAdminEmpresasCompanyIdWhatsappRoute
 }
@@ -453,7 +462,7 @@ export interface FileRoutesById {
   '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/api': typeof AppApiRoute
   '/_app/automatizaciones': typeof AppAutomatizacionesRoute
-  '/_app/comunicacion': typeof AppComunicacionRoute
+  '/_app/comunicacion': typeof AppComunicacionRouteWithChildren
   '/_app/configuracion': typeof AppConfiguracionRoute
   '/_app/crm': typeof AppCrmRoute
   '/_app/dashboard': typeof AppDashboardRoute
@@ -498,6 +507,7 @@ export interface FileRoutesById {
   '/_app/nova/mapas': typeof AppNovaMapasRoute
   '/api/public/sms-scheduler': typeof ApiPublicSmsSchedulerRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
+  '/_app/comunicacion/whatsapp/contactos': typeof AppComunicacionWhatsappContactosRoute
   '/api/public/webhooks/wompi': typeof ApiPublicWebhooksWompiRoute
   '/_admin/admin/empresas/$companyId/whatsapp': typeof AdminAdminEmpresasCompanyIdWhatsappRoute
 }
@@ -553,6 +563,7 @@ export interface FileRouteTypes {
     | '/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
+    | '/comunicacion/whatsapp/contactos'
     | '/api/public/webhooks/wompi'
     | '/admin/empresas/$companyId/whatsapp'
   fileRoutesByTo: FileRoutesByTo
@@ -606,6 +617,7 @@ export interface FileRouteTypes {
     | '/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
+    | '/comunicacion/whatsapp/contactos'
     | '/api/public/webhooks/wompi'
     | '/admin/empresas/$companyId/whatsapp'
   id:
@@ -662,6 +674,7 @@ export interface FileRouteTypes {
     | '/_app/nova/mapas'
     | '/api/public/sms-scheduler'
     | '/api/public/whatsapp-webhook'
+    | '/_app/comunicacion/whatsapp/contactos'
     | '/api/public/webhooks/wompi'
     | '/_admin/admin/empresas/$companyId/whatsapp'
   fileRoutesById: FileRoutesById
@@ -1049,6 +1062,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksWompiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/comunicacion/whatsapp/contactos': {
+      id: '/_app/comunicacion/whatsapp/contactos'
+      path: '/whatsapp/contactos'
+      fullPath: '/comunicacion/whatsapp/contactos'
+      preLoaderRoute: typeof AppComunicacionWhatsappContactosRouteImport
+      parentRoute: typeof AppComunicacionRoute
+    }
     '/_admin/admin/empresas/$companyId/whatsapp': {
       id: '/_admin/admin/empresas/$companyId/whatsapp'
       path: '/$companyId/whatsapp'
@@ -1133,6 +1153,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AppComunicacionRouteChildren {
+  AppComunicacionWhatsappContactosRoute: typeof AppComunicacionWhatsappContactosRoute
+}
+
+const AppComunicacionRouteChildren: AppComunicacionRouteChildren = {
+  AppComunicacionWhatsappContactosRoute: AppComunicacionWhatsappContactosRoute,
+}
+
+const AppComunicacionRouteWithChildren = AppComunicacionRoute._addFileChildren(
+  AppComunicacionRouteChildren,
+)
+
 interface AppNovaRouteChildren {
   AppNovaMapasRoute: typeof AppNovaMapasRoute
 }
@@ -1148,7 +1180,7 @@ interface AppRouteChildren {
   AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppApiRoute: typeof AppApiRoute
   AppAutomatizacionesRoute: typeof AppAutomatizacionesRoute
-  AppComunicacionRoute: typeof AppComunicacionRoute
+  AppComunicacionRoute: typeof AppComunicacionRouteWithChildren
   AppConfiguracionRoute: typeof AppConfiguracionRoute
   AppCrmRoute: typeof AppCrmRoute
   AppDashboardRoute: typeof AppDashboardRoute
@@ -1162,7 +1194,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAnalyticsRoute: AppAnalyticsRoute,
   AppApiRoute: AppApiRoute,
   AppAutomatizacionesRoute: AppAutomatizacionesRoute,
-  AppComunicacionRoute: AppComunicacionRoute,
+  AppComunicacionRoute: AppComunicacionRouteWithChildren,
   AppConfiguracionRoute: AppConfiguracionRoute,
   AppCrmRoute: AppCrmRoute,
   AppDashboardRoute: AppDashboardRoute,
@@ -1208,3 +1240,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
