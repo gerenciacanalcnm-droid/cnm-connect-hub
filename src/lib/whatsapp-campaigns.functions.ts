@@ -11,7 +11,7 @@ export const getWhatsAppCampaigns = createServerFn({ method: "GET" })
       .select(`
         *,
         whatsapp_templates (name),
-        whatsapp_accounts (alias, display_phone)
+        whatsapp_accounts (alias)
       `)
       .eq("company_id", data.companyId)
       .order("created_at", { ascending: false });
@@ -37,7 +37,7 @@ export const createWhatsAppCampaign = createServerFn({ method: "POST" })
   }).parse(v))
   .handler(async ({ data, context }) => {
     // 1. Create campaign record
-    const { data: campaign, error: campaignError } = await context.supabase
+    const { data: campaign, error: campaignError } = await (context.supabase as any)
       .from("whatsapp_campaigns")
       .insert({
         company_id: data.companyId,
@@ -47,7 +47,6 @@ export const createWhatsAppCampaign = createServerFn({ method: "POST" })
         status: data.scheduledAt ? 'scheduled' : 'draft',
         scheduled_at: data.scheduledAt,
         total_recipients: data.recipients.length,
-        estimated_cost: data.estimatedCost,
         created_by: context.userId
       })
       .select()
@@ -69,8 +68,6 @@ export const createWhatsAppCampaign = createServerFn({ method: "POST" })
       .insert(results);
 
     if (resultsError) {
-      // Rollback campaign if queue fails? 
-      // For now just throw, Supabase transactions are implicit in single-query but not across
       throw new Error(resultsError.message);
     }
 
@@ -97,7 +94,7 @@ export const getWhatsAppCampaignDetails = createServerFn({ method: "GET" })
       .from("whatsapp_campaign_results")
       .select("*")
       .eq("campaign_id", data.campaignId)
-      .limit(100); // Pagination needed for real production
+      .limit(100);
 
     if (resultsError) throw new Error(resultsError.message);
 
