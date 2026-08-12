@@ -91,7 +91,7 @@ function CampaignValidationDialog({ campaignId, isOpen, onOpenChange }: { campai
               <CardContent className="pt-4 pb-2">
                 <p className="text-[10px] text-slate-500 uppercase font-bold">Estado Actual</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <div className={`h-2 w-2 rounded-full animate-pulse ${campaign?.status === 'processing' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+                  <div className={`h-2 w-2 rounded-full animate-pulse ${campaign?.status === 'running' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
                   <span className="text-sm font-bold capitalize">{campaign?.status}</span>
                 </div>
               </CardContent>
@@ -118,7 +118,7 @@ function CampaignValidationDialog({ campaignId, isOpen, onOpenChange }: { campai
                       <Badge variant="outline" className={`h-4 text-[8px] px-1 ${r.wamid ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400'}`}>
                         {r.wamid ? 'SENT' : r.status.toUpperCase()}
                       </Badge>
-                      <span className="text-[8px] text-slate-400">Intento: {r.attempt_count || 1}</span>
+                      <span className="text-[8px] text-slate-400">Intento: {(r as any).attempt_count || 1}</span>
                     </div>
                   </div>
                 ))}
