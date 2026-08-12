@@ -253,7 +253,7 @@ function WhatsAppInventoryPage() {
                               <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
                               {n.companies.name}
                             </div>
-                            <span className="text-[10px] text-muted-foreground uppercase font-mono mt-0.5">ID: {n.company_id.split('-')[0]}...</span>
+                            <span className="text-[10px] text-muted-foreground uppercase font-mono mt-0.5">ID: {n.company_id?.split('-')[0]}...</span>
                           </div>
                         ) : (
                           <span className="text-xs text-muted-foreground italic">No asignado</span>
