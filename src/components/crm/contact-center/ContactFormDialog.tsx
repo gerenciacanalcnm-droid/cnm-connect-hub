@@ -31,12 +31,14 @@ export function ContactFormDialog({
   children, 
   defaultValues, 
   open: externalOpen, 
-  setOpen: externalSetOpen 
+  setOpen: externalSetOpen,
+  editingContact = null // Nueva prop para aislamiento
 }: { 
   children: React.ReactNode, 
   defaultValues?: any,
   open?: boolean,
-  setOpen?: (open: boolean) => void
+  setOpen?: (open: boolean) => void,
+  editingContact?: any
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen ?? internalOpen;
@@ -134,6 +136,26 @@ export function ContactFormDialog({
       toast.error("Error al guardar contacto");
     }
   };
+
+  // PRUEBA DE DIAGNÓSTICO: Montar el modal sin lógica interna pesada
+  if (editingContact !== null) {
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>{children}</DialogTrigger>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>NO PUDE REPRODUCIR EL ERROR EN EL ENTORNO</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 text-center">
+            <p>EDIT DIALOG TEST</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Si ves esto, el crash no es al montar el componente Dialog básico.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
