@@ -175,5 +175,6 @@ export function ContactListManager() {
         ))}
       </div>
       )}
+    </div>
   );
 }
