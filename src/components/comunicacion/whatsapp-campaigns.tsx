@@ -55,8 +55,8 @@ export function WhatsAppCampaigns() {
   const { data: myWallet } = useMyWallet("whatsapp");
   const companyId = myWallet?.company_id;
   const { data: campaigns, isLoading } = useWhatsAppCampaigns(companyId);
-  const { data: accounts = [] } = useWhatsAppAccounts(companyId);
-  const { data: allTemplates = [] } = useWhatsAppTemplates(companyId);
+  const { data: accounts = [] } = useWhatsAppAccounts();
+  const { data: allTemplates = [] } = useWhatsAppTemplates();
   const createCampaign = useCreateWhatsAppCampaign();
   
   const [searchTerm, setSearchTerm] = useState("");
