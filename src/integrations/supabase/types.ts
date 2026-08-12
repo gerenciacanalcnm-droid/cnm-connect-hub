@@ -2586,6 +2586,50 @@ export type Database = {
           },
         ]
       }
+      whatsapp_limits: {
+        Row: {
+          campaign_limit: number | null
+          company_id: string
+          created_at: string | null
+          daily_limit: number | null
+          hourly_limit: number | null
+          id: string
+          is_active: boolean | null
+          monthly_limit: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          campaign_limit?: number | null
+          company_id: string
+          created_at?: string | null
+          daily_limit?: number | null
+          hourly_limit?: number | null
+          id?: string
+          is_active?: boolean | null
+          monthly_limit?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          campaign_limit?: number | null
+          company_id?: string
+          created_at?: string | null
+          daily_limit?: number | null
+          hourly_limit?: number | null
+          id?: string
+          is_active?: boolean | null
+          monthly_limit?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_limits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_media: {
         Row: {
           caption: string | null
@@ -2659,6 +2703,9 @@ export type Database = {
           body: string | null
           campaign_id: string | null
           company_id: string | null
+          consumption_type:
+            | Database["public"]["Enums"]["whatsapp_consumption_type"]
+            | null
           conversation_id: string | null
           cost: number
           created_at: string
@@ -2682,6 +2729,9 @@ export type Database = {
           body?: string | null
           campaign_id?: string | null
           company_id?: string | null
+          consumption_type?:
+            | Database["public"]["Enums"]["whatsapp_consumption_type"]
+            | null
           conversation_id?: string | null
           cost?: number
           created_at?: string
@@ -2705,6 +2755,9 @@ export type Database = {
           body?: string | null
           campaign_id?: string | null
           company_id?: string | null
+          consumption_type?:
+            | Database["public"]["Enums"]["whatsapp_consumption_type"]
+            | null
           conversation_id?: string | null
           cost?: number
           created_at?: string
@@ -2953,6 +3006,7 @@ export type Database = {
         Args: { _account_id: string; _admin_id: string; _company_id: string }
         Returns: undefined
       }
+      check_whatsapp_limits: { Args: { _company_id: string }; Returns: Json }
       has_company_role: {
         Args: {
           _company_id: string
@@ -3040,6 +3094,11 @@ export type Database = {
         | "DISCONNECTED"
         | "ERROR"
         | "DISABLED"
+      whatsapp_consumption_type:
+        | "individual"
+        | "bulk"
+        | "campaign"
+        | "automation"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3219,6 +3278,12 @@ export const Constants = {
         "DISCONNECTED",
         "ERROR",
         "DISABLED",
+      ],
+      whatsapp_consumption_type: [
+        "individual",
+        "bulk",
+        "campaign",
+        "automation",
       ],
     },
   },
