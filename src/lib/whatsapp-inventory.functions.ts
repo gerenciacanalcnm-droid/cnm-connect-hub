@@ -80,7 +80,7 @@ export const unassignNumber = createServerFn({ method: "POST" })
  */
 export const getAssignmentAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ accountId: z.string().uuid().optional() }).parse(v))
+  .inputValidator((v) => z.object({ accountId: z.string().uuid().optional().nullable() }).parse(v))
   .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc('has_role', { 
       _user_id: context.userId, 
@@ -107,3 +107,4 @@ export const getAssignmentAudit = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return audits;
   });
+
