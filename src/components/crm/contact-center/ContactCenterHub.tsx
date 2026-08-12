@@ -6,6 +6,8 @@ import { UserPlus, Download, Upload, Filter, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { ContactListManager } from "./ContactListManager";
+
 
 export function ContactCenterHub() {
   return (
