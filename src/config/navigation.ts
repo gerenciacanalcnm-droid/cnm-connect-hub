@@ -50,9 +50,9 @@ export const primaryNavigation: NavSection[] = [
       },
       {
         title: "CRM",
-        to: "/crm/legacy",
-        icon: BarChart3,
-        description: "Pipeline y oportunidades",
+        to: "/crm",
+        icon: Users,
+        description: "Gestión comercial y pipeline",
       },
       {
         title: "Automatizaciones",
