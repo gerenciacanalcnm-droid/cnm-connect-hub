@@ -1,44 +1,44 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
   getWhatsAppCampaigns, 
   createWhatsAppCampaign, 
-  getWhatsAppCampaignDetails 
+  getWhatsAppCampaignDetails,
+  startWhatsAppCampaign 
 } from "@/lib/whatsapp-campaigns.functions";
-import { toast } from "sonner";
 
 export function useWhatsAppCampaigns(companyId?: string) {
-  const fetchCampaigns = useServerFn(getWhatsAppCampaigns);
-
   return useQuery({
     queryKey: ["whatsapp-campaigns", companyId],
-    queryFn: () => fetchCampaigns({ data: { companyId: companyId! } }),
-    enabled: !!companyId,
+    queryFn: () => getWhatsAppCampaigns({ data: { companyId: companyId! } }),
+    enabled: !!companyId
+  });
+}
+
+export function useWhatsAppCampaignDetails(campaignId?: string) {
+  return useQuery({
+    queryKey: ["whatsapp-campaign-details", campaignId],
+    queryFn: () => getWhatsAppCampaignDetails({ data: { campaignId: campaignId! } }),
+    enabled: !!campaignId
   });
 }
 
 export function useCreateWhatsAppCampaign() {
   const queryClient = useQueryClient();
-  const createFn = useServerFn(createWhatsAppCampaign);
-
   return useMutation({
-    mutationFn: (data: any) => createFn({ data }),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["whatsapp-campaigns", variables.companyId] });
-      toast.success("Campaña creada correctamente");
-    },
-    onError: (error: any) => {
-      toast.error(error.message || "Error al crear la campaña");
+    mutationFn: (data: any) => createWhatsAppCampaign({ data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["whatsapp-campaigns"] });
     }
   });
 }
 
-export function useWhatsAppCampaignDetails(campaignId?: string) {
-  const fetchDetails = useServerFn(getWhatsAppCampaignDetails);
-
-  return useQuery({
-    queryKey: ["whatsapp-campaign-details", campaignId],
-    queryFn: () => fetchDetails({ data: { campaignId: campaignId! } }),
-    enabled: !!campaignId,
+export function useStartWhatsAppCampaign() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (campaignId: string) => startWhatsAppCampaign({ data: { campaignId } }),
+    onSuccess: (_, campaignId) => {
+      queryClient.invalidateQueries({ queryKey: ["whatsapp-campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["whatsapp-campaign-details", campaignId] });
+    }
   });
 }
