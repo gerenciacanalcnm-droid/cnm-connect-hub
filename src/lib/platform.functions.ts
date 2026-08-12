@@ -161,16 +161,29 @@ export const listListMembers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v) => z.object({ list_id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
-    const { data: members, error } = await (context.supabase as any)
-      .from("contact_list_members")
-      .select(`
-        contact:contacts(*)
-      `)
-      .eq("list_id", data.list_id)
-      .eq("company_id", CNM_COMPANY_ID);
-    
-    if (error) throw new Error(error.message);
-    return (members ?? []).map((m: any) => m.contact);
+    try {
+      const { data: members, error } = await (context.supabase as any)
+        .from("contact_list_members")
+        .select(`
+          contact:contacts(*)
+        `)
+        .eq("list_id", data.list_id)
+        .eq("company_id", CNM_COMPANY_ID);
+      
+      if (error) {
+        console.error("Error in listListMembers:", {
+          error,
+          list_id: data.list_id,
+          company_id: CNM_COMPANY_ID,
+          table: "contact_list_members"
+        });
+        throw new Error(`No fue posible cargar los contactos de esta lista: ${error.message}`);
+      }
+      return (members ?? []).map((m: any) => m.contact);
+    } catch (e: any) {
+      console.error("Catch in listListMembers:", e);
+      throw new Error(e.message || "Error desconocido al listar miembros");
+    }
   });
 
 export const removeMemberFromList = createServerFn({ method: "POST" })
