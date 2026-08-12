@@ -137,14 +137,26 @@ export function ContactFormDialog({
     }
   };
 
-  // PRUEBA DE DIAGNÓSTICO 2: Reintroducir únicamente react-hook-form
+  // PRUEBA DE DIAGNÓSTICO 3: Reintroducir useEffect de sincronización
+  useEffect(() => {
+    if (open && editingContact) {
+      console.log("DIAGNÓSTICO PRUEBA 3: Ejecutando reset de formulario");
+      form.reset({
+        first_name: defaultValues?.first_name || "",
+        last_name: defaultValues?.last_name || "",
+        phone: defaultValues?.phone || "",
+        email: defaultValues?.email || "",
+      });
+    }
+  }, [open, defaultValues, form, editingContact]);
+
   if (editingContact !== null) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>PRUEBA 2 — FORMULARIO MÍNIMO</DialogTitle>
+            <DialogTitle>PRUEBA 3 — EFECTOS DE SINCRONIZACIÓN</DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form className="space-y-4">
@@ -161,7 +173,7 @@ export function ContactFormDialog({
                 <FormItem><FormLabel>Email</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <div className="p-2 bg-muted text-xs rounded text-center">
-                DIAGNÓSTICO: react-hook-form ACTIVO (Prueba 2)
+                DIAGNÓSTICO: useEffect de sincronización ACTIVO (Prueba 3)
               </div>
             </form>
           </Form>
