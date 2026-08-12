@@ -145,7 +145,7 @@ export function ContactFormDialog({
               <FormLabel>Etiquetas</FormLabel>
               <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/20">
                 {allTags?.length === 0 && <span className="text-xs text-muted-foreground">No hay etiquetas creadas.</span>}
-                {allTags?.map((tag: any) => {
+                {allTags?.filter((tag: any) => tag && tag.id)?.map((tag: any) => {
                   const isSelected = selectedTagIds.includes(tag.id);
                   return (
                     <Badge 
