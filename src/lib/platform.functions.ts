@@ -251,17 +251,16 @@ export const exportListCsv = createServerFn({ method: "POST" })
         .eq("list_id", data.list_id);
       
       if (error) {
-        console.error("[EXPORT_LIST_QUERY_ERROR]", {
+        console.error("[EXPORT_LIST] QUERY_ERROR", {
           error,
           list_id: data.list_id,
-          company_id: CNM_COMPANY_ID,
-          table: "contact_list_members"
+          company_id: CNM_COMPANY_ID
         });
         throw new Error(`Error al exportar lista: ${error.message}`);
       }
 
       const rows = (members ?? []).map((m: any) => m.contact).filter(Boolean);
-      console.log("[EXPORT_LIST_CONTACTS] count:", rows.length);
+      console.log("[EXPORT_LIST] MEMBERS_FOUND", rows.length);
       
       if (!rows || rows.length === 0) {
         throw new Error("No hay contactos para exportar en esta lista.");
