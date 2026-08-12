@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MessageSquare, MessageCircle, Mail, Inbox, Settings2, Send, FileText, Calendar, Smartphone, LayoutTemplate } from "lucide-react";
+import { MessageSquare, MessageCircle, Mail, Inbox, Settings2, Send, FileText, Calendar, Smartphone, LayoutTemplate, Users } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SendSms } from "@/components/comunicacion/send-sms";
@@ -12,6 +12,7 @@ import { WhatsAppSchedules } from "@/components/comunicacion/whatsapp-schedules"
 import { EmailMarketing } from "@/components/comunicacion/email-marketing";
 import { CommunicationSettings } from "@/components/comunicacion/communication-settings";
 import { ConversationCenter } from "@/components/comunicacion/conversation-center";
+import { ContactsTable } from "@/components/crm/contacts-table";
 
 export const Route = createFileRoute("/_app/comunicacion")({
   head: () => ({
