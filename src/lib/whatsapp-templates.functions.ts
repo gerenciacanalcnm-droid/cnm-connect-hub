@@ -26,13 +26,15 @@ export const saveWhatsAppTemplateDraft = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const row = {
       company_id: CNM_COMPANY_ID,
+      account_id: data.accountId,
       name: data.name,
       category: data.category,
       language: data.language,
       body: data.body,
       footer: data.footer || null,
       buttons: data.buttons || [],
-      header: data.header ? JSON.stringify(data.header) : null,
+      header: typeof data.header === 'string' ? data.header : data.header ? JSON.stringify(data.header) : null,
+      metadata: data.metadata || {},
       status: "DRAFT",
       updated_at: new Date().toISOString(),
     };
