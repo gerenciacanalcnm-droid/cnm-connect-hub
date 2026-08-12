@@ -22,7 +22,7 @@ export function useCreateWhatsAppCampaign() {
   const createFn = useServerFn(createWhatsAppCampaign);
 
   return useMutation({
-    mutationFn: (data: Parameters<typeof createFn>[0]["data"]) => createFn({ data }),
+    mutationFn: (data: any) => createFn({ data }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["whatsapp-campaigns", variables.companyId] });
       toast.success("Campaña creada correctamente");
