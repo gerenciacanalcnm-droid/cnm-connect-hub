@@ -33,7 +33,7 @@ export const saveWhatsAppTemplateDraft = createServerFn({ method: "POST" })
       body: data.body,
       footer: data.footer || null,
       buttons: data.buttons || [],
-      header: typeof data.header === 'string' ? data.header : data.header ? JSON.stringify(data.header) : null,
+      header: data.header ? (typeof data.header === 'string' ? data.header : JSON.stringify(data.header)) : null,
       metadata: data.metadata || {},
       status: "DRAFT",
       updated_at: new Date().toISOString(),
