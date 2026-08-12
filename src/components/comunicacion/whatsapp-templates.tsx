@@ -607,8 +607,10 @@ export function WhatsAppTemplates() {
               const saved: any = await saveMutation.mutateAsync({ 
                 data: { 
                   id: editingTemplate?.id,
+                  accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
-                  header: headerType === 'TEXT' ? headerText : null
+                  header: headerType === 'TEXT' ? headerText : headerType,
+                  metadata: { header_type: headerType, header_text: headerText }
                 } 
               });
               
