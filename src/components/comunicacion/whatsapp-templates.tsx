@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   FileText, 
   Plus, 
@@ -10,7 +10,12 @@ import {
   RefreshCw,
   Save,
   Send,
-  Globe
+  Globe,
+  Upload,
+  Loader2,
+  ImageIcon,
+  Video,
+  File
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +29,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { saveWhatsAppTemplateDraft, getWhatsAppTemplates } from "@/lib/whatsapp-templates.functions";
 import { submitWhatsAppTemplateToMeta } from "@/lib/whatsapp-meta.functions";
 import { syncWhatsAppTemplates } from "@/lib/whatsapp.functions";
+import { uploadWhatsAppMedia } from "@/lib/whatsapp-assets.functions";
 
 export function WhatsAppTemplates() {
   const queryClient = useQueryClient();
@@ -41,6 +47,8 @@ export function WhatsAppTemplates() {
 
   const [selectedComponent, setSelectedComponent] = useState<'HEADER' | 'BODY' | 'FOOTER' | 'BUTTONS' | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Cargar plantillas
   const { data: templates = [], isLoading } = useQuery({
@@ -138,9 +146,15 @@ export function WhatsAppTemplates() {
       setHeaderText(editingTemplate.header || "");
       setFooter(editingTemplate.footer || "");
       setButtons(editingTemplate.buttons || []);
-      // Simplificación para header type
-      if (editingTemplate.header) setHeaderType("TEXT");
-      else setHeaderType("NONE");
+      
+      const meta = editingTemplate.metadata || {};
+      if (meta.header_type) {
+        setHeaderType(meta.header_type);
+      } else if (editingTemplate.header) {
+        setHeaderType("TEXT");
+      } else {
+        setHeaderType("NONE");
+      }
     } else {
       setName(`template_${Date.now()}`);
       setCategory("MARKETING");
@@ -153,11 +167,39 @@ export function WhatsAppTemplates() {
     }
   }, [editingTemplate]);
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !account) return;
 
-  // Lógica de Previsualización (FASE 3 & 4)
+    setIsUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        const res = await uploadWhatsAppMedia({
+          data: {
+            fileBase64: base64,
+            fileName: file.name,
+            fileType: file.type,
+            companyId: account.company_id
+          }
+        });
+        
+        setHeaderType(res.type as any);
+        setHeaderText(res.url);
+        toast.success("Archivo cargado correctamente");
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Error al cargar el archivo");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const renderPreviewBody = () => {
     if (!body) return "Hola mundo";
-    // FASE 4: Transformación de variables
     return body.replace(/\{\{(\d+)\}\}/g, (match, number) => {
       const examples: Record<string, string> = {
         "1": "Juan",
@@ -168,7 +210,6 @@ export function WhatsAppTemplates() {
     });
   };
 
-  // FASE 7: Agregar botón
   const addButton = (type: 'QUICK_REPLY' | 'URL' | 'PHONE') => {
     if (buttons.length >= 10) return;
     setButtons([...buttons, { type, text: "", url: "", phoneNumber: "" }]);
@@ -243,7 +284,6 @@ export function WhatsAppTemplates() {
     );
   }
 
-
   return (
     <div className="flex h-screen bg-slate-100 overflow-hidden">
       {/* IZQUIERDA: Componentes */}
@@ -310,7 +350,7 @@ export function WhatsAppTemplates() {
 
             {headerType === "IMAGE" && (
               <div className="w-full aspect-video bg-slate-200 rounded-md flex items-center justify-center overflow-hidden border border-slate-300">
-                <span className="text-[10px] text-slate-500 font-bold uppercase">Vista previa de imagen</span>
+                {headerText ? <img src={headerText} alt="Preview" className="w-full h-full object-cover" /> : <span className="text-[10px] text-slate-500 font-bold uppercase">Vista previa de imagen</span>}
               </div>
             )}
 
@@ -406,35 +446,65 @@ export function WhatsAppTemplates() {
             {headerType === "IMAGE" && (
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center bg-slate-50">
-                  <Button variant="outline" size="sm" className="w-full">Cargar imagen</Button>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleFileUpload} 
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    disabled={isUploading}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                    {isUploading ? "Cargando..." : "Cargar imagen"}
+                  </Button>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-500">O ingresa URL</label>
-                  <Input placeholder="https://..." className="text-slate-900" />
+                  <Input 
+                    value={headerText}
+                    onChange={(e) => setHeaderText(e.target.value)}
+                    placeholder="https://..." 
+                    className="text-slate-900" 
+                  />
                 </div>
               </div>
             )}
 
-            {headerType === "VIDEO" && (
+            {(headerType === "VIDEO" || headerType === "DOCUMENT") && (
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center bg-slate-50">
-                  <Button variant="outline" size="sm" className="w-full">Cargar video</Button>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept={headerType === "VIDEO" ? "video/*" : ".pdf,.doc,.docx"}
+                    onChange={handleFileUpload} 
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    disabled={isUploading}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                    {isUploading ? "Cargando..." : `Cargar ${headerType.toLowerCase()}`}
+                  </Button>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-500">O ingresa URL</label>
-                  <Input placeholder="https://..." className="text-slate-900" />
-                </div>
-              </div>
-            )}
-
-            {headerType === "DOCUMENT" && (
-              <div className="space-y-4">
-                <div className="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center bg-slate-50">
-                  <Button variant="outline" size="sm" className="w-full">Cargar documento</Button>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-500">O ingresa URL</label>
-                  <Input placeholder="https://..." className="text-slate-900" />
+                  <Input 
+                    value={headerText}
+                    onChange={(e) => setHeaderText(e.target.value)}
+                    placeholder="https://..." 
+                    className="text-slate-900" 
+                  />
                 </div>
               </div>
             )}
@@ -468,7 +538,7 @@ export function WhatsAppTemplates() {
             </Button>
             <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
               <p className="text-[10px] text-blue-600 leading-relaxed font-medium">
-                Las variables <code className="bg-blue-100 px-1 rounded">{"{{n}}"}</code> serán reemplazadas por datos reales. Ejemplo: <span className="italic">"Hola Juan, tu pedido 12345..."</span>
+                Las variables <code className="bg-blue-100 px-1 rounded">{"{{n}}"}</code> serán reemplazadas por datos reales.
               </p>
             </div>
           </div>
@@ -603,7 +673,6 @@ export function WhatsAppTemplates() {
             className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" 
             disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending}
             onClick={async () => {
-              // Primero guardamos
               const saved: any = await saveMutation.mutateAsync({ 
                 data: { 
                   id: editingTemplate?.id,
