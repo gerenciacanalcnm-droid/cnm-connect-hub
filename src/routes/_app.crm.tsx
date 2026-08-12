@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Segments } from "@/components/crm/segments";
 import { Pipeline } from "@/components/crm/pipeline";
 import { UnifiedTimeline } from "@/components/crm/unified-timeline";
+import { BarChart3, Zap, MessageSquare, Users } from "lucide-react";
 
 export const Route = createFileRoute("/_app/crm")({
   head: () => ({
