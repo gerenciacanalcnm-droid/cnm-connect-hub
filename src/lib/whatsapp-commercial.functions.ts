@@ -135,8 +135,9 @@ export const getWhatsAppConsumptionStats = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     let query = context.supabase
       .from("whatsapp_messages")
-      .select("metadata, created_at")
+      .select("metadata, created_at, consumption_type")
       .eq("company_id", data.companyId);
+
 
     const now = new Date();
     if (data.period === 'today') {
