@@ -23,28 +23,20 @@ function CrmPage() {
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <PageHeader
-        title="CRM"
-        description="Gestiona contactos, segmentos inteligentes y tu pipeline comercial."
+        title="CRM Comercial"
+        description="Gestión de pipeline, oportunidades y seguimiento comercial."
       />
-      <Tabs defaultValue="contactos" className="w-full">
+      <Tabs defaultValue="pipeline" className="w-full">
         <TabsList className="mb-6">
-          <TabsTrigger value="contactos">Conversaciones</TabsTrigger>
-          <TabsTrigger value="conversaciones">Conversaciones</TabsTrigger>
-          <TabsTrigger value="segmentos">Segmentos</TabsTrigger>
           <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
+          <TabsTrigger value="segmentos">Segmentos</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
         </TabsList>
-        <TabsContent value="contactos">
-          <ContactCenterHub />
-        </TabsContent>
-        <TabsContent value="conversaciones">
-          <ConversationCenter />
+        <TabsContent value="pipeline">
+          <Pipeline />
         </TabsContent>
         <TabsContent value="segmentos">
           <Segments />
-        </TabsContent>
-        <TabsContent value="pipeline">
-          <Pipeline />
         </TabsContent>
         <TabsContent value="timeline">
           <UnifiedTimeline />
