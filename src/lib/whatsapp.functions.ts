@@ -188,7 +188,8 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
       }
 
       // 2. Preparar payload para Meta
-      const toFormatted = data.recipient.startsWith("57") ? data.recipient : `57${data.recipient}`;
+      const { normalizeWhatsAppPhone } = await import("./whatsapp-contacts.functions");
+      const toFormatted = normalizeWhatsAppPhone(data.recipient);
       let metaPayload: any = {
         messaging_product: "whatsapp",
         recipient_type: "individual",
@@ -436,7 +437,8 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
     for (const chunk of chunks) {
       const chunkPromises = chunk.map(async (to) => {
         try {
-          const toFormatted = to.startsWith("57") ? to : `57${to}`;
+          const { normalizeWhatsAppPhone } = await import("./whatsapp-contacts.functions");
+          const toFormatted = normalizeWhatsAppPhone(to);
           
           let metaPayload: any = {
             messaging_product: "whatsapp",
