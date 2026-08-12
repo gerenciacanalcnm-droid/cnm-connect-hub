@@ -146,7 +146,7 @@ export const getContactCenterStats = createServerFn({ method: "GET" })
     const [totalRes, waRes, optOutRes] = await Promise.all([
       base(),
       base().not("whatsapp_phone", "is", null),
-      base().eq("status", "opted_out"),
+      base().eq("opt_in", false),
     ]);
 
     if (totalRes.error) throw new Error(totalRes.error.message);
