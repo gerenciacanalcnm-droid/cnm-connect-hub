@@ -180,7 +180,7 @@ export function SendWhatsAppIndividual() {
     // Check limits via RPC before sending
     try {
       const { data: limitCheck, error: rpcError } = await supabase.rpc('check_whatsapp_limits', {
-        _company_id: connectedAccount.company_id
+        _company_id: connectedAccount.companyId
       });
       
       if (rpcError) throw rpcError;
@@ -197,6 +197,7 @@ export function SendWhatsAppIndividual() {
       console.error("Limit check failed:", e);
       // Fallback: allow sending if RPC fails but log it
     }
+
 
     if (stats.valid === 0) return toast.error("Sin destinatarios válidos.");
     if (isInsufficient) {
