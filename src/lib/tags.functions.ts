@@ -130,12 +130,20 @@ export const listContactTagsForContact = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: results, error } = await (context.supabase as any)
       .from("contact_tag_members")
-      .select("tag:contact_tags(*)")
+      .select(`
+        tag_id,
+        contact_tags (
+          id,
+          name,
+          color,
+          description
+        )
+      `)
       .eq("contact_id", data.contact_id)
       .eq("company_id", CNM_COMPANY_ID);
     
     if (error) throw new Error(error.message);
-    return results?.map((r: any) => r.tag) || [];
+    return results?.map((r: any) => r.contact_tags).filter(Boolean) || [];
   });
 
 export const listContactsByTag = createServerFn({ method: "POST" })
@@ -146,10 +154,15 @@ export const listContactsByTag = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: results, error } = await (context.supabase as any)
       .from("contact_tag_members")
-      .select("contact:contacts(*)")
+      .select(`
+        contact_id,
+        contacts (
+          *
+        )
+      `)
       .eq("tag_id", data.tag_id)
       .eq("company_id", CNM_COMPANY_ID);
     
     if (error) throw new Error(error.message);
-    return results?.map((r: any) => r.contact) || [];
+    return results?.map((r: any) => r.contacts).filter(Boolean) || [];
   });
