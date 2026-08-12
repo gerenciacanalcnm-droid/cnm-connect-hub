@@ -257,7 +257,7 @@ export function WhatsAppTemplates() {
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex gap-2">
-                      <Badge variant={tpl.status === 'APPROVED' ? 'default' : tpl.status === 'REJECTED' ? 'destructive' : 'secondary'}>
+                      <Badge variant={tpl.status === 'APPROVED' ? 'default' : tpl.status === 'REJECTED' ? 'destructive' : tpl.status === 'PENDING' ? 'outline' : 'secondary'}>
                         {tpl.status}
                       </Badge>
                       {tpl.external_id && (
@@ -292,7 +292,7 @@ export function WhatsAppTemplates() {
           <Button variant="ghost" size="icon" onClick={() => setIsEditorOpen(false)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="font-semibold text-slate-900">Nueva Plantilla</span>
+          <span className="font-semibold text-slate-900">completado</span>
         </div>
         
         <div className="space-y-4">
@@ -338,7 +338,7 @@ export function WhatsAppTemplates() {
       <div className="flex-1 p-12 flex items-center justify-center overflow-y-auto">
         <div className="w-full max-w-sm">
           <div className="bg-white/50 p-4 rounded-xl mb-4 text-center border border-dashed border-slate-300">
-            <span className="text-xs text-slate-400 font-mono uppercase tracking-wider">Vista previa WhatsApp</span>
+            <span className="text-xs text-slate-400 font-mono uppercase tracking-wider">completado</span>
           </div>
           
           <div className="bg-[#E7FFDB] rounded-lg shadow-md w-full p-4 relative space-y-3 border border-slate-200">
@@ -660,7 +660,7 @@ export function WhatsAppTemplates() {
                   accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
                   header: headerType === 'TEXT' ? headerText : headerType,
-                  metadata: { header_type: headerType, header_text: headerText }
+                  metadata: { header_type: headerType, header_text: headerText, status: 'DRAFT' }
                 } 
               });
             }}
@@ -671,7 +671,7 @@ export function WhatsAppTemplates() {
           
           <Button 
             className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" 
-            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending}
+            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending || (headerType !== 'NONE' && headerType !== 'TEXT' && !headerText)}
             onClick={async () => {
               const saved: any = await saveMutation.mutateAsync({ 
                 data: { 
