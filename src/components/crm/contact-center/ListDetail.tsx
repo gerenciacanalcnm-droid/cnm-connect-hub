@@ -210,7 +210,7 @@ export function ListDetail({ list, onBack }: ListDetailProps) {
       <div className="mt-4 p-4 border rounded-lg bg-muted/20 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">
-            typecheck exitoso
+            CSV corregido
           </Badge>
           <span className="text-xs text-muted-foreground italic">Validación de esquema y relaciones completada.</span>
         </div>
