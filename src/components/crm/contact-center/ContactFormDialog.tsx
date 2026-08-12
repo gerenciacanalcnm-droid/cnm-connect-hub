@@ -137,21 +137,34 @@ export function ContactFormDialog({
     }
   };
 
-  // PRUEBA DE DIAGNÓSTICO: Montar el modal sin lógica interna pesada
+  // PRUEBA DE DIAGNÓSTICO 2: Reintroducir únicamente react-hook-form
   if (editingContact !== null) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>NO PUDE REPRODUCIR EL ERROR EN EL ENTORNO</DialogTitle>
+            <DialogTitle>PRUEBA 2 — FORMULARIO MÍNIMO</DialogTitle>
           </DialogHeader>
-          <div className="p-4 text-center">
-            <p>EDIT DIALOG TEST</p>
-            <p className="text-xs text-muted-foreground mt-2">
-              Si ves esto, el crash no es al montar el componente Dialog básico.
-            </p>
-          </div>
+          <Form {...form}>
+            <form className="space-y-4">
+              <FormField control={form.control} name="first_name" render={({ field }) => (
+                <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <FormField control={form.control} name="last_name" render={({ field }) => (
+                <FormItem><FormLabel>Apellido</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <FormField control={form.control} name="phone" render={({ field }) => (
+                <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <FormField control={form.control} name="email" render={({ field }) => (
+                <FormItem><FormLabel>Email</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <div className="p-2 bg-muted text-xs rounded text-center">
+                DIAGNÓSTICO: react-hook-form ACTIVO (Prueba 2)
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     );
