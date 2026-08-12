@@ -83,12 +83,12 @@ function WhatsAppInventoryPage() {
 
   const { data: audits = [], isLoading: isLoadingAudit } = useQuery({
     queryKey: ["whatsapp-assignment-audit", selectedAccount?.id],
-    queryFn: () => getAssignmentAudit({ accountId: selectedAccount?.id }),
+    queryFn: () => getAssignmentAudit({ data: { accountId: selectedAccount?.id } }),
     enabled: isAuditOpen,
   });
 
   const assignMutation = useMutation({
-    mutationFn: assignNumberToCompany,
+    mutationFn: (data: { accountId: string; companyId: string }) => assignNumberToCompany({ data }),
     onSuccess: () => {
       toast.success("Número asignado correctamente");
       queryClient.invalidateQueries({ queryKey: ["whatsapp-inventory"] });
@@ -99,7 +99,7 @@ function WhatsAppInventoryPage() {
   });
 
   const unassignMutation = useMutation({
-    mutationFn: unassignNumber,
+    mutationFn: (data: { accountId: string }) => unassignNumber({ data }),
     onSuccess: () => {
       toast.success("Número desasignado correctamente");
       queryClient.invalidateQueries({ queryKey: ["whatsapp-inventory"] });
