@@ -44,15 +44,15 @@ export const primaryNavigation: NavSection[] = [
       },
       {
         title: "Centro de Contactos",
-        to: "/crm",
+        to: "/centro-de-contactos",
         icon: Users,
         description: "Gestión central de contactos",
       },
       {
         title: "CRM",
         to: "/crm/legacy",
-        icon: Users,
-        description: "Conversaciones y tratos",
+        icon: BarChart3,
+        description: "Pipeline y oportunidades",
       },
       {
         title: "Automatizaciones",
