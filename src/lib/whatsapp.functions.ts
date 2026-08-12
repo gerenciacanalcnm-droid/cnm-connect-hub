@@ -321,7 +321,9 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
             template_id: data.templateId,
             direction: "outbound",
             status: "sent",
+            consumption_type: "individual",
             external_id: wamid,
+
             metadata: { ...metaResult, variables: data.variables },
             cost: 250
           } as never);
@@ -492,7 +494,9 @@ export const sendBulkWhatsApp = createServerFn({ method: "POST" })
             template_id: templateId,
             direction: "outbound",
             status: isOk ? "sent" : "failed",
+            consumption_type: "bulk",
             external_id: metaResult.messages?.[0]?.id,
+
             error_code: isOk ? null : metaResult.error?.code?.toString(),
             metadata: { batch_id: batchId, ...metaResult, variables },
             cost: isOk ? 250 : 0, // Costo real si fue enviado
