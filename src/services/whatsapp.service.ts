@@ -37,7 +37,7 @@ type AccountRow = {
   nova_status: string | null;
 };
 
-function mapAccount(r: any): WhatsAppAccount {
+function mapAccount(r: AccountRow): WhatsAppAccount {
   return {
     id: r.id,
     companyId: r.company_id ?? undefined,
