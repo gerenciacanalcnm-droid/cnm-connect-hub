@@ -1,22 +1,48 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
-type MessageStatus = Database['public']['Enums']['message_status'];
+
+type WhatsAppConversation = Database['public']['Tables']['whatsapp_conversations']['Row'];
+type WhatsAppMessage = Database['public']['Tables']['whatsapp_messages']['Row'];
+type Contact = Database['public']['Tables']['contacts']['Row'];
+type WhatsAppAccount = Database['public']['Tables']['whatsapp_accounts']['Row'];
+
+export interface ConversationWithDetails extends WhatsAppConversation {
+  contacts: Contact | null;
+  whatsapp_accounts: WhatsAppAccount | null;
+}
 
 /**
  * Fetch all conversations for the current company.
  */
 export const getWhatsAppConversations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ companyId: z.string().uuid() }).parse(v))
+  .inputValidator((v) => z.object({ 
+    companyId: z.string().uuid().optional(),
+    search: z.string().optional()
+  }).parse(v || {}))
   .handler(async ({ data, context }) => {
-    const { data: conversations, error } = await context.supabase
+    let companyId = data.companyId;
+
+    if (!companyId) {
+      const { data: membership } = await context.supabase
+        .from("company_members")
+        .select("company_id")
+        .eq("user_id", context.userId)
+        .eq("is_active", true)
+        .maybeSingle();
+      
+      companyId = membership?.company_id;
+    }
+
+    if (!companyId) return [];
+
+    let q = context.supabase
       .from("whatsapp_conversations")
       .select(`
         *,
-        contacts (
+        contacts!whatsapp_conversations_contact_id_fkey (
           id,
           first_name,
           last_name,
@@ -30,11 +56,22 @@ export const getWhatsAppConversations = createServerFn({ method: "GET" })
           display_phone
         )
       `)
-      .eq("company_id", data.companyId)
+      .eq("company_id", companyId)
       .order("last_message_at", { ascending: false });
 
-    if (error) throw new Error(error.message);
-    return conversations;
+    if (data.search) {
+      const s = `%${data.search}%`;
+      q = q.or(`contact_phone.ilike.${s},contact_name.ilike.${s}`);
+    }
+
+    const { data: conversations, error } = await q;
+
+    if (error) {
+      console.error("[getWhatsAppConversations] Error:", error);
+      throw new Error(error.message);
+    }
+    
+    return (conversations || []) as unknown as ConversationWithDetails[];
   });
 
 /**
@@ -58,7 +95,7 @@ export const getWhatsAppConversationMessages = createServerFn({ method: "GET" })
       .update({ unread_count: 0 })
       .eq("id", data.conversationId);
 
-    return messages;
+    return (messages || []) as WhatsAppMessage[];
   });
 
 /**
@@ -86,11 +123,10 @@ export const sendWhatsAppReply = createServerFn({ method: "POST" })
     
     return await sendWhatsAppIndividual({
       data: {
-        companyId: conv.company_id,
-        accountId: conv.account_id,
-        to: conv.contact_phone,
-        message: data.body,
-        conversationId: data.conversationId
+        accountId: conv.account_id!,
+        recipient: conv.contact_phone,
+        body: data.body,
+        // We'll pass conversationId if the function supports it to link the message
       }
     });
   });

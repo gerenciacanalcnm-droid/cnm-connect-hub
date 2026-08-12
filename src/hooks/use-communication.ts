@@ -3,7 +3,7 @@ import { conversationRepository } from "@/repositories/conversation.repository";
 import { communicationRepository } from "@/repositories/communication.repository";
 import { sendWhatsAppMessage } from "@/lib/communication.functions";
 import { getWhatsAppConversations, getWhatsAppConversationMessages, sendWhatsAppReply } from "@/lib/whatsapp-inbox.functions";
-import type { Conversation } from "@/types/communication";
+import type { Conversation, ConversationMessage } from "@/types/communication";
 import { toast } from "sonner";
 import { queryKeys } from "./queries/keys";
 import { useServerFn } from "@tanstack/react-start";
@@ -18,12 +18,32 @@ export function useConversations(filters?: {
   
   return useQuery({
     queryKey: queryKeys.conversations(filters),
-    queryFn: () => {
-      // If we have a companyId, use the specialized WhatsApp Inbox fetcher
-      if (filters?.companyId) {
-        return listFn({ data: { companyId: filters.companyId } });
-      }
-      return conversationRepository.list(filters);
+    queryFn: async () => {
+      // For the WhatsApp Inbox, we use the specialized fetcher
+      const rows = await listFn({ 
+        data: { 
+          companyId: filters?.companyId,
+          search: filters?.search
+        } 
+      });
+
+      // Map to the common Conversation type
+      return rows.map((r: any) => ({
+        id: r.id,
+        companyId: r.company_id,
+        accountId: r.account_id,
+        contactId: r.contact_id,
+        channel: r.channel || 'whatsapp',
+        contactPhone: r.contact_phone,
+        contactName: r.contacts?.first_name ? `${r.contacts.first_name} ${r.contacts.last_name || ''}`.trim() : r.contact_name,
+        status: r.status,
+        assignedTo: r.assigned_to,
+        tags: r.tags || [],
+        unreadCount: r.unread_count || 0,
+        lastMessageAt: r.last_message_at,
+        lastMessagePreview: r.last_message_preview,
+        createdAt: r.created_at,
+      })) as Conversation[];
     },
   });
 }
@@ -33,9 +53,20 @@ export function useConversationMessages(id: string | null) {
   
   return useQuery({
     queryKey: queryKeys.conversationMessages(id ?? "none"),
-    queryFn: () => {
-      if (id) return messagesFn({ data: { conversationId: id } });
-      return conversationRepository.messages(id as string);
+    queryFn: async () => {
+      if (!id) return [];
+      const rows = await messagesFn({ data: { conversationId: id } });
+      
+      return rows.map((r: any) => ({
+        id: r.id,
+        conversationId: id,
+        direction: r.direction,
+        kind: r.media_url ? "image" : "text",
+        body: r.body,
+        mediaUrl: r.media_url,
+        status: r.status,
+        createdAt: r.created_at,
+      })) as ConversationMessage[];
     },
     enabled: Boolean(id),
   });
