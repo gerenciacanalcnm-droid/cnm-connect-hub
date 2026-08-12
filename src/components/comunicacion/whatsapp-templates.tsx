@@ -371,8 +371,8 @@ export function WhatsAppTemplates() {
 
             {headerType === "IMAGE" && (
               <div className="w-full aspect-video bg-slate-200 rounded-md flex items-center justify-center overflow-hidden border border-slate-300">
-                {(localPreviewUrl || headerText) ? (
-                  <img src={localPreviewUrl || headerText} alt="Preview" className="w-full h-full object-cover" />
+                {localPreviewUrl ? (
+                  <img src={localPreviewUrl} alt="Vista previa del encabezado" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-[10px] text-slate-500 font-bold uppercase">Vista previa de imagen</span>
                 )}
@@ -674,6 +674,31 @@ export function WhatsAppTemplates() {
         )}
 
         <div className="mt-auto pt-6 border-t space-y-3">
+          {uploadDiagnostic.selected && (
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-3 space-y-1 text-[11px] font-mono">
+              <div className="flex justify-between"><span className="text-slate-500">Imagen seleccionada</span><span className="text-emerald-600 font-bold">OK</span></div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Preview</span>
+                <span className={uploadDiagnostic.preview ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>{uploadDiagnostic.preview ? "OK" : "ERROR"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Upload Meta</span>
+                <span className={uploadDiagnostic.upload === null ? "text-slate-400" : uploadDiagnostic.upload ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>
+                  {uploadDiagnostic.upload === null ? "..." : uploadDiagnostic.upload ? "OK" : "ERROR"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Header Handle</span>
+                <span className={uploadDiagnostic.handle === null ? "text-slate-400" : uploadDiagnostic.handle ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>
+                  {uploadDiagnostic.handle === null ? "..." : uploadDiagnostic.handle ? "OK" : "ERROR"}
+                </span>
+              </div>
+              {uploadDiagnostic.error && (
+                <pre className="whitespace-pre-wrap text-[10px] text-red-600 pt-1 border-t border-slate-200">{uploadDiagnostic.error}</pre>
+              )}
+            </div>
+          )}
+
           <Button 
             variant="outline"
             className="w-full text-slate-600"
@@ -685,7 +710,7 @@ export function WhatsAppTemplates() {
                   accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
                   header: headerType === 'TEXT' ? headerText : headerType,
-                  metadata: { header_type: headerType, header_text: headerText, status: 'DRAFT', header_handle: headerText }
+                  metadata: { header_type: headerType, header_text: headerText, status: 'DRAFT', media_id: mediaId, header_handle: headerHandle }
                 } 
               });
             }}
@@ -706,15 +731,19 @@ export function WhatsAppTemplates() {
           
           <Button 
             className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-sm" 
-            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending || (headerType !== 'NONE' && headerType !== 'TEXT' && !headerText)}
+            disabled={!name || !body || (headerType === 'TEXT' && !headerText) || buttons.some(b => !b.text) || sendToMetaMutation.isPending || isUploading || (headerType !== 'NONE' && headerType !== 'TEXT' && !headerHandle)}
             onClick={async () => {
+              if (headerType !== 'NONE' && headerType !== 'TEXT' && !headerHandle) {
+                toast.error("Falta el header_handle de Meta. Carga la imagen antes de enviar.");
+                return;
+              }
               const saved: any = await saveMutation.mutateAsync({ 
                 data: { 
                   id: editingTemplate?.id,
                   accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
                   header: headerType === 'TEXT' ? headerText : headerType,
-                  metadata: { header_type: headerType, header_text: headerText, header_handle: headerText }
+                  metadata: { header_type: headerType, header_text: headerText, media_id: mediaId, header_handle: headerHandle }
                 } 
               });
               
@@ -726,6 +755,7 @@ export function WhatsAppTemplates() {
             <Send className="h-4 w-4 mr-2" />
             Enviar a Meta para aprobación
           </Button>
+
           
           <Button variant="ghost" className="w-full text-xs text-slate-400" onClick={() => setIsEditorOpen(false)}>
             Cancelar
