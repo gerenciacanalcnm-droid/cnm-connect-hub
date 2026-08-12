@@ -225,6 +225,7 @@ export function ContactsTable() {
         <ContactFormDialog 
           open={!!editingContact} 
           setOpen={(o) => !o && setEditingContact(null)}
+          editingContact={editingContact} // Pasar para aislamiento en Prueba 1
           defaultValues={{
             id: editingContact.id,
             first_name: editingContact.firstName,
