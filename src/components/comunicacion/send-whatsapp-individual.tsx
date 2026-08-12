@@ -61,7 +61,13 @@ export function SendWhatsAppIndividual() {
   const { data: groupsData } = useContactGroups();
   const { data: myWallet } = useMyWallet("whatsapp");
   const { data: tiersData } = useRateTiers();
-  const { data: accounts = [] } = useWhatsAppAccounts();
+  const { data: allAccounts = [] } = useWhatsAppAccounts();
+  const accounts = useMemo(() => {
+    // Super admins see all (assigned or not, though only assigned usually show up for them if not filtered)
+    // Regular users ONLY see accounts assigned to their company.
+    // The hook/repository should ideally filter this, but we'll double-shield here.
+    return allAccounts.filter(a => a.novaStatus === 'ASSIGNED');
+  }, [allAccounts]);
   const { data: allTemplates = [] } = useWhatsAppTemplates();
   
   const sendIndividualMutation = useSendWhatsAppIndividual();
