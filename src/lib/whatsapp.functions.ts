@@ -206,14 +206,15 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
         metaTemplate.components.forEach((comp: any) => {
           if (comp.type === "BODY" || comp.type === "HEADER") {
             const text = comp.text || "";
-            const matches = text.match(/{{(\d+)}}/g) || [];
+            const matches = (text.match(/{{(\d+)}}/g) || []) as string[];
             
             const uniqueVarIndices = Array.from(new Set(matches.map((m: string) => m.replace(/[{}]/g, ''))));
 
             if (uniqueVarIndices.length > 0) {
               const parameters: any[] = [];
-              uniqueVarIndices.forEach((idx: string) => {
-                const val = data.variables?.[idx];
+              uniqueVarIndices.forEach((idx: unknown) => {
+                const stringIdx = idx as string;
+                const val = data.variables?.[stringIdx];
                 if (val !== undefined) {
                   parameters.push({ type: "text", text: val });
                 }
