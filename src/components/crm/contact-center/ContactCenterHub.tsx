@@ -131,7 +131,7 @@ export function ContactCenterHub() {
                   <Filter className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <h3 className="text-lg font-semibold">Módulo de Segmentos</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">Próximamente: Filtros avanzados y audiencias dinámicas.</p>
+                <p className="text-sm text-muted-foreground max-w-sm">En desarrollo: Filtros avanzados y audiencias dinámicas.</p>
               </div>
             </CardContent>
           </Card>
@@ -149,7 +149,7 @@ export function ContactCenterHub() {
                   #
                 </Badge>
                 <h3 className="text-lg font-semibold">Gestión de Etiquetas</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">Próximamente: Editor centralizado de etiquetas multicanal.</p>
+                <p className="text-sm text-muted-foreground max-w-sm">En desarrollo: Editor centralizado de etiquetas multicanal.</p>
               </div>
             </CardContent>
           </Card>
