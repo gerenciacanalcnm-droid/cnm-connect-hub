@@ -156,7 +156,7 @@ export function ContactCenterHub() {
                   <Badge>Etiqueta = CLIENTE</Badge>
                   <span className="text-xs text-muted-foreground">AND</span>
                   <Badge variant="outline">Ciudad = Tunja</Badge>
-                  <Button size="xs" variant="ghost" className="ml-auto text-xs">Calcular</Button>
+                  <Button size="sm" variant="ghost" className="ml-auto text-xs">Calcular</Button>
                 </div>
                 <div className="flex flex-col items-center justify-center py-6 text-center border rounded-md border-dashed">
                   <h3 className="text-sm font-semibold">Resultados del segmento</h3>
