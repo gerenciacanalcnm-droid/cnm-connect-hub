@@ -36,6 +36,8 @@ import { formatCurrency } from "@/lib/format";
 import { useWhatsAppAccounts, useSendWhatsAppIndividual, useSendWhatsAppBulk, useWhatsAppTemplates, useSendWhatsAppTemplate, useCreateWhatsAppSchedule } from "@/hooks/use-whatsapp";
 import { useContacts } from "@/hooks/use-contacts";
 import { useContactGroups } from "@/hooks/use-platform";
+import { supabase } from "@/integrations/supabase/client";
+
 
 type SendMode = "individual" | "bulk" | "schedule";
 type MessageType = "text" | "template";
