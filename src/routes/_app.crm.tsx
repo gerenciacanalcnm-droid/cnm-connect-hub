@@ -9,7 +9,7 @@ import { ConversationCenter } from "@/components/comunicacion/conversation-cente
 import { ContactCenterHub } from "@/components/crm/contact-center/ContactCenterHub";
 
 
-export const Route = createFileRoute("/_app/centro-de-contactos")({
+export const Route = createFileRoute("/_app/crm")({
   head: () => ({
     meta: [
       { title: "CRM · SMS CNM" },
@@ -19,29 +19,10 @@ export const Route = createFileRoute("/_app/centro-de-contactos")({
   component: CrmPage,
 });
 
-function CrmPage() {
+function ContactCenterPage() {
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <PageHeader
-        title="CRM Comercial"
-        description="Gestión de pipeline, oportunidades y seguimiento comercial."
-      />
-      <Tabs defaultValue="pipeline" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
-          <TabsTrigger value="segmentos">Segmentos</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
-        </TabsList>
-        <TabsContent value="pipeline">
-          <Pipeline />
-        </TabsContent>
-        <TabsContent value="segmentos">
-          <Segments />
-        </TabsContent>
-        <TabsContent value="timeline">
-          <UnifiedTimeline />
-        </TabsContent>
-      </Tabs>
+      <ContactCenterHub />
     </div>
   );
 }
