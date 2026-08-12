@@ -33,7 +33,7 @@ export function ContactCenterHub() {
       toast.error("Error al exportar contactos");
     }
   };
-
+  return (
     <div className="space-y-6">
       <PageHeader
         title="Centro de Contactos"
