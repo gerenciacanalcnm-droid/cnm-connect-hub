@@ -13,7 +13,12 @@ import {
   Loader2,
   AlertCircle,
   FileText,
-  UserPlus
+  UserPlus,
+  Play,
+  Zap,
+  Check,
+  AlertTriangle,
+  Info
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,13 +48,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useWhatsAppCampaigns, useCreateWhatsAppCampaign } from "@/hooks/use-whatsapp-campaigns";
+import { useWhatsAppCampaigns, useCreateWhatsAppCampaign, useStartWhatsAppCampaign, useWhatsAppCampaignDetails } from "@/hooks/use-whatsapp-campaigns";
 import { useWhatsAppAccounts, useWhatsAppTemplates } from "@/hooks/use-whatsapp";
 import { useMyWallet } from "@/hooks/use-commercial";
 import { formatCurrency } from "@/lib/format";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function WhatsAppCampaigns() {
   const { data: myWallet } = useMyWallet("whatsapp");
