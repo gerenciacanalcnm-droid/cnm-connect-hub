@@ -201,7 +201,7 @@ export function SendWhatsAppIndividual() {
     if (stats.valid === 0) return toast.error("Sin destinatarios válidos.");
     if (isInsufficient) {
       return toast.error(
-        `Saldo insuficiente. Disponible: ${formatCurrency(balance)}, Requerido: ${formatCurrency(totalCost)}, Faltante: ${formatCurrency(totalCost - balance)}`
+        `Saldo insuficiente`
       );
     }
 
@@ -538,7 +538,7 @@ export function SendWhatsAppIndividual() {
                           </SelectItem>
                         ))}
                         {templates.length === 0 && (
-                          <div className="p-2 text-xs text-muted-foreground italic">Saldo insuficiente para ejecutar esta campaña</div>
+                          <div className="p-2 text-xs text-muted-foreground italic">No hay plantillas aprobadas disponibles</div>
                         )}
                       </SelectContent>
                     </Select>
@@ -622,7 +622,7 @@ export function SendWhatsAppIndividual() {
               <Alert variant="destructive" className="py-2 px-3">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-xs font-bold uppercase">
-                  Saldo insuficiente. Necesitas {formatCurrency(totalCost)} para realizar este envío.
+                  Saldo insuficiente
                 </AlertDescription>
               </Alert>
             )}
@@ -641,7 +641,7 @@ export function SendWhatsAppIndividual() {
               <Alert variant="destructive" className="py-2 px-3 bg-blue-50 border-blue-200">
                 <Info className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-xs text-blue-800 font-bold">
-                  Saldo insuficiente para ejecutar esta campaña
+                  Falta información para completar la plantilla
                 </AlertDescription>
               </Alert>
             )}
