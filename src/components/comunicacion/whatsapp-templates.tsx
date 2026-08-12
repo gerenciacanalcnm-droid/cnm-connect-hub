@@ -685,7 +685,7 @@ export function WhatsAppTemplates() {
             }}
           >
             <Send className="h-4 w-4 mr-2" />
-            corregido
+            Enviar a Meta para aprobación
           </Button>
           
           <Button variant="ghost" className="w-full text-xs text-slate-400" onClick={() => setIsEditorOpen(false)}>
