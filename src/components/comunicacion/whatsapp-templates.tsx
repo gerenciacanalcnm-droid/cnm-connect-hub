@@ -223,7 +223,7 @@ export function WhatsAppTemplates() {
     if (!body) return "Hola mundo";
     return body.replace(/\{\{(\d+)\}\}/g, (match, number) => {
       const examples: Record<string, string> = {
-        "1": "Juan",
+        "1": "Laura",
         "2": "12345",
         "3": "Bogotá"
       };
