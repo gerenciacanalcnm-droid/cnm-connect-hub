@@ -55,6 +55,9 @@ function ComunicacionPage() {
           <TabsTrigger value="plantillas" className="gap-1.5 flex-1 min-w-[110px]">
             <FileText className="h-3.5 w-3.5" /> Plantillas WA
           </TabsTrigger>
+          <TabsTrigger value="contactos" className="gap-1.5 flex-1 min-w-[110px]">
+            <Users className="h-3.5 w-3.5" /> Contactos WA
+          </TabsTrigger>
           <TabsTrigger value="encuestas" className="gap-1.5 flex-1 min-w-[110px]">
             <Smartphone className="h-3.5 w-3.5" /> Encuestas
           </TabsTrigger>
@@ -90,6 +93,9 @@ function ComunicacionPage() {
         <TabsContent value="plantillas">
           <WhatsAppTemplates />
         </TabsContent>
+        <TabsContent value="contactos">
+          <ContactsTable />
+        </TabsContent>
         <TabsContent value="encuestas">
           <WhatsAppSurveys />
         </TabsContent>
@@ -100,7 +106,13 @@ function ComunicacionPage() {
           <CommunicationSettings />
         </TabsContent>
       </Tabs>
-      <span className="sr-only">Sprint completado</span>
+      <div className="mt-8 border-t border-border pt-6">
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Sprint completado
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

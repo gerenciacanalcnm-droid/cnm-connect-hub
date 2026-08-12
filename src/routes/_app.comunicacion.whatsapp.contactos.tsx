@@ -4,6 +4,12 @@ import { PageHeader } from "@/components/common/page-header";
 import { Users } from "lucide-react";
 
 export const Route = createFileRoute("/_app/comunicacion/whatsapp/contactos")({
+  head: () => ({
+    meta: [
+      { title: "Contactos de WhatsApp · SMS CNM" },
+      { name: "description", content: "Gestión segmentada de contactos para campañas masivas de WhatsApp Business." },
+    ],
+  }),
   component: WhatsAppContactsPage,
 });
 
