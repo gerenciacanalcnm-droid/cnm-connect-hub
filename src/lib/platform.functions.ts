@@ -162,6 +162,17 @@ export const listListMembers = createServerFn({ method: "POST" })
   .inputValidator((v) => z.object({ list_id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     try {
+      // First, ensure the list belongs to the company
+      const { data: listExists, error: listError } = await (context.supabase as any)
+        .from("contact_lists")
+        .select("id")
+        .eq("id", data.list_id)
+        .eq("company_id", CNM_COMPANY_ID)
+        .maybeSingle();
+
+      if (listError) throw new Error(listError.message);
+      if (!listExists) throw new Error("La lista no existe o no pertenece a esta empresa.");
+
       const { data: members, error } = await (context.supabase as any)
         .from("contact_list_members")
         .select(`
@@ -179,7 +190,7 @@ export const listListMembers = createServerFn({ method: "POST" })
         });
         throw new Error(`No fue posible cargar los contactos de esta lista: ${error.message}`);
       }
-      return (members ?? []).map((m: any) => m.contact);
+      return (members ?? []).map((m: any) => m.contact).filter(Boolean);
     } catch (e: any) {
       console.error("Catch in listListMembers:", e);
       throw new Error(e.message || "Error desconocido al listar miembros");
