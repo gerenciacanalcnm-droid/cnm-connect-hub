@@ -58,6 +58,55 @@ import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+function WebhookDiagnosticPanel({ campaignId }: { campaignId: string }) {
+  const { data: myWallet } = useMyWallet("whatsapp");
+  const { data: diagnostic, isLoading } = useWebhookDiagnostic(myWallet?.company_id);
+
+  if (isLoading || !diagnostic) return null;
+
+  const isHealthy = diagnostic.status === 'CONNECTED';
+
+  return (
+    <Card className={`border-none ${isHealthy ? 'bg-emerald-50/50' : 'bg-amber-50/50'}`}>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Activity className={`h-4 w-4 ${isHealthy ? 'text-emerald-500' : 'text-amber-500'}`} />
+            <h4 className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">Diagnóstico Webhook Real</h4>
+          </div>
+          <Badge className={`text-[9px] px-1.5 h-4 ${isHealthy ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' : 'bg-amber-100 text-amber-700 hover:bg-amber-100'}`}>
+            {diagnostic.status}
+          </Badge>
+        </div>
+        
+        <div className="grid grid-cols-3 gap-3">
+          <div className="space-y-0.5">
+            <p className="text-[9px] text-slate-400 font-medium">Procesados</p>
+            <p className="text-sm font-bold text-slate-900">{diagnostic.totalProcessed}</p>
+          </div>
+          <div className="space-y-0.5 border-x border-slate-200/50 px-3">
+            <p className="text-[9px] text-slate-400 font-medium">Duplicados</p>
+            <p className="text-sm font-bold text-slate-900">{diagnostic.totalDuplicates}</p>
+          </div>
+          <div className="space-y-0.5 pl-3">
+            <p className="text-[9px] text-slate-400 font-medium">Errores Meta</p>
+            <p className="text-sm font-bold text-slate-900">{diagnostic.errors}</p>
+          </div>
+        </div>
+
+        {diagnostic.lastReceivedAt && (
+          <div className="mt-3 pt-3 border-t border-slate-200/50 flex items-center gap-1.5">
+            <Clock className="h-3 w-3 text-slate-400" />
+            <span className="text-[9px] text-slate-500">
+              Último evento: {format(new Date(diagnostic.lastReceivedAt), "HH:mm:ss 'hoy'", { locale: es })}
+            </span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function CampaignValidationDialog({ campaignId, isOpen, onOpenChange }: { campaignId: string, isOpen: boolean, onOpenChange: (open: boolean) => void }) {
   const { data } = useWhatsAppCampaignDetails(campaignId);
   const campaign = data?.campaign;
@@ -86,20 +135,23 @@ function CampaignValidationDialog({ campaignId, isOpen, onOpenChange }: { campai
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Panel de Diagnóstico de Webhook (Sprint 4.3) */}
+          <WebhookDiagnosticPanel campaignId={campaignId} />
+
           <div className="grid grid-cols-2 gap-4">
-            <Card className="bg-slate-50 border-none">
+            <Card className="bg-slate-50 border-none shadow-sm">
               <CardContent className="pt-4 pb-2">
-                <p className="text-[10px] text-slate-500 uppercase font-bold">Estado Actual</p>
+                <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tight">Estado Actual</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <div className={`h-2 w-2 rounded-full animate-pulse ${campaign?.status === 'running' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
-                  <span className="text-sm font-bold capitalize">{campaign?.status}</span>
+                  <div className={`h-2 w-2 rounded-full animate-pulse ${campaign?.status === 'running' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-blue-500'}`} />
+                  <span className="text-sm font-bold capitalize text-slate-900">{campaign?.status}</span>
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-slate-50 border-none">
+            <Card className="bg-slate-50 border-none shadow-sm">
               <CardContent className="pt-4 pb-2">
-                <p className="text-[10px] text-slate-500 uppercase font-bold">Progreso Meta</p>
-                <p className="text-xl font-bold mt-1">{stats.sent} / {stats.total}</p>
+                <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tight">Progreso Meta</p>
+                <p className="text-xl font-black mt-1 text-slate-900">{stats.sent} / {stats.total}</p>
               </CardContent>
             </Card>
           </div>

@@ -84,7 +84,7 @@ export const Route = createFileRoute('/api/public/whatsapp-webhook')({
                     .update({ 
                       status: newStatus.toLowerCase() as any,
                       updated_at: new Date().toISOString()
-                    })
+                    } as any)
                     .eq('id', campaignResult.id);
                 }
               }
