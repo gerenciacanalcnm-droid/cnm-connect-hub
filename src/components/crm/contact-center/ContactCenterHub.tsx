@@ -2,11 +2,13 @@ import React from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { ContactsTable } from "@/components/crm/contacts-table";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Download, Upload, Filter, Search } from "lucide-react";
+import { UserPlus, Download, Upload, Filter, Search, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ContactListManager } from "./ContactListManager";
+import { Badge } from "@/components/ui/badge";
+
 
 
 export function ContactCenterHub() {
@@ -90,9 +92,19 @@ export function ContactCenterHub() {
         </TabsContent>
         
         <TabsContent value="whatsapp" className="mt-0">
-           <Card>
-            <CardContent className="py-10 text-center text-muted-foreground">
-              Vista filtrada por WhatsApp en desarrollo
+           <Card className="border-border/50">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-bold">Identidades WhatsApp</CardTitle>
+                <CardDescription>Contactos con número normalizado y verificado para Meta Cloud API.</CardDescription>
+              </div>
+              <Badge variant="nova" className="gap-1.5 px-3 py-1">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Validación E.164 Activa
+              </Badge>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <ContactsTable />
             </CardContent>
           </Card>
         </TabsContent>
