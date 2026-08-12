@@ -12,10 +12,10 @@ export const Route = createFileRoute("/_app/crm")({
       { name: "description", content: "Pipeline, oportunidades y seguimiento comercial." },
     ],
   }),
-  component: CrmLegacyPage,
+  component: CrmPage,
 });
 
-function CrmLegacyPage() {
+function CrmPage() {
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <PageHeader
