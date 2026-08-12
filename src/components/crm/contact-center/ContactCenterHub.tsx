@@ -100,25 +100,31 @@ export function ContactCenterHub() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Contactos</CardTitle>
-            <CardDescription className="text-2xl font-bold text-foreground">0</CardDescription>
+            <CardDescription className="text-2xl font-bold text-foreground">
+              {statsLoading ? "…" : statsError ? "Error" : (stats?.totalContacts ?? 0)}
+            </CardDescription>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">WhatsApp Activos</CardTitle>
-            <CardDescription className="text-2xl font-bold text-foreground">0</CardDescription>
+            <CardDescription className="text-2xl font-bold text-foreground">
+              {statsLoading ? "…" : statsError ? "Error" : (stats?.whatsappActive ?? 0)}
+            </CardDescription>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">SMS Disponibles</CardTitle>
-            <CardDescription className="text-2xl font-bold text-foreground">0</CardDescription>
+            <CardDescription className="text-2xl font-bold text-muted-foreground">No disponible</CardDescription>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Opt-out Total</CardTitle>
-            <CardDescription className="text-2xl font-bold text-foreground text-destructive">0</CardDescription>
+            <CardDescription className="text-2xl font-bold text-destructive">
+              {statsLoading ? "…" : statsError ? "Error" : (stats?.optOutTotal ?? 0)}
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
