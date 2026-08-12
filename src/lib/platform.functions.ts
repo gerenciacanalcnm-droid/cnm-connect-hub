@@ -237,16 +237,7 @@ export const exportListCsv = createServerFn({ method: "POST" })
       const { data: members, error } = await (context.supabase as any)
         .from("contact_list_members")
         .select(`
-          contact:contacts(
-            first_name, 
-            last_name, 
-            phone, 
-            email, 
-            city,
-            preferred_channel,
-            tags,
-            status
-          )
+          contact:contacts(*)
         `)
         .eq("list_id", data.list_id);
       
