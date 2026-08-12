@@ -130,7 +130,7 @@ export function ContactsTable() {
         cell: ({ row }) => {
           const contact = row.original;
           const getContactTagsFn = useServerFn(listContactTagsForContact);
-          console.log("Rendering Tags cell for contact:", contact.id);
+          
           
           const { data: realTags } = useQuery({
             queryKey: ["contact-tags", contact.id],
