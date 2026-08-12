@@ -32,6 +32,7 @@ export const syncContactToWhatsApp = createServerFn({ method: "POST" })
         normalized_phone: whatsappPhone,
         first_name: data.firstName,
         last_name: data.lastName,
+        normalized_phone: whatsappPhone,
         whatsapp_phone: whatsappPhone,
         status: "active",
         updated_at: new Date().toISOString(),

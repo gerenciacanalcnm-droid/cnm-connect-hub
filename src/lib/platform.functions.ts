@@ -71,7 +71,7 @@ export const listContacts = createServerFn({ method: "POST" })
       .eq("company_id", CNM_COMPANY_ID)
       .order("created_at", { ascending: false })
       .range(from, to);
-    if (data.search) query = query.or(`first_name.ilike.%${data.search}%,phone.ilike.%${data.search}%`);
+    if (data.search) query = query.or(`first_name.ilike.%${data.search}%,phone.ilike.%${data.search}%,normalized_phone.ilike.%${data.search}%`);
     if (data.tag) query = query.contains("tags", [data.tag]);
     const { data: rows, error, count } = await query;
     if (error) throw new Error(error.message);
