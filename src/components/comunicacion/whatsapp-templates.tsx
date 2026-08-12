@@ -91,7 +91,7 @@ export function WhatsAppTemplates() {
       // El error ya viene con el formato detallado desde el server function
       // Para evitar problemas de compilación JSX en algunos entornos de transformación,
       // nos aseguramos de que el mensaje sea procesado correctamente
-      toast.error(String(err.message), { 
+      toast.error(String(String(err.message)), { 
         duration: 10000,
         description: "Error detallado de Meta Cloud API" 
       });
@@ -106,7 +106,7 @@ export function WhatsAppTemplates() {
       const hasErrors = res.errors > 0;
       const details = res.details || [];
       
-      toast(String(`Sincronización completada: ${res.updated} actualizadas, ${res.errors} errores`), {
+      toast(String(String(`Sincronización completada: ${res.updated} actualizadas, ${res.errors} errores`)), {
         duration: hasErrors ? 10000 : 4000,
         description: hasErrors ? "Revisa el detalle en los logs de la cuenta" : undefined
       });
