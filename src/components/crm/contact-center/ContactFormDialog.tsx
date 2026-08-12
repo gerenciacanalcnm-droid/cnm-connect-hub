@@ -58,7 +58,7 @@ export function ContactFormDialog({
 
   const { data: contactTags } = useQuery({
     queryKey: ["contact-tags", defaultValues?.id],
-    queryFn: () => getContactTagsFn({ data: { contact_id: defaultValues.id } }),
+    queryFn: () => getContactTagsFn({ data: { contact_id: defaultValues?.id as string } }),
     enabled: !!defaultValues?.id && open,
   });
 
