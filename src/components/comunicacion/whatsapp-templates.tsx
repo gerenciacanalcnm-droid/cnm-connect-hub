@@ -89,7 +89,7 @@ export function WhatsAppTemplates() {
     mutationFn: submitWhatsAppTemplateToMeta,
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['whatsapp_templates'] });
-      toast.success(`Plantilla enviada a Meta. Estado: ${String(res.status)}`);
+      toast.success("Plantilla enviada a Meta correctamente");
       setIsEditorOpen(false);
     },
     onError: (err: any) => {

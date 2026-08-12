@@ -109,18 +109,12 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
       components
     };
 
-    // Log del payload sanitizado (sin tokens)
+    // 4. Log del payload sanitizado (sin tokens)
     console.log("META_PAYLOAD_SANITTIZED:", {
       name: payload.name,
       language: payload.language,
       category: payload.category,
-      components: payload.components.map(c => ({
-        type: c.type,
-        format: c.format,
-        has_header_handle: !!c.example?.header_handle,
-        variables_count: c.text?.match(/\{\{(\d+)\}\}/g)?.length || 0,
-        has_example: !!c.example
-      }))
+      components: payload.components
     });
 
     // 3. Envío Real a Meta
@@ -140,13 +134,12 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
 
     if (!response.ok) {
       const metaError = result.error || {};
-      const errorMessage = `META_TEMPLATE_CREATE_ERROR
-HTTP: ${response.status}
-Code: ${metaError.code || 'N/A'}
-Subcode: ${metaError.error_subcode || 'N/A'}
-Message: ${metaError.message || 'Error desconocido'}
-Type: ${metaError.type || 'N/A'}
-Trace ID: ${metaError.fbtrace_id || 'N/A'}`;
+      const errorMessage = `META_API_ERROR
+HTTP STATUS: ${response.status}
+META ERROR CODE: ${metaError.code || 'N/A'}
+META ERROR TYPE: ${metaError.type || 'N/A'}
+META ERROR MESSAGE: ${metaError.message || 'Error desconocido'}
+FBTRACE_ID: ${metaError.fbtrace_id || 'N/A'}`;
       
       console.error("Meta API Error:", result);
       throw new Error(errorMessage);
