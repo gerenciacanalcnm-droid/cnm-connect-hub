@@ -139,6 +139,16 @@ export function WhatsAppTemplates() {
       setButtons(editingTemplate.buttons || []);
       
       const meta = editingTemplate.metadata || {};
+      setMediaId(meta.media_id || null);
+      setHeaderHandle(meta.header_handle || null);
+      setLocalPreviewUrl(null);
+      setUploadDiagnostic({
+        selected: !!meta.header_handle,
+        preview: false,
+        upload: meta.header_handle ? true : null,
+        handle: meta.header_handle ? true : null,
+        error: null,
+      });
       if (meta.header_type) {
         setHeaderType(meta.header_type);
       } else if (editingTemplate.header) {
@@ -154,6 +164,9 @@ export function WhatsAppTemplates() {
       setHeaderType("NONE");
       setHeaderText("");
       setLocalPreviewUrl(null);
+      setMediaId(null);
+      setHeaderHandle(null);
+      setUploadDiagnostic({ selected: false, preview: false, upload: null, handle: null, error: null });
       setFooter("");
       setButtons([]);
     }
