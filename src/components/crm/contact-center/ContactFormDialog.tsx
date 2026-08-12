@@ -169,9 +169,9 @@ export function ContactFormDialog({
                       variant={isSelected ? "default" : "outline"}
                       className="cursor-pointer transition-all hover:scale-105 flex items-center gap-1 py-1"
                       style={{ 
-                        backgroundColor: isSelected ? tag.color : 'transparent',
-                        borderColor: tag.color,
-                        color: isSelected ? 'white' : tag.color
+                        backgroundColor: isSelected ? (tag?.color || '#3b82f6') : 'transparent',
+                        borderColor: tag?.color || '#3b82f6',
+                        color: isSelected ? 'white' : (tag?.color || '#3b82f6')
                       }}
                       onClick={() => toggleTag(tag.id)}
                     >
