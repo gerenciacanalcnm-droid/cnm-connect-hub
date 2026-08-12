@@ -257,7 +257,7 @@ export function WhatsAppTemplates() {
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex gap-2">
-                      <Badge variant={tpl.status === 'APPROVED' ? 'default' : tpl.status === 'REJECTED' ? 'destructive' : 'secondary'}>
+                      <Badge variant={tpl.status === 'APPROVED' ? 'default' : tpl.status === 'REJECTED' ? 'destructive' : tpl.status === 'PENDING' ? 'outline' : 'secondary'}>
                         {tpl.status}
                       </Badge>
                       {tpl.external_id && (
