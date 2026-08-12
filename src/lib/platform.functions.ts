@@ -80,7 +80,14 @@ export const listContacts = createServerFn({ method: "POST" })
 
 export const createContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ first_name: z.string(), last_name: z.string().optional(), phone: z.string(), email: z.string().optional(), tags: z.array(z.string()).default([]) }).parse(v))
+  .inputValidator((v) => z.object({ 
+    first_name: z.string(), 
+    last_name: z.string().optional(), 
+    phone: z.string(), 
+    normalized_phone: z.string().optional(),
+    email: z.string().optional(), 
+    tags: z.array(z.string()).default([]) 
+  }).parse(v))
   .handler(async ({ data, context }) => {
     const { data: result, error } = await (context.supabase as any)
       .from("contacts")
@@ -94,7 +101,15 @@ export const createContact = createServerFn({ method: "POST" })
 
 export const updateContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v) => z.object({ id: z.string().uuid(), first_name: z.string().optional(), last_name: z.string().optional(), phone: z.string().optional(), email: z.string().optional(), tags: z.array(z.string()).optional() }).parse(v))
+  .inputValidator((v) => z.object({ 
+    id: z.string().uuid(), 
+    first_name: z.string().optional(), 
+    last_name: z.string().optional(), 
+    phone: z.string().optional(), 
+    normalized_phone: z.string().optional(),
+    email: z.string().optional(), 
+    tags: z.array(z.string()).optional() 
+  }).parse(v))
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
     const { data: result, error } = await (context.supabase as any)

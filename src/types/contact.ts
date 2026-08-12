@@ -6,7 +6,11 @@ export interface Contact {
   companyId: ID;
   firstName: string;
   lastName?: string;
+  /** Nombre completo calculado (GENERATED ALWAYS en DB). */
+  name?: string;
   phone: string;
+  /** Teléfono normalizado al formato Meta E.164. */
+  normalizedPhone?: string;
   email?: string;
   tags: string[];
   createdAt: string;
