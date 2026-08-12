@@ -36,7 +36,7 @@ export const createWhatsAppCampaign = createServerFn({ method: "POST" })
     estimatedCost: z.number()
   }).parse(v))
   .handler(async ({ data, context }) => {
-    // 1. Create campaign record
+    // 1. Create campaign record (Starts in DRAFT)
     const { data: campaign, error: campaignError } = await (context.supabase as any)
       .from("whatsapp_campaigns")
       .insert({
@@ -44,10 +44,11 @@ export const createWhatsAppCampaign = createServerFn({ method: "POST" })
         account_id: data.accountId,
         template_id: data.templateId,
         name: data.name,
-        status: data.scheduledAt ? 'scheduled' : 'draft',
+        status: 'draft',
         scheduled_at: data.scheduledAt,
         total_recipients: data.recipients.length,
-        created_by: context.userId
+        created_by: context.userId,
+        metadata: { estimated_cost: data.estimatedCost }
       })
       .select()
       .single();
@@ -55,9 +56,10 @@ export const createWhatsAppCampaign = createServerFn({ method: "POST" })
     if (campaignError) throw new Error(campaignError.message);
 
     // 2. Insert results/queue entries
+    // normalized_phone is important for idempotency
     const results = data.recipients.map(r => ({
       campaign_id: campaign.id,
-      phone: r.phone,
+      phone: r.phone.replace(/\D/g, ''),
       contact_id: r.contactId,
       status: 'queued' as const,
       metadata: { variables: r.variables }
@@ -72,6 +74,28 @@ export const createWhatsAppCampaign = createServerFn({ method: "POST" })
     }
 
     return campaign;
+  });
+
+export const startWhatsAppCampaign = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v) => z.object({ campaignId: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    // Update status to VALIDATING to start the flow
+    const { error } = await (context.supabase as any)
+      .from("whatsapp_campaigns")
+      .update({ status: 'validating' })
+      .eq("id", data.campaignId);
+
+    if (error) throw new Error(error.message);
+
+    // In a real worker environment, this would trigger the process.
+    // For this simulation/test, we move to READY immediately if logic passes.
+    await (context.supabase as any)
+      .from("whatsapp_campaigns")
+      .update({ status: 'ready' })
+      .eq("id", data.campaignId);
+
+    return { success: true };
   });
 
 export const getWhatsAppCampaignDetails = createServerFn({ method: "GET" })
@@ -100,3 +124,4 @@ export const getWhatsAppCampaignDetails = createServerFn({ method: "GET" })
 
     return { campaign, results };
   });
+
