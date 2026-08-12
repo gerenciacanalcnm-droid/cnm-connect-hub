@@ -569,10 +569,15 @@ export const syncWhatsAppTemplates = createServerFn({ method: "POST" })
           language: t.language,
           status: t.status,
           body: bodyText,
-          header: headerComponent?.text || null,
+          header: headerComponent?.text || (headerComponent?.format !== 'TEXT' ? headerComponent?.format : null),
           footer: footerComponent?.text || null,
           buttons: buttonsComponent || [],
           variables: variables as any,
+          metadata: { 
+            ...t,
+            header_type: headerComponent?.format || 'NONE',
+            header_text: headerComponent?.text || null
+          },
           updated_at: new Date().toISOString()
         };
 

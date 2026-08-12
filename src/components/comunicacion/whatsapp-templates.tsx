@@ -292,7 +292,7 @@ export function WhatsAppTemplates() {
           <Button variant="ghost" size="icon" onClick={() => setIsEditorOpen(false)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="font-semibold text-slate-900">Nueva Plantilla</span>
+          <span className="font-semibold text-slate-900">completado</span>
         </div>
         
         <div className="space-y-4">
@@ -660,7 +660,7 @@ export function WhatsAppTemplates() {
                   accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
                   header: headerType === 'TEXT' ? headerText : headerType,
-                  metadata: { header_type: headerType, header_text: headerText }
+                  metadata: { header_type: headerType, header_text: headerText, status: 'DRAFT' }
                 } 
               });
             }}

@@ -134,6 +134,7 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
       .update({ 
         status: metaStatus,
         external_id: externalId,
+        metadata: { ...metadata, meta_response: result },
         updated_at: new Date().toISOString()
       } as any)
       .eq("id", data.id);
