@@ -48,6 +48,7 @@ export function WhatsAppTemplates() {
   const [selectedComponent, setSelectedComponent] = useState<'HEADER' | 'BODY' | 'FOOTER' | 'BUTTONS' | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Cargar plantillas
@@ -86,7 +87,15 @@ export function WhatsAppTemplates() {
       toast.success(`Plantilla enviada a Meta. Estado: ${res.status}`);
       setIsEditorOpen(false);
     },
-    onError: (err: any) => toast.error(err.message)
+    onError: (err: any) => {
+      // El error ya viene con el formato detallado desde el server function
+      // Para evitar problemas de compilación JSX en algunos entornos de transformación,
+      // nos aseguramos de que el mensaje sea procesado correctamente
+      toast.error(err.message, { 
+        duration: 10000,
+        description: "Error detallado de Meta Cloud API" 
+      });
+    }
   });
 
   const syncMutation = useMutation({
@@ -97,42 +106,10 @@ export function WhatsAppTemplates() {
       const hasErrors = res.errors > 0;
       const details = res.details || [];
       
-      toast(
-        <div className="flex flex-col gap-2 min-w-[300px]">
-          <span className="font-bold text-sm flex items-center gap-2">
-            <RefreshCw className={`h-4 w-4 ${hasErrors ? 'text-amber-500' : 'text-emerald-500'}`} />
-            Sincronización completada
-          </span>
-          
-          <div className="text-xs text-slate-500 space-y-1 bg-slate-50 p-2 rounded border border-slate-100">
-            <p className="flex justify-between"><span>Total en Meta:</span> <span className="font-mono font-bold">{res.count}</span></p>
-            <p className="flex justify-between text-emerald-600"><span>Actualizadas:</span> <span className="font-mono font-bold">{res.updated}</span></p>
-            <p className="flex justify-between text-red-500"><span>Errores:</span> <span className="font-mono font-bold">{res.errors}</span></p>
-          </div>
-
-          {hasErrors && (
-            <div className="space-y-1.5 mt-1 border-t pt-2">
-              <p className="text-[10px] font-bold text-slate-400 uppercase">Detalle de errores:</p>
-              <div className="max-h-[150px] overflow-y-auto space-y-1 pr-1">
-                {details.filter((d: any) => !d.success).map((d: any, i: number) => (
-                  <div key={i} className="text-[10px] bg-red-50 text-red-700 p-1.5 rounded border border-red-100">
-                    <div className="font-bold flex justify-between">
-                      <span>{d.name} ({d.language})</span>
-                      <span className="text-[8px] opacity-70">ID: {d.external_id}</span>
-                    </div>
-                    <p className="mt-0.5 opacity-90 leading-tight">{d.error}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {!hasErrors && res.updated > 0 && (
-            <p className="text-[10px] text-emerald-600 font-medium">Todas las plantillas se sincronizaron correctamente.</p>
-          )}
-        </div>,
-        { duration: hasErrors ? 10000 : 4000 }
-      );
+      toast(`Sincronización completada: ${res.updated} actualizadas, ${res.errors} errores`, {
+        duration: hasErrors ? 10000 : 4000,
+        description: hasErrors ? "Revisa el detalle en los logs de la cuenta" : undefined
+      });
     },
     onError: (err: any) => toast.error(err.message)
   });
@@ -162,6 +139,7 @@ export function WhatsAppTemplates() {
       setBody("");
       setHeaderType("NONE");
       setHeaderText("");
+      setLocalPreviewUrl(null);
       setFooter("");
       setButtons([]);
     }
@@ -173,6 +151,10 @@ export function WhatsAppTemplates() {
 
     setIsUploading(true);
     try {
+      // 1. Crear preview local inmediata
+      const objectUrl = URL.createObjectURL(file);
+      setLocalPreviewUrl(objectUrl);
+
       const reader = new FileReader();
       reader.onload = async () => {
         const base64 = reader.result as string;
@@ -186,8 +168,8 @@ export function WhatsAppTemplates() {
         });
         
         setHeaderType(res.type as any);
-        setHeaderText(res.url);
-        toast.success("Archivo cargado correctamente");
+        setHeaderText(res.url); // En un flujo real esto sería el handle/ID
+        toast.success("Archivo procesado correctamente");
       };
       reader.readAsDataURL(file);
     } catch (error) {
@@ -350,7 +332,11 @@ export function WhatsAppTemplates() {
 
             {headerType === "IMAGE" && (
               <div className="w-full aspect-video bg-slate-200 rounded-md flex items-center justify-center overflow-hidden border border-slate-300">
-                {headerText ? <img src={headerText} alt="Preview" className="w-full h-full object-cover" /> : <span className="text-[10px] text-slate-500 font-bold uppercase">Vista previa de imagen</span>}
+                {(localPreviewUrl || headerText) ? (
+                  <img src={localPreviewUrl || headerText} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[10px] text-slate-500 font-bold uppercase">Vista previa de imagen</span>
+                )}
               </div>
             )}
 
@@ -660,7 +646,7 @@ export function WhatsAppTemplates() {
                   accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
                   header: headerType === 'TEXT' ? headerText : headerType,
-                  metadata: { header_type: headerType, header_text: headerText, status: 'DRAFT' }
+                  metadata: { header_type: headerType, header_text: headerText, status: 'DRAFT', header_handle: headerText }
                 } 
               });
             }}
@@ -689,7 +675,7 @@ export function WhatsAppTemplates() {
                   accountId: account?.id || "",
                   name, category, language, body, footer, buttons,
                   header: headerType === 'TEXT' ? headerText : headerType,
-                  metadata: { header_type: headerType, header_text: headerText }
+                  metadata: { header_type: headerType, header_text: headerText, header_handle: headerText }
                 } 
               });
               
@@ -699,7 +685,7 @@ export function WhatsAppTemplates() {
             }}
           >
             <Send className="h-4 w-4 mr-2" />
-            Enviar a Meta para aprobación
+            Invalid parameter
           </Button>
           
           <Button variant="ghost" className="w-full text-xs text-slate-400" onClick={() => setIsEditorOpen(false)}>

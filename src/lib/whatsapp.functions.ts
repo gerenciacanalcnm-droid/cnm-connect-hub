@@ -205,19 +205,20 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
 
         metaTemplate.components.forEach((comp: any) => {
           if (comp.type === "BODY" || comp.type === "HEADER") {
-            // Count variables in this component text
             const text = comp.text || "";
-            const matches = text.match(/{{(\d+)}}/g) || [];
-            const varCount = new Set(matches).size;
+            const matches = (text.match(/{{(\d+)}}/g) || []) as string[];
+            
+            const uniqueVarIndices = Array.from(new Set(matches.map((m: string) => m.replace(/[{}]/g, ''))));
 
-            if (varCount > 0) {
+            if (uniqueVarIndices.length > 0) {
               const parameters: any[] = [];
-              for (let i = 1; i <= varCount; i++) {
-                const val = data.variables?.[i.toString()];
+              uniqueVarIndices.forEach((idx: unknown) => {
+                const stringIdx = idx as string;
+                const val = data.variables?.[stringIdx];
                 if (val !== undefined) {
                   parameters.push({ type: "text", text: val });
                 }
-              }
+              });
 
               if (parameters.length > 0) {
                 components.push({
@@ -227,7 +228,6 @@ export const sendWhatsAppIndividual = createServerFn({ method: "POST" })
               }
             }
           }
-          // BUTTONS support can be added here if needed based on comp.buttons
         });
 
         metaPayload = {

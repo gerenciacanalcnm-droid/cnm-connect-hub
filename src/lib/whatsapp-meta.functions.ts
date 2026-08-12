@@ -54,8 +54,10 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
         headerComp.text = metadata.header_text || template.header;
       } else {
         // Para Media (IMAGE, VIDEO, DOCUMENT) Meta requiere un handle de ejemplo
+        // El handle debe ser el devuelto por la API de subida de Meta
+        const mediaHandle = metadata.header_handle || metadata.media_id;
         headerComp.example = { 
-          header_handle: [metadata.header_handle || "https://example.com/placeholder.png"] 
+          header_handle: [mediaHandle || "4_IMAGE_HANDLE_PLACEHOLDER"] 
         };
       }
       components.push(headerComp);
@@ -70,6 +72,7 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
     };
 
     if (variables.length > 0) {
+      // Meta requiere que body_text sea un array de arrays de strings (uno por cada juego de variables)
       bodyComp.example = {
         body_text: [variables.map((_, i) => `Ejemplo ${i + 1}`)]
       };
@@ -122,7 +125,17 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
     const result = await response.json();
 
     if (!response.ok) {
-      throw new Error(result.error?.message || "Error al enviar plantilla a Meta API");
+      const metaError = result.error || {};
+      const errorMessage = `META_TEMPLATE_CREATE_ERROR
+HTTP: ${response.status}
+Code: ${metaError.code || 'N/A'}
+Subcode: ${metaError.error_subcode || 'N/A'}
+Message: ${metaError.message || 'Error desconocido'}
+Type: ${metaError.type || 'N/A'}
+Trace ID: ${metaError.fbtrace_id || 'N/A'}`;
+      
+      console.error("Meta API Error:", result);
+      throw new Error(errorMessage);
     }
 
     // 4. Actualizar estado según Meta
@@ -134,12 +147,16 @@ export const submitWhatsAppTemplateToMeta = createServerFn({ method: "POST" })
       .update({ 
         status: metaStatus,
         external_id: externalId,
-        metadata: { ...metadata, meta_response: result },
+        metadata: { 
+          ...metadata, 
+          meta_response: result,
+          last_sync: new Date().toISOString()
+        },
         updated_at: new Date().toISOString()
       } as any)
       .eq("id", data.id);
 
-    if (updErr) throw new Error(updErr.message);
+    if (updErr) throw new Error(`Error al actualizar DB: ${updErr.message}`);
 
     return { ok: true, status: metaStatus, metaId: externalId };
   });
