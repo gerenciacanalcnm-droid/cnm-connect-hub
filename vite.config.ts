@@ -9,24 +9,38 @@ import path from "node:path";
 
 // Repunta los módulos Supabase autogenerados al proyecto Supabase propio
 // (ver src/config/supabase.runtime.ts). No se modifican los archivos generados.
-const supabaseOverrides: Record<string, string> = {
-  "@/integrations/supabase/client": "src/integrations/supabase/client.custom.ts",
-  "@/integrations/supabase/client.server": "src/integrations/supabase/client.server.custom.ts",
-  "@/integrations/supabase/auth-middleware": "src/integrations/supabase/auth-middleware.custom.ts",
-  "../supabase/client": "src/integrations/supabase/client.custom.ts",
-  "./client": "src/integrations/supabase/client.custom.ts",
-};
+const supabaseOverrides: Array<[RegExp, string]> = [
+  [
+    /src\/integrations\/supabase\/client\.server(\.ts)?$/,
+    "src/integrations/supabase/client.server.custom.ts",
+  ],
+  [
+    /src\/integrations\/supabase\/auth-middleware(\.ts)?$/,
+    "src/integrations/supabase/auth-middleware.custom.ts",
+  ],
+  [/src\/integrations\/supabase\/client(\.ts)?$/, "src/integrations/supabase/client.custom.ts"],
+];
 
 function supabaseRepointPlugin() {
   return {
     name: "supabase-repoint-own-project",
-    enforce: "pre" as const,
-    resolveId(source: string, importer?: string) {
-      const target = supabaseOverrides[source];
-      if (!target) return null;
-      // Las rutas relativas solo se redirigen dentro de src/integrations/**
-      if (source.startsWith(".") && !importer?.includes("/src/integrations/")) return null;
-      return path.resolve(process.cwd(), target);
+    enforce: "post" as const,
+    async resolveId(source: string, importer: string | undefined, options: any) {
+      if (options?.custom?.supabaseRepoint) return null;
+      const resolved = await (this as any).resolve(source, importer, {
+        ...options,
+        skipSelf: true,
+        custom: { ...options?.custom, supabaseRepoint: true },
+      });
+      const id = resolved?.id;
+      if (!id || id.includes(".custom.ts")) return null;
+      const clean = id.split("?")[0].replace(/\\/g, "/");
+      for (const [pattern, target] of supabaseOverrides) {
+        if (pattern.test(clean)) {
+          return path.resolve(process.cwd(), target);
+        }
+      }
+      return resolved;
     },
   };
 }
