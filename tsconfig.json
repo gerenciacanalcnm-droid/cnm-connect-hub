@@ -21,6 +21,13 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
+      "@/integrations/supabase/client": ["./src/integrations/supabase/client.custom.ts"],
+      "@/integrations/supabase/client.server": [
+        "./src/integrations/supabase/client.server.custom.ts"
+      ],
+      "@/integrations/supabase/auth-middleware": [
+        "./src/integrations/supabase/auth-middleware.custom.ts"
+      ],
       "@/*": ["./src/*"]
     }
   }
