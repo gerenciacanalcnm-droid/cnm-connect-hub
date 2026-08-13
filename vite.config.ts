@@ -24,24 +24,18 @@ const supabaseOverrides: Array<[RegExp, string]> = [
 function supabaseRepointPlugin() {
   return {
     name: "supabase-repoint-own-project",
-    buildStart() { console.log("[REPOINT] plugin active"); },
-    enforce: "post" as const,
-    async resolveId(source: string, importer: string | undefined, options: any) {
-      if (options?.custom?.supabaseRepoint) return null;
-      const resolved = await (this as any).resolve(source, importer, {
-        ...options,
-        skipSelf: true,
-        custom: { ...options?.custom, supabaseRepoint: true },
-      });
-      const id = resolved?.id;
-      if (!id || id.includes(".custom.ts")) return null;
-      const clean = id.split("?")[0].replace(/\\/g, "/");
-      for (const [pattern, target] of supabaseOverrides) {
-        if (pattern.test(clean)) {
-          return path.resolve(process.cwd(), target);
-        }
+    enforce: "pre" as const,
+    resolveId(source: string, importer?: string) {
+      if (!source.includes("supabase")) return null;
+      if (source.includes(".custom")) return null;
+      let clean = source.split("?")[0].replace(/\\/g, "/");
+      if (clean.startsWith(".") && importer) {
+        clean = path.resolve(path.dirname(importer), clean).replace(/\\/g, "/");
       }
-      return resolved;
+      for (const [pattern, target] of supabaseOverrides) {
+        if (pattern.test(clean)) return path.resolve(process.cwd(), target);
+      }
+      return null;
     },
   };
 }
