@@ -24,6 +24,7 @@ const supabaseOverrides: Array<[RegExp, string]> = [
 function supabaseRepointPlugin() {
   return {
     name: "supabase-repoint-own-project",
+    buildStart() { console.log("[REPOINT] plugin active"); },
     enforce: "post" as const,
     async resolveId(source: string, importer: string | undefined, options: any) {
       if (options?.custom?.supabaseRepoint) return null;
