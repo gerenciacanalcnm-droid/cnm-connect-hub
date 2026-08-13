@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function SocialProviders() {
@@ -10,19 +10,18 @@ export function SocialProviders() {
   async function handleGoogle() {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      // Google OAuth directo contra el proyecto Supabase propio (identidades ya recuperadas).
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin },
       });
-      if (result.error) {
+      if (error) {
         toast.error("No pudimos iniciar sesión con Google", {
-          description: result.error.message,
+          description: error.message,
         });
         setLoading(false);
         return;
       }
-      if (result.redirected) return;
-      // Session set by the wrapper; navigation handled by auth listener.
-      window.location.assign("/dashboard");
     } catch (e) {
       toast.error("Error inesperado con Google");
       setLoading(false);
